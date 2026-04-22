@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Edge,
@@ -15,10 +15,10 @@ import {
   NodeTypes,
   ReactFlowInstance,
   BackgroundVariant,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { useWorkflowStore, CustomNode } from '@/lib/store';
-import CanvasNode from './CanvasNode';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { useWorkflowStore, CustomNode } from "@/lib/store";
+import CanvasNode from "./CanvasNode";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -54,12 +54,12 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     (connection: Connection) => {
       const edge: Edge = {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
-        source: connection.source || '',
-        target: connection.target || '',
+        source: connection.source || "",
+        target: connection.target || "",
       };
       addStoreEdge(edge);
     },
-    [addStoreEdge]
+    [addStoreEdge],
   );
 
   const onEdgesChange = useCallback(
@@ -70,19 +70,19 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         return nextEdges;
       });
     },
-    [setCanvasEdges, setStoreEdges]
+    [setCanvasEdges, setStoreEdges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = "move";
   }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const data = event.dataTransfer.getData('application/reactflow');
+      const data = event.dataTransfer.getData("application/reactflow");
       if (!data) return;
 
       try {
@@ -105,15 +105,15 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             config: {},
           },
           position,
-          type: 'canvas',
+          type: "canvas",
         };
 
         addNode(newNode);
       } catch (error) {
-        console.error('[v0] Error parsing dropped block:', error);
+        console.error("[v0] Error parsing dropped block:", error);
       }
     },
-    [addNode]
+    [addNode],
   );
 
   const selectedNodeData = storeNodes.find((n) => n.id === selectedNode);
@@ -123,7 +123,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   }, [onNodeSelect, selectedNodeData]);
 
   return (
-    <div className="flex-1 bg-card relative" onDragOver={onDragOver} onDrop={onDrop}>
+    <div
+      className="flex-1 bg-card relative"
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <ReactFlow
         nodes={nodes.map((node) => ({
           ...node,
@@ -144,17 +148,17 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         <MiniMap
           nodeColor={(node) => {
             switch (node.data.type) {
-              case 'actor':
-                return '#3b82f6';
-              case 'decision':
-              case 'condition':
-                return '#a855f7';
-              case 'automation':
-                return '#f97316';
-              case 'action':
-                return '#22c55e';
+              case "actor":
+                return "var(--chart-4)";
+              case "decision":
+              case "condition":
+                return "var(--chart-3)";
+              case "automation":
+                return "var(--chart-2)";
+              case "action":
+                return "var(--chart-1)";
               default:
-                return '#64748b';
+                return "var(--chart-5)";
             }
           }}
           maskColor="rgba(0, 0, 0, 0.1)"
