@@ -15,10 +15,10 @@ export interface CustomNode extends Node {
     label: string;
     type: NodeType;
     id?: string;
-    description?: string;
     config?: {
       [key: string]: any;
     };
+    description?: string;
   };
 }
 
@@ -34,7 +34,7 @@ export interface WorkflowStore {
   // Node operations
   addNode: (node: CustomNode) => void;
   setNodes: (nodes: CustomNode[]) => void;
-  updateNode: (id: string, data: Partial<CustomNode["data"]>) => void;
+  updateNode: (id: string, data: Partial<CustomNode>) => void;
   deleteNode: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
 
@@ -76,21 +76,7 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
   updateNode: (id, data) =>
     set((state) => ({
       nodes: state.nodes.map((node) =>
-        node.id === id
-          ? {
-              ...node,
-              data: {
-                ...node.data,
-                ...data,
-                config: data.config
-                  ? {
-                      ...node.data.config,
-                      ...data.config,
-                    }
-                  : node.data.config,
-              },
-            }
-          : node,
+        node.id === id ? { ...node, ...data } : node,
       ),
     })),
 

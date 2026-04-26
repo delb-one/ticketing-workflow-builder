@@ -38,7 +38,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     addNode,
     setNodes: setStoreNodes,
     addEdge: addStoreEdge,
-    deleteEdge,
     setEdges: setStoreEdges,
     selectedNode,
   } = useWorkflowStore();
@@ -91,9 +90,28 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onEdgeDoubleClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
-      deleteEdge(edge.id);
+      const currentLabel =
+        typeof edge.label === "string" ? edge.label : "";
+      const nextLabel = window.prompt(
+        "Inserisci label edge (vuoto per rimuoverla):",
+        currentLabel,
+      );
+
+      if (nextLabel === null) return;
+
+      const trimmedLabel = nextLabel.trim();
+      const updatedEdges = storeEdges.map((currentEdge) =>
+        currentEdge.id === edge.id
+          ? {
+              ...currentEdge,
+              label: trimmedLabel || undefined,
+            }
+          : currentEdge,
+      );
+
+      setStoreEdges(updatedEdges);
     },
-    [deleteEdge],
+    [setStoreEdges, storeEdges],
   );
 
   const onEdgesDelete = useCallback(

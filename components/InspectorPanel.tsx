@@ -23,13 +23,22 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
   }
 
   const handleLabelChange = (newLabel: string) => {
-    updateNode(selectedNode.id, { label: newLabel });
+    updateNode(selectedNode.id, {
+      data: {
+        ...selectedNode.data,
+        label: newLabel,
+      },
+    });
   };
 
   const handleConfigChange = (key: string, value: any) => {
     updateNode(selectedNode.id, {
-      config: {
-        [key]: value,
+      data: {
+        ...selectedNode.data,
+        config: {
+          ...selectedNode.data.config,
+          [key]: value,
+        },
       },
     });
   };
@@ -62,12 +71,12 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <Card className="p-4">
+        {/* <Card className="p-4">
           <label className="text-sm font-semibold text-foreground block mb-2">
             Description
           </label>
           {selectedNode.data.description}
-        </Card>
+        </Card> */}
         <Card className="p-4">
           <label className="text-sm font-semibold text-foreground block mb-2">
             Label
