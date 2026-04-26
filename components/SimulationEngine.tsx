@@ -3,8 +3,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useWorkflowStore } from '@/lib/store';
+import { NodeType, useWorkflowStore } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowUpCircle,
+  ArrowRight,
+  Bell,
+  CheckCircle,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  Filter,
+  GitBranch,
+  Headphones,
+  LucideIcon,
+  MessageSquare,
+  Play,
+  RotateCcw,
+  ShieldCheck,
+  Shuffle,
+  SlidersHorizontal,
+  User,
+  UserCog,
+} from 'lucide-react';
 
 interface SimulationState {
   currentNodeId: string | null;
@@ -15,6 +36,44 @@ interface SimulationState {
 }
 
 const DEFAULT_STEP_DELAY_MS = 900;
+
+const BLOCK_ICON_MAP: Record<string, LucideIcon> = {
+  start: Play,
+  end: CheckCircle2,
+  client: User,
+  'l1-tech': Headphones,
+  'l2-tech': UserCog,
+  'l3-specialist': Cpu,
+  supervisor: ShieldCheck,
+  decision: GitBranch,
+  condition: Filter,
+  'business-rules': SlidersHorizontal,
+  'auto-assign': Shuffle,
+  'sla-timer': Clock,
+  escalation: ArrowUpCircle,
+  notify: Bell,
+  reopen: RotateCcw,
+  resolve: CheckCircle,
+  validate: MessageSquare,
+  close: CheckCircle2,
+};
+
+const TYPE_ICON_MAP: Record<NodeType, LucideIcon> = {
+  actor: User,
+  decision: GitBranch,
+  condition: Filter,
+  automation: SlidersHorizontal,
+  action: CheckCircle,
+  start: Play,
+  end: CheckCircle2,
+};
+
+const getLogNodeLabel = (log: string) => {
+  if (log.startsWith('Started at: ')) return log.replace('Started at: ', '').trim();
+  if (log.startsWith('Decision required at: ')) return log.replace('Decision required at: ', '').trim();
+  if (log.startsWith('-> ')) return log.replace('-> ', '').trim();
+  return null;
+};
 
 export default function SimulationEngine() {
   const {
@@ -39,6 +98,33 @@ export default function SimulationEngine() {
 
   const [showDecisionDialog, setShowDecisionDialog] = useState(false);
   const [stepDelayMs, setStepDelayMs] = useState(DEFAULT_STEP_DELAY_MS);
+
+  const getIconForLog = useCallback(
+    (log: string): LucideIcon => {
+      const label = getLogNodeLabel(log);
+      if (label) {
+        const matchedNode = nodes.find(
+          (node) => node.data.label.toLowerCase() === label.toLowerCase(),
+        );
+        if (matchedNode?.data?.id && BLOCK_ICON_MAP[matchedNode.data.id]) {
+          return BLOCK_ICON_MAP[matchedNode.data.id];
+        }
+        if (matchedNode) {
+          return TYPE_ICON_MAP[matchedNode.data.type];
+        }
+      }
+
+      if (log.startsWith('Workflow completed')) return CheckCircle2;
+      if (log.startsWith('Simulation started')) return Play;
+      if (log.startsWith('Step delay')) return Clock;
+      if (log.startsWith('Finding start node')) return ArrowRight;
+      if (log.startsWith('Decision:')) return GitBranch;
+      if (log.startsWith('No start node found')) return Filter;
+
+      return ArrowRight;
+    },
+    [nodes],
+  );
 
   const startSimulationFlow = () => {
     clearSimulationLog();
@@ -204,17 +290,21 @@ export default function SimulationEngine() {
         <h3 className="font-semibold mb-3">Simulation Log</h3>
         <div className="space-y-1 text-sm font-mono">
           <AnimatePresence>
-            {simulationLog.map((log, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="text-slate-100"
-              >
-                {log}
-              </motion.div>
-            ))}
+            {simulationLog.map((log, idx) => {
+              const LogIcon = getIconForLog(log);
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="text-slate-100 flex items-center gap-2"
+                >
+                  <LogIcon className="h-4 w-4 shrink-0 text-slate-300" />
+                  <span>{log}</span>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       </Card>

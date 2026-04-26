@@ -2,13 +2,37 @@
 
 import { Card } from "@/components/ui/card";
 import { NodeType } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import {
+  Play,
+  CheckCircle2,
+  User,
+  Headphones,
+  UserCog,
+  Cpu,
+  ShieldCheck,
+  GitBranch,
+  Filter,
+  SlidersHorizontal,
+  Shuffle,
+  Clock,
+  ArrowUpCircle,
+  Bell,
+  RotateCcw,
+  CheckCircle,
+  MessageSquare,
+} from "lucide-react";
+import { LucideIcon } from "lucide-react";
+import { ScrollArea } from "./ui/scroll-area";
 
+type ChartColor = "chart-1" | "chart-2" | "chart-3" | "chart-4" | "chart-5";
 interface BlockDefinition {
   id: string;
   label: string;
   type: NodeType;
-  color: string;
-  icon: string;
+  color: ChartColor;
+  icon: LucideIcon;
+  description?: string;
 }
 
 const BLOCKS: Record<string, BlockDefinition[]> = {
@@ -17,129 +41,139 @@ const BLOCKS: Record<string, BlockDefinition[]> = {
       id: "start",
       label: "Start",
       type: "start",
-      color: "bg-chart-5",
-      icon: "🚀",
+      color: "chart-5",
+      icon: Play,
     },
-    { id: "end", label: "End", type: "end", color: "bg-chart-5", icon: "🏁" },
+    {
+      id: "end",
+      label: "End",
+      type: "end",
+      color: "chart-5",
+      icon: CheckCircle2,
+    },
   ],
+
   Actors: [
     {
       id: "client",
       label: "Client",
       type: "actor",
-      color: "bg-chart-4",
-      icon: "👤",
+      color: "chart-4",
+      icon: User,
     },
     {
       id: "l1-tech",
       label: "L1 Technician",
       type: "actor",
-      color: "bg-chart-4",
-      icon: "🔧",
+      color: "chart-4",
+      icon: Headphones,
     },
     {
       id: "l2-tech",
       label: "L2 Technician",
       type: "actor",
-      color: "bg-chart-4",
-      icon: "⚙️",
+      color: "chart-4",
+      icon: UserCog,
     },
     {
       id: "l3-specialist",
       label: "L3 Specialist",
       type: "actor",
-      color: "bg-chart-4",
-      icon: "🎯",
+      color: "chart-4",
+      icon: Cpu,
     },
     {
       id: "supervisor",
       label: "Supervisor",
       type: "actor",
-      color: "bg-chart-4",
-      icon: "👔",
+      color: "chart-4",
+      icon: ShieldCheck,
     },
   ],
+
   "Logic Blocks": [
     {
       id: "decision",
       label: "Decision",
       type: "decision",
-      color: "bg-chart-3",
-      icon: "🔀",
+      color: "chart-3",
+      icon: GitBranch,
     },
     {
       id: "condition",
       label: "Condition",
       type: "condition",
-      color: "bg-chart-3",
-      icon: "📋",
+      color: "chart-3",
+      icon: Filter,
     },
   ],
+
   Automation: [
     {
       id: "business-rules",
       label: "Business Rules",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "📐",
+      color: "chart-2",
+      icon: SlidersHorizontal,
     },
     {
       id: "auto-assign",
       label: "Auto Assignment",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "📍",
+      color: "chart-2",
+      icon: Shuffle,
     },
     {
       id: "sla-timer",
       label: "SLA Timer",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "⏱️",
+      color: "chart-2",
+      icon: Clock,
     },
     {
       id: "escalation",
       label: "Escalation",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "📈",
+      color: "chart-2",
+      icon: ArrowUpCircle,
     },
     {
       id: "notify",
       label: "Notification",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "🔔",
+      color: "chart-2",
+      icon: Bell,
     },
     {
       id: "reopen",
       label: "Reopen Ticket",
       type: "automation",
-      color: "bg-chart-2",
-      icon: "🔄",
+      color: "chart-2",
+      icon: RotateCcw,
     },
   ],
+
   Actions: [
     {
       id: "resolve",
       label: "Resolve Ticket",
       type: "action",
-      color: "bg-chart-1",
-      icon: "✅",
+      color: "chart-1",
+      icon: CheckCircle,
     },
     {
       id: "validate",
       label: "Validate Ticket",
       type: "action",
-      color: "bg-chart-1",
-      icon: "✔️",
+      color: "chart-1",
+      icon: MessageSquare,
     },
     {
       id: "close",
       label: "Close Ticket",
       type: "action",
-      color: "bg-chart-1",
-      icon: "🏁",
+      color: "chart-1",
+      icon: CheckCircle2,
     },
   ],
 };
@@ -153,6 +187,13 @@ interface BlockLibraryProps {
 }
 
 export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
+  const colorMap: Record<ChartColor, string> = {
+    "chart-1": "border-chart-1 hover:bg-chart-1/10 ",
+    "chart-2": "border-chart-2 hover:bg-chart-2/10 ",
+    "chart-3": "border-chart-3 hover:bg-chart-3/10",
+    "chart-4": "border-chart-4 hover:bg-chart-4/10 ",
+    "chart-5": "border-chart-5 hover:bg-chart-5/10 ",
+  };
   const handleDragStart = (e: React.DragEvent, block: BlockDefinition) => {
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData(
@@ -174,30 +215,38 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <ScrollArea className="flex-1 overflow-y-auto p-4 space-y-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {Object.entries(BLOCKS).map(([category, blocks]) => (
           <div key={category}>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide mt-2">
               {category}
             </h3>
+
             <div className="space-y-2">
-              {blocks.map((block) => (
-                <Card
-                  key={block.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, block)}
-                  className={`p-3 cursor-move hover:shadow-md transition-shadow ${block.color} text-white rounded-lg`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{block.icon}</span>
-                    <span className="text-sm font-medium">{block.label}</span>
-                  </div>
-                </Card>
-              ))}
+              {blocks.map((block) => {
+                const Icon = block.icon;
+
+                return (
+                  <Card
+                    key={block.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, block)}
+                    className={cn(
+                      "p-3 cursor-move hover:shadow-md transition-shadow rounded-lg bg-card border",
+                      colorMap[block.color],
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className={cn("w-4 h-4", `text-${block.color}`)} />{" "}
+                      <span className="text-sm font-medium">{block.label}</span>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         ))}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

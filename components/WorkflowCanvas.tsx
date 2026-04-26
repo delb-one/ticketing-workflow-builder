@@ -8,13 +8,16 @@ import {
   Background,
   useNodesState,
   useEdgesState,
+  applyNodeChanges,
   applyEdgeChanges,
   Connection,
   EdgeChange,
+  NodeChange,
+  ConnectionMode,
   MiniMap,
   NodeTypes,
-  ReactFlowInstance,
   BackgroundVariant,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
@@ -33,14 +36,16 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     nodes: storeNodes,
     edges: storeEdges,
     addNode,
+    setNodes: setStoreNodes,
     addEdge: addStoreEdge,
+    deleteEdge,
     setEdges: setStoreEdges,
     selectedNode,
   } = useWorkflowStore();
+  const { screenToFlowPosition } = useReactFlow();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
+  const [nodes, setNodes] = useNodesState(storeNodes);
   const [edges, setCanvasEdges] = useEdgesState(storeEdges);
-  const reactFlowInstanceRef = React.useRef<ReactFlowInstance | null>(null);
 
   useEffect(() => {
     setNodes(storeNodes);
@@ -62,6 +67,17 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     [addStoreEdge],
   );
 
+  const onNodesChange = useCallback(
+    (changes: NodeChange<CustomNode>[]) => {
+      setNodes((currentNodes) => {
+        const nextNodes = applyNodeChanges(changes, currentNodes) as CustomNode[];
+        setStoreNodes(nextNodes);
+        return nextNodes;
+      });
+    },
+    [setNodes, setStoreNodes],
+  );
+
   const onEdgesChange = useCallback(
     (changes: EdgeChange<Edge>[]) => {
       setCanvasEdges((currentEdges) => {
@@ -71,6 +87,21 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       });
     },
     [setCanvasEdges, setStoreEdges],
+  );
+
+  const onEdgeDoubleClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      deleteEdge(edge.id);
+    },
+    [deleteEdge],
+  );
+
+  const onEdgesDelete = useCallback(
+    (deletedEdges: Edge[]) => {
+      const deletedIds = new Set(deletedEdges.map((edge) => edge.id));
+      setStoreEdges(storeEdges.filter((edge) => !deletedIds.has(edge.id)));
+    },
+    [setStoreEdges, storeEdges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -87,10 +118,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
       try {
         const blockData = JSON.parse(data);
-        const reactFlowInstance = reactFlowInstanceRef.current;
-        if (!reactFlowInstance) return;
 
-        const position = reactFlowInstance.screenToFlowPosition({
+        const position = screenToFlowPosition({
           x: event.clientX,
           y: event.clientY,
         });
@@ -113,7 +142,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         console.error("[v0] Error parsing dropped block:", error);
       }
     },
-    [addNode],
+    [addNode, screenToFlowPosition],
   );
 
   const selectedNodeData = storeNodes.find((n) => n.id === selectedNode);
@@ -136,11 +165,12 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onEdgeDoubleClick={onEdgeDoubleClick}
+        onEdgesDelete={onEdgesDelete}
         onConnect={onConnect}
-        onInit={(instance) => {
-          reactFlowInstanceRef.current = instance;
-        }}
         nodeTypes={nodeTypes}
+        connectionMode={ConnectionMode.Loose}
+        deleteKeyCode={["Backspace", "Delete"]}
         fitView
       >
         <Background variant={BackgroundVariant.Dots} />
