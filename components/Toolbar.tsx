@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
-import { WORKFLOW_TEMPLATES } from "@/lib/workflow-templates";
+import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
 import { Edge } from "@xyflow/react";
 import { useRef, useState } from "react";
 import { ThemeToggle } from "./theme-toggle";

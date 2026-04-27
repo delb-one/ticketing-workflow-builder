@@ -1,5 +1,5 @@
-import { SimulationEventBus } from './event-bus';
-import { NODE_HANDLER_REGISTRY } from './node-handlers';
+import { SimulationEventBus } from "./event-bus";
+import { NODE_HANDLER_REGISTRY } from "./node-handlers";
 import type {
   DecisionOutcome,
   NodeConfig,
@@ -9,18 +9,21 @@ import type {
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
-} from './types';
+} from "./types";
 
-export type EngineStateListener = (runtime: SimulationRuntime, event?: SimulationEvent) => void;
+export type EngineStateListener = (
+  runtime: SimulationRuntime,
+  event?: SimulationEvent,
+) => void;
 
 const createDefaultTicket = (): Ticket => {
   const now = Date.now();
 
   return {
     id: `ticket-${now}`,
-    state: 'new',
-    priority: 'medium',
-    impact: 'medium',
+    state: "open",
+    priority: "medium",
+    impact: "medium",
     createdAt: now,
     updatedAt: now,
     context: {
@@ -40,27 +43,29 @@ const createDefaultRuntime = (): SimulationRuntime => ({
   completed: false,
 });
 
-const createDefaultConfig = (type: WorkflowNode['data']['type']): NodeConfig => {
+const createDefaultConfig = (
+  type: WorkflowNode["data"]["type"],
+): NodeConfig => {
   switch (type) {
-    case 'decision':
-      return { nodeType: 'decision', decisionType: 'boolean', outcomes: [] };
-    case 'automation':
-      return { nodeType: 'automation', automationType: 'business-rules' };
-    case 'action':
-      return { nodeType: 'action', ticketAction: 'validate' };
-    case 'actor':
-      return { nodeType: 'actor' };
-    case 'status':
-      return { nodeType: 'status', statusValue: 'in-progress' };
-    case 'event':
-      return { nodeType: 'event', eventTrigger: 'manual' };
-    case 'condition':
-      return { nodeType: 'condition' };
-    case 'start':
-      return { nodeType: 'start' };
-    case 'end':
+    case "decision":
+      return { nodeType: "decision", decisionType: "manual", outcomes: [] };
+    case "automation":
+      return { nodeType: "automation", automationType: "business-rules" };
+    case "action":
+      return { nodeType: "action", ticketAction: "validate" };
+    case "actor":
+      return { nodeType: "actor" };
+    case "status":
+      return { nodeType: "status", statusValue: "in_progress" };
+    case "event":
+      return { nodeType: "event", eventTrigger: "manual" };
+    case "condition":
+      return { nodeType: "condition" };
+    case "start":
+      return { nodeType: "start" };
+    case "end":
     default:
-      return { nodeType: 'end' };
+      return { nodeType: "end" };
   }
 };
 
@@ -103,10 +108,10 @@ export class SimulationEngine {
         pendingDecisionOutcomes: [],
       };
       this.emit({
-        type: 'workflow.error',
+        type: "workflow.error",
         ticketId: this.runtime.ticket.id,
         timestamp: Date.now(),
-        payload: { message: 'No start node found' },
+        payload: { reason: "No start node found" },
       });
       return;
     }
@@ -123,18 +128,24 @@ export class SimulationEngine {
   }
 
   step(): void {
-    if (!this.runtime.currentNodeId || this.runtime.completed || this.runtime.paused) {
+    if (
+      !this.runtime.currentNodeId ||
+      this.runtime.completed ||
+      this.runtime.paused
+    ) {
       return;
     }
 
-    const currentNode = this.workflow.nodes.find((node) => node.id === this.runtime.currentNodeId);
+    const currentNode = this.workflow.nodes.find(
+      (node) => node.id === this.runtime.currentNodeId,
+    );
 
     if (!currentNode) {
       this.emit({
-        type: 'workflow.error',
+        type: "workflow.error",
         ticketId: this.runtime.ticket.id,
         timestamp: Date.now(),
-        payload: { message: `Node not found: ${this.runtime.currentNodeId}` },
+        payload: { reason: `Node not found: ${this.runtime.currentNodeId}` },
       });
       this.runtime = { ...this.runtime, completed: true, currentNodeId: null };
       this.notify();
@@ -146,12 +157,14 @@ export class SimulationEngine {
     const handler = NODE_HANDLER_REGISTRY[currentNode.data.type];
     if (!handler) {
       this.emit({
-        type: 'workflow.error',
+        type: "workflow.error",
         ticketId: this.runtime.ticket.id,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
-        payload: { message: `No handler for node type ${currentNode.data.type}` },
+        payload: {
+          reason: `No handler for node type ${currentNode.data.type}`,
+        },
       });
       this.runtime = { ...this.runtime, completed: true, currentNodeId: null };
       this.notify();
@@ -192,7 +205,7 @@ export class SimulationEngine {
       return;
     }
 
-    if (currentNode.data.type === 'end') {
+    if (currentNode.data.type === "end") {
       this.runtime = {
         ...this.runtime,
         completed: true,
@@ -217,12 +230,12 @@ export class SimulationEngine {
         pendingDecisionOutcomes: [],
       };
       this.emit({
-        type: 'workflow.completed',
+        type: "workflow.completed",
         ticketId: this.runtime.ticket.id,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
-        payload: { reason: 'no-outgoing-edge' },
+        payload: { reason: "no-outgoing-edge" },
       });
       return;
     }
@@ -242,7 +255,9 @@ export class SimulationEngine {
       return;
     }
 
-    const currentNode = this.workflow.nodes.find((node) => node.id === this.runtime.currentNodeId);
+    const currentNode = this.workflow.nodes.find(
+      (node) => node.id === this.runtime.currentNodeId,
+    );
     if (!currentNode) {
       return;
     }
@@ -251,19 +266,22 @@ export class SimulationEngine {
       (outcome) => outcome.label === outcomeLabel,
     );
 
-    const nextNode = this.resolveNextNode(currentNode.id, outcomeLabel) ??
+    const nextNode =
+      this.resolveNextNode(currentNode.id, outcomeLabel) ??
       (selectedOutcome
-        ? this.workflow.nodes.find((node) => node.id === selectedOutcome.targetNodeId)
+        ? this.workflow.nodes.find(
+            (node) => node.id === selectedOutcome.targetNodeId,
+          )
         : undefined);
 
     if (!nextNode) {
       this.emit({
-        type: 'workflow.error',
+        type: "workflow.error",
         ticketId: this.runtime.ticket.id,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
-        payload: { message: `Decision outcome not routable: ${outcomeLabel}` },
+        payload: { reason: `Decision outcome not routable: ${outcomeLabel}` },
       });
       return;
     }
@@ -284,12 +302,12 @@ export class SimulationEngine {
     };
 
     this.emit({
-      type: 'decision.made',
+      type: "decision.made",
       ticketId: this.runtime.ticket.id,
       timestamp: Date.now(),
       nodeId: currentNode.id,
       nodeLabel: currentNode.data.label,
-      payload: { outcome: outcomeLabel },
+      payload: { newState: outcomeLabel },
     });
 
     this.notify();
@@ -330,7 +348,9 @@ export class SimulationEngine {
     listener(this.getRuntime());
 
     return () => {
-      this.listeners = this.listeners.filter((activeListener) => activeListener !== listener);
+      this.listeners = this.listeners.filter(
+        (activeListener) => activeListener !== listener,
+      );
     };
   }
 
@@ -344,15 +364,22 @@ export class SimulationEngine {
   }
 
   private resolveStartNode(): WorkflowNode | undefined {
-    return this.workflow.nodes.find((node) => node.data.type === 'start');
+    return this.workflow.nodes.find((node) => node.data.type === "start");
   }
 
-  private resolveNextNode(currentId: string, outcomeLabel?: string): WorkflowNode | undefined {
-    const outgoingEdges = this.workflow.edges.filter((edge) => edge.source === currentId);
+  private resolveNextNode(
+    currentId: string,
+    outcomeLabel?: string,
+  ): WorkflowNode | undefined {
+    const outgoingEdges = this.workflow.edges.filter(
+      (edge) => edge.source === currentId,
+    );
 
     let edge: WorkflowEdge | undefined;
     if (outcomeLabel) {
-      edge = outgoingEdges.find((outgoingEdge) => outgoingEdge.label === outcomeLabel);
+      edge = outgoingEdges.find(
+        (outgoingEdge) => outgoingEdge.label === outcomeLabel,
+      );
     } else {
       edge = outgoingEdges[0];
     }

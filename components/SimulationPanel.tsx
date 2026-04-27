@@ -31,7 +31,7 @@ const DEFAULT_STEP_DELAY_MS = 900;
 const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig => {
   switch (type) {
     case 'decision':
-      return { nodeType: 'decision', decisionType: 'boolean', outcomes: [] };
+      return { nodeType: 'decision', decisionType: 'manual', outcomes: [] };
     case 'condition':
       return { nodeType: 'condition' };
     case 'automation': {
@@ -71,7 +71,7 @@ const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig =
       return { nodeType: 'actor', agentLevel };
     }
     case 'status':
-      return { nodeType: 'status', statusValue: 'in-progress' };
+      return { nodeType: 'status', statusValue: 'in_progress' };
     case 'event':
       return { nodeType: 'event', eventTrigger: 'manual' };
     case 'start':
@@ -130,12 +130,12 @@ const getEventText = (event: SimulationEvent): string => {
   }
 
   if (event.type === 'decision.made') {
-    const outcome = typeof event.payload?.outcome === 'string' ? event.payload.outcome : 'n/a';
+    const outcome = typeof event.payload?.newState === 'string' ? event.payload.newState : 'n/a';
     return `Decision made: ${outcome}`;
   }
 
   if (event.type === 'workflow.error') {
-    const message = typeof event.payload?.message === 'string' ? event.payload.message : 'Unknown error';
+    const message = typeof event.payload?.reason === 'string' ? event.payload.reason : 'Unknown error';
     return `Error: ${message}`;
   }
 

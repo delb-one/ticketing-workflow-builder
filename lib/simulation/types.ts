@@ -1,59 +1,65 @@
 export type NodeType =
-  | 'start'
-  | 'end'
-  | 'actor'
-  | 'action'
-  | 'automation'
-  | 'decision'
-  | 'condition'
-  | 'status'
-  | 'event';
+  | "start"
+  | "end"
+  | "actor"
+  | "action"
+  | "automation"
+  | "decision"
+  | "condition"
+  | "status"
+  | "event";
 
 export interface DecisionOutcome {
   label: string;
   targetNodeId: string;
-  condition?: string;
+  priority?: number;
+  condition?: {
+    field: string;
+    operator: "equals" | "gt" | "lt" | "includes";
+    value: string | number | boolean;
+  };
 }
 
 export type NodeConfig =
   | {
-      nodeType: 'decision';
-      decisionType: 'boolean' | 'custom';
+      nodeType: "decision";
+      decisionType: "manual" | "rule-based";
       outcomes?: DecisionOutcome[];
     }
   | {
-      nodeType: 'automation';
+      nodeType: "automation";
       automationType:
-        | 'sla-timer'
-        | 'escalation'
-        | 'auto-assign'
-        | 'notify'
-        | 'business-rules'
-        | 'reopen';
+        | "sla-timer"
+        | "escalation"
+        | "auto-assign"
+        | "notify"
+        | "business-rules"
+        | "reopen";
       duration?: number;
-      assignTo?: 'l1' | 'l2' | 'l3';
+      assignTo?: "l1" | "l2" | "l3";
       channel?: string;
     }
   | {
-      nodeType: 'action';
-      ticketAction: 'resolve' | 'validate' | 'close';
+      nodeType: "action";
+      ticketAction: "resolve" | "validate" | "close";
     }
   | {
-      nodeType: 'actor';
-      agentLevel?: 'l1' | 'l2' | 'l3' | 'client' | 'supervisor';
+      nodeType: "actor";
+      agentLevel?: "l1" | "l2" | "l3" | "client" | "supervisor";
     }
   | {
-      nodeType: 'status';
-      statusValue: string;
+      nodeType: "status";
+      statusValue: "open" | "in_progress" | "pending" | "resolved" | "closed"| "reopened";
       startsSla?: boolean;
       stopsSla?: boolean;
+      isFinal?: boolean;
     }
   | {
-      nodeType: 'event';
+      nodeType: "event";
       eventTrigger: string;
     }
   | {
-      nodeType: 'start' | 'end' | 'condition';
+      nodeType: "start" | "end" | "condition";
     };
 
 export interface WorkflowNode {
@@ -74,7 +80,11 @@ export interface WorkflowEdge {
   source: string;
   target: string;
   label?: string;
-  condition?: string;
+  condition?: {
+    field: string;
+    operator: "equals" | "gt" | "lt" | "includes";
+    value: string | number | boolean;
+  }
 }
 
 export interface WorkflowDefinition {
@@ -94,25 +104,43 @@ export interface SlaState {
   startTime: number;
   deadline: number;
   breached: boolean;
+  paused?: boolean;
+  pausedAt?: number;
 }
 
 export interface SimulationContext {
-  variables: Record<string, unknown>;
-  events: string[];
+  variables: {
+    category?: string;
+    priority?: string;
+    source?: string;
+    [key: string]: unknown;
+  };
+  events: SimulationEventType[];
   lastDecisionOutcome?: string;
 }
 
 export interface Ticket {
   id: string;
-  state: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  impact: 'low' | 'medium' | 'high';
-  assignedAgent?: string;
+  state:
+    | "open"
+    | "in_progress"
+    | "pending"
+    | "resolved"
+    | "closed"
+    | "reopened";
+  priority: "low" | "medium" | "high" | "critical";
+  impact: "low" | "medium" | "high";
+  assignedAgent?: {
+    id: string;
+    level: "l1" | "l2" | "l3";
+  };
   assignedGroup?: string;
   createdAt: number;
   updatedAt: number;
   sla?: SlaState;
   context: SimulationContext;
+  queue?: "l1" | "l2" | "l3";
+  history?: string[];
 }
 
 export interface HistoryEntry {
@@ -133,21 +161,21 @@ export interface SimulationRuntime {
 }
 
 export type SimulationEventType =
-  | 'ticket.created'
-  | 'ticket.updated'
-  | 'ticket.assigned'
-  | 'ticket.resolved'
-  | 'ticket.closed'
-  | 'ticket.escalated'
-  | 'ticket.reopened'
-  | 'sla.started'
-  | 'sla.breached'
-  | 'decision.required'
-  | 'decision.made'
-  | 'workflow.started'
-  | 'workflow.step'
-  | 'workflow.completed'
-  | 'workflow.error';
+  | "ticket.created"
+  | "ticket.updated"
+  | "ticket.assigned"
+  | "ticket.resolved"
+  | "ticket.closed"
+  | "ticket.escalated"
+  | "ticket.reopened"
+  | "sla.started"
+  | "sla.breached"
+  | "decision.required"
+  | "decision.made"
+  | "workflow.started"
+  | "workflow.step"
+  | "workflow.completed"
+  | "workflow.error";
 
 export interface SimulationEvent {
   type: SimulationEventType;
@@ -155,5 +183,17 @@ export interface SimulationEvent {
   timestamp: number;
   nodeId?: string;
   nodeLabel?: string;
-  payload?: Record<string, unknown>;
+  payload?: {
+    previousState?: string;
+    newState?: string;
+    assignedTo?: string;
+    reason?: string;
+  };
+}
+
+export interface ExecutionResult {
+  nextNodeId?: string;
+  ticketUpdates?: Partial<Ticket>;
+  events?: SimulationEvent[];
+  pause?: boolean;
 }
