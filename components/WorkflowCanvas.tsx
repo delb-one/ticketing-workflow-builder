@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   Edge,
@@ -18,10 +18,11 @@ import {
   NodeTypes,
   BackgroundVariant,
   useReactFlow,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import { useWorkflowStore, CustomNode } from "@/lib/store";
-import CanvasNode from "./CanvasNode";
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { useWorkflowStore, CustomNode } from '@/lib/store';
+import type { NodeConfig } from '@/lib/simulation/types';
+import CanvasNode from './CanvasNode';
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -29,6 +30,14 @@ const nodeTypes: NodeTypes = {
 
 interface WorkflowCanvasProps {
   onNodeSelect?: (node: CustomNode | null) => void;
+}
+
+interface DragPayload {
+  type: CustomNode['data']['type'];
+  blockId?: string;
+  id?: string;
+  label: string;
+  config?: NodeConfig;
 }
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
@@ -43,8 +52,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   } = useWorkflowStore();
   const { screenToFlowPosition } = useReactFlow();
 
-  const [nodes, setNodes] = useNodesState(storeNodes);
-  const [edges, setCanvasEdges] = useEdgesState(storeEdges);
+  const [nodes, setNodes] = useNodesState<CustomNode>(storeNodes);
+  const [edges, setCanvasEdges] = useEdgesState<Edge>(storeEdges);
 
   useEffect(() => {
     setNodes(storeNodes);
@@ -58,8 +67,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     (connection: Connection) => {
       const edge: Edge = {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
-        source: connection.source || "",
-        target: connection.target || "",
+        source: connection.source || '',
+        target: connection.target || '',
       };
       addStoreEdge(edge);
     },
@@ -90,12 +99,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onEdgeDoubleClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
-      const currentLabel =
-        typeof edge.label === "string" ? edge.label : "";
-      const nextLabel = window.prompt(
-        "Inserisci label edge (vuoto per rimuoverla):",
-        currentLabel,
-      );
+      const currentLabel = typeof edge.label === 'string' ? edge.label : '';
+      const nextLabel = window.prompt('Inserisci label edge (vuoto per rimuoverla):', currentLabel);
 
       if (nextLabel === null) return;
 
@@ -124,18 +129,18 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+    event.dataTransfer.dropEffect = 'move';
   }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const data = event.dataTransfer.getData("application/reactflow");
+      const data = event.dataTransfer.getData('application/reactflow');
       if (!data) return;
 
       try {
-        const blockData = JSON.parse(data);
+        const blockData = JSON.parse(data) as DragPayload;
 
         const position = screenToFlowPosition({
           x: event.clientX,
@@ -143,39 +148,36 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         });
 
         const nodeId = `${blockData.type}-${Date.now()}`;
+        const blockId = blockData.blockId ?? blockData.id;
         const newNode: CustomNode = {
           id: nodeId,
           data: {
             label: blockData.label,
             type: blockData.type,
-            id: blockData.id,
-            config: {},
+            blockId,
+            config: blockData.config,
           },
           position,
-          type: "canvas",
+          type: 'canvas',
         };
 
         addNode(newNode);
       } catch (error) {
-        console.error("[v0] Error parsing dropped block:", error);
+        console.error('[workflow-canvas] Error parsing dropped block:', error);
       }
     },
     [addNode, screenToFlowPosition],
   );
 
-  const selectedNodeData = storeNodes.find((n) => n.id === selectedNode);
+  const selectedNodeData = storeNodes.find((node) => node.id === selectedNode);
 
   useEffect(() => {
     onNodeSelect?.(selectedNodeData ?? null);
   }, [onNodeSelect, selectedNodeData]);
 
   return (
-    <div
-      className="flex-1 bg-card relative"
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-    >
-      <ReactFlow
+    <div className="relative flex-1 bg-card" onDragOver={onDragOver} onDrop={onDrop}>
+      <ReactFlow<CustomNode, Edge>
         nodes={nodes.map((node) => ({
           ...node,
           selected: node.id === selectedNode,
@@ -188,7 +190,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
-        deleteKeyCode={["Backspace", "Delete"]}
+        deleteKeyCode={['Backspace', 'Delete']}
         fitView
       >
         <Background variant={BackgroundVariant.Dots} />
@@ -196,17 +198,20 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         <MiniMap
           nodeColor={(node) => {
             switch (node.data.type) {
-              case "actor":
-                return "var(--chart-4)";
-              case "decision":
-              case "condition":
-                return "var(--chart-3)";
-              case "automation":
-                return "var(--chart-2)";
-              case "action":
-                return "var(--chart-1)";
+              case 'actor':
+                return 'var(--chart-4)';
+              case 'decision':
+              case 'condition':
+                return 'var(--chart-3)';
+              case 'automation':
+                return 'var(--chart-2)';
+              case 'action':
+              case 'status':
+                return 'var(--chart-1)';
+              case 'event':
+                return 'var(--chart-2)';
               default:
-                return "var(--chart-5)";
+                return 'var(--chart-5)';
             }
           }}
           maskColor="rgba(0, 0, 0, 0.1)"

@@ -1,26 +1,26 @@
-import { create } from "zustand";
-import { Node, Edge } from "@xyflow/react";
+import { create } from 'zustand';
+import type { Edge, Node } from '@xyflow/react';
+import type {
+  NodeConfig,
+  NodeType,
+  SimulationEvent,
+  SimulationRuntime,
+} from '@/lib/simulation/types';
 
-export type NodeType =
-  | "actor"
-  | "decision"
-  | "condition"
-  | "automation"
-  | "action"
-  | "start"
-  | "end";
+export type { NodeType, NodeConfig } from '@/lib/simulation/types';
 
-export interface CustomNode extends Node {
-  data: {
-    label: string;
-    type: NodeType;
-    id?: string;
-    config?: {
-      [key: string]: any;
-    };
-    description?: string;
-  };
+export interface CustomNodeData {
+  [key: string]: unknown;
+  label: string;
+  type: NodeType;
+  blockId?: string;
+  config?: NodeConfig;
+  description?: string;
+  // Legacy support for older saved JSON/templates.
+  id?: string;
 }
+
+export type CustomNode = Node<CustomNodeData, 'canvas'>;
 
 export interface WorkflowStore {
   nodes: CustomNode[];
@@ -30,20 +30,19 @@ export interface WorkflowStore {
   simulationStep: number;
   activeNodeId: string | null;
   simulationLog: string[];
+  simulationRuntime: SimulationRuntime | null;
+  simulationEvents: SimulationEvent[];
 
-  // Node operations
   addNode: (node: CustomNode) => void;
   setNodes: (nodes: CustomNode[]) => void;
   updateNode: (id: string, data: Partial<CustomNode>) => void;
   deleteNode: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
 
-  // Edge operations
   addEdge: (edge: Edge) => void;
   deleteEdge: (id: string) => void;
   setEdges: (edges: Edge[]) => void;
 
-  // Simulation
   startSimulation: () => void;
   endSimulation: () => void;
   nextStep: () => void;
@@ -51,8 +50,10 @@ export interface WorkflowStore {
   setActiveNode: (id: string | null) => void;
   addSimulationLog: (message: string) => void;
   clearSimulationLog: () => void;
+  setSimulationRuntime: (runtime: SimulationRuntime | null) => void;
+  addSimulationEvent: (event: SimulationEvent) => void;
+  clearSimulationEvents: () => void;
 
-  // Workflow
   clearWorkflow: () => void;
   loadWorkflow: (nodes: CustomNode[], edges: Edge[]) => void;
 }
@@ -65,6 +66,8 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
   simulationStep: 0,
   activeNodeId: null,
   simulationLog: [],
+  simulationRuntime: null,
+  simulationEvents: [],
 
   addNode: (node) =>
     set((state) => ({
@@ -75,17 +78,13 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
 
   updateNode: (id, data) =>
     set((state) => ({
-      nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, ...data } : node,
-      ),
+      nodes: state.nodes.map((node) => (node.id === id ? { ...node, ...data } : node)),
     })),
 
   deleteNode: (id) =>
     set((state) => ({
       nodes: state.nodes.filter((node) => node.id !== id),
-      edges: state.edges.filter(
-        (edge) => edge.source !== id && edge.target !== id,
-      ),
+      edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
     })),
 
   setSelectedNode: (id) => set({ selectedNode: id }),
@@ -106,8 +105,10 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
     set({
       isSimulating: true,
       simulationStep: 0,
-      simulationLog: ["Simulation started..."],
-      activeNodeId: "start",
+      simulationLog: ['Simulation started...'],
+      activeNodeId: null,
+      simulationRuntime: null,
+      simulationEvents: [],
     }),
 
   endSimulation: () =>
@@ -135,6 +136,19 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
 
   clearSimulationLog: () => set({ simulationLog: [] }),
 
+  setSimulationRuntime: (runtime) =>
+    set({
+      simulationRuntime: runtime,
+      activeNodeId: runtime?.currentNodeId ?? null,
+    }),
+
+  addSimulationEvent: (event) =>
+    set((state) => ({
+      simulationEvents: [...state.simulationEvents, event],
+    })),
+
+  clearSimulationEvents: () => set({ simulationEvents: [] }),
+
   clearWorkflow: () =>
     set({
       nodes: [],
@@ -144,11 +158,18 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       simulationStep: 0,
       activeNodeId: null,
       simulationLog: [],
+      simulationRuntime: null,
+      simulationEvents: [],
     }),
 
   loadWorkflow: (nodes, edges) =>
     set({
       nodes,
       edges,
+      selectedNode: null,
+      activeNodeId: null,
+      simulationRuntime: null,
+      simulationEvents: [],
+      simulationLog: [],
     }),
 }));

@@ -1,5 +1,6 @@
-import { Edge } from "@xyflow/react";
-import { CustomNode } from "@/lib/store";
+import type { Edge } from '@xyflow/react';
+import type { CustomNode } from '@/lib/store';
+import type { DecisionOutcome, NodeConfig, NodeType } from '@/lib/simulation/types';
 
 export interface WorkflowTemplate {
   id: string;
@@ -9,7 +10,7 @@ export interface WorkflowTemplate {
   edges: Edge[];
 }
 
-export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+const RAW_WORKFLOW_TEMPLATES = [
   {
     id: "l1-l2-escalation",
     name: "1. Escalation L1 -> L2",
@@ -846,7 +847,117 @@ export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
       { id: "e19", source: "postmortem", target: "closure" },
     ],
   },
-];
+] as WorkflowTemplate[];
+
+const buildDefaultNodeConfig = (
+  nodeType: NodeType,
+  blockId: string | undefined,
+  nodeId: string,
+  edges: Edge[],
+): NodeConfig => {
+  if (nodeType === 'decision') {
+    const outcomes: DecisionOutcome[] = edges
+      .filter((edge) => edge.source === nodeId)
+      .map((edge, index) => ({
+        label: (typeof edge.label === 'string' ? edge.label : '').trim() || `Opzione ${index + 1}`,
+        targetNodeId: edge.target,
+      }));
+
+    return {
+      nodeType: 'decision',
+      decisionType: 'boolean',
+      outcomes,
+    };
+  }
+
+  if (nodeType === 'condition') {
+    return { nodeType: 'condition' };
+  }
+
+  if (nodeType === 'automation') {
+    const automationType =
+      blockId === 'sla-timer' ||
+      blockId === 'escalation' ||
+      blockId === 'auto-assign' ||
+      blockId === 'notify' ||
+      blockId === 'business-rules' ||
+      blockId === 'reopen'
+        ? blockId
+        : 'business-rules';
+
+    return {
+      nodeType: 'automation',
+      automationType,
+      duration: automationType === 'sla-timer' ? 60 : undefined,
+      assignTo: automationType === 'auto-assign' ? 'l2' : undefined,
+      channel: automationType === 'notify' ? 'email' : undefined,
+    };
+  }
+
+  if (nodeType === 'action') {
+    const ticketAction = blockId === 'resolve' || blockId === 'validate' || blockId === 'close' ? blockId : 'validate';
+    return { nodeType: 'action', ticketAction };
+  }
+
+  if (nodeType === 'actor') {
+    const agentLevel =
+      blockId === 'l1-tech'
+        ? 'l1'
+        : blockId === 'l2-tech'
+          ? 'l2'
+          : blockId === 'l3-specialist'
+            ? 'l3'
+            : blockId === 'client'
+              ? 'client'
+              : blockId === 'supervisor'
+                ? 'supervisor'
+                : undefined;
+    return { nodeType: 'actor', agentLevel };
+  }
+
+  if (nodeType === 'status') {
+    return { nodeType: 'status', statusValue: 'in-progress' };
+  }
+
+  if (nodeType === 'event') {
+    return { nodeType: 'event', eventTrigger: 'manual' };
+  }
+
+  if (nodeType === 'start') {
+    return { nodeType: 'start' };
+  }
+
+  return { nodeType: 'end' };
+};
+
+const enrichTemplate = (template: WorkflowTemplate): WorkflowTemplate => {
+  const normalizedEdges = template.edges.map((edge) => ({
+    ...edge,
+    label: typeof edge.label === 'string' ? edge.label : undefined,
+  }));
+
+  const normalizedNodes: CustomNode[] = template.nodes.map((node) => {
+    const blockId = node.data.blockId ?? node.data.id;
+    const config = node.data.config ?? buildDefaultNodeConfig(node.data.type, blockId, node.id, normalizedEdges);
+
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        blockId,
+        config,
+      },
+    };
+  });
+
+  return {
+    ...template,
+    nodes: normalizedNodes,
+    edges: normalizedEdges,
+  };
+};
+
+export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = RAW_WORKFLOW_TEMPLATES.map(enrichTemplate);
 
 
 

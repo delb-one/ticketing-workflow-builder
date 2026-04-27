@@ -1,179 +1,199 @@
-"use client";
+'use client';
 
-import { Card } from "@/components/ui/card";
-import { NodeType } from "@/lib/store";
-import { cn } from "@/lib/utils";
+import { Card } from '@/components/ui/card';
+import type { NodeConfig, NodeType } from '@/lib/simulation/types';
+import { cn } from '@/lib/utils';
 import {
-  Play,
-  CheckCircle2,
-  User,
-  Headphones,
-  UserCog,
-  Cpu,
-  ShieldCheck,
-  GitBranch,
-  Filter,
-  SlidersHorizontal,
-  Shuffle,
-  Clock,
   ArrowUpCircle,
   Bell,
-  RotateCcw,
   CheckCircle,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  Filter,
+  GitBranch,
+  Headphones,
   MessageSquare,
-} from "lucide-react";
-import { LucideIcon } from "lucide-react";
-import { ScrollArea } from "./ui/scroll-area";
+  Play,
+  RotateCcw,
+  ShieldCheck,
+  Shuffle,
+  SlidersHorizontal,
+  User,
+  UserCog,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
-type ChartColor = "chart-1" | "chart-2" | "chart-3" | "chart-4" | "chart-5";
+type ChartColor = 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5';
+
 interface BlockDefinition {
-  id: string;
+  blockId: string;
   label: string;
   type: NodeType;
   color: ChartColor;
   icon: LucideIcon;
   description?: string;
+  config: NodeConfig;
 }
 
 const BLOCKS: Record<string, BlockDefinition[]> = {
   Other: [
     {
-      id: "start",
-      label: "Start",
-      type: "start",
-      color: "chart-5",
+      blockId: 'start',
+      label: 'Start',
+      type: 'start',
+      color: 'chart-5',
       icon: Play,
+      config: { nodeType: 'start' },
     },
     {
-      id: "end",
-      label: "End",
-      type: "end",
-      color: "chart-5",
+      blockId: 'end',
+      label: 'End',
+      type: 'end',
+      color: 'chart-5',
       icon: CheckCircle2,
+      config: { nodeType: 'end' },
     },
   ],
 
   Actors: [
     {
-      id: "client",
-      label: "Client",
-      type: "actor",
-      color: "chart-4",
+      blockId: 'client',
+      label: 'Client',
+      type: 'actor',
+      color: 'chart-4',
       icon: User,
+      config: { nodeType: 'actor', agentLevel: 'client' },
     },
     {
-      id: "l1-tech",
-      label: "L1 Technician",
-      type: "actor",
-      color: "chart-4",
+      blockId: 'l1-tech',
+      label: 'L1 Technician',
+      type: 'actor',
+      color: 'chart-4',
       icon: Headphones,
+      config: { nodeType: 'actor', agentLevel: 'l1' },
     },
     {
-      id: "l2-tech",
-      label: "L2 Technician",
-      type: "actor",
-      color: "chart-4",
+      blockId: 'l2-tech',
+      label: 'L2 Technician',
+      type: 'actor',
+      color: 'chart-4',
       icon: UserCog,
+      config: { nodeType: 'actor', agentLevel: 'l2' },
     },
     {
-      id: "l3-specialist",
-      label: "L3 Specialist",
-      type: "actor",
-      color: "chart-4",
+      blockId: 'l3-specialist',
+      label: 'L3 Specialist',
+      type: 'actor',
+      color: 'chart-4',
       icon: Cpu,
+      config: { nodeType: 'actor', agentLevel: 'l3' },
     },
     {
-      id: "supervisor",
-      label: "Supervisor",
-      type: "actor",
-      color: "chart-4",
+      blockId: 'supervisor',
+      label: 'Supervisor',
+      type: 'actor',
+      color: 'chart-4',
       icon: ShieldCheck,
+      config: { nodeType: 'actor', agentLevel: 'supervisor' },
     },
   ],
 
-  "Logic Blocks": [
+  'Logic Blocks': [
     {
-      id: "decision",
-      label: "Decision",
-      type: "decision",
-      color: "chart-3",
+      blockId: 'decision',
+      label: 'Decision',
+      type: 'decision',
+      color: 'chart-3',
       icon: GitBranch,
+      config: { nodeType: 'decision', decisionType: 'boolean', outcomes: [] },
     },
     {
-      id: "condition",
-      label: "Condition",
-      type: "condition",
-      color: "chart-3",
+      blockId: 'condition',
+      label: 'Condition',
+      type: 'condition',
+      color: 'chart-3',
       icon: Filter,
+      config: { nodeType: 'condition' },
     },
   ],
 
   Automation: [
     {
-      id: "business-rules",
-      label: "Business Rules",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'business-rules',
+      label: 'Business Rules',
+      type: 'automation',
+      color: 'chart-2',
       icon: SlidersHorizontal,
+      config: { nodeType: 'automation', automationType: 'business-rules' },
     },
     {
-      id: "auto-assign",
-      label: "Auto Assignment",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'auto-assign',
+      label: 'Auto Assignment',
+      type: 'automation',
+      color: 'chart-2',
       icon: Shuffle,
+      config: { nodeType: 'automation', automationType: 'auto-assign', assignTo: 'l1' },
     },
     {
-      id: "sla-timer",
-      label: "SLA Timer",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'sla-timer',
+      label: 'SLA Timer',
+      type: 'automation',
+      color: 'chart-2',
       icon: Clock,
+      config: { nodeType: 'automation', automationType: 'sla-timer', duration: 60 },
     },
     {
-      id: "escalation",
-      label: "Escalation",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'escalation',
+      label: 'Escalation',
+      type: 'automation',
+      color: 'chart-2',
       icon: ArrowUpCircle,
+      config: { nodeType: 'automation', automationType: 'escalation' },
     },
     {
-      id: "notify",
-      label: "Notification",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'notify',
+      label: 'Notification',
+      type: 'automation',
+      color: 'chart-2',
       icon: Bell,
+      config: { nodeType: 'automation', automationType: 'notify', channel: 'email' },
     },
     {
-      id: "reopen",
-      label: "Reopen Ticket",
-      type: "automation",
-      color: "chart-2",
+      blockId: 'reopen',
+      label: 'Reopen Ticket',
+      type: 'automation',
+      color: 'chart-2',
       icon: RotateCcw,
+      config: { nodeType: 'automation', automationType: 'reopen' },
     },
   ],
 
   Actions: [
     {
-      id: "resolve",
-      label: "Resolve Ticket",
-      type: "action",
-      color: "chart-1",
+      blockId: 'resolve',
+      label: 'Resolve Ticket',
+      type: 'action',
+      color: 'chart-1',
       icon: CheckCircle,
+      config: { nodeType: 'action', ticketAction: 'resolve' },
     },
     {
-      id: "validate",
-      label: "Validate Ticket",
-      type: "action",
-      color: "chart-1",
+      blockId: 'validate',
+      label: 'Validate Ticket',
+      type: 'action',
+      color: 'chart-1',
       icon: MessageSquare,
+      config: { nodeType: 'action', ticketAction: 'validate' },
     },
     {
-      id: "close",
-      label: "Close Ticket",
-      type: "action",
-      color: "chart-1",
+      blockId: 'close',
+      label: 'Close Ticket',
+      type: 'action',
+      color: 'chart-1',
       icon: CheckCircle2,
+      config: { nodeType: 'action', ticketAction: 'close' },
     },
   ],
 };
@@ -183,42 +203,45 @@ interface BlockLibraryProps {
     blockType: NodeType,
     blockId: string,
     blockLabel: string,
+    blockConfig: NodeConfig,
   ) => void;
 }
 
 export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
+  void onBlockDrag;
+
   const colorMap: Record<ChartColor, string> = {
-    "chart-1": "border-chart-1 hover:bg-chart-1/10 ",
-    "chart-2": "border-chart-2 hover:bg-chart-2/10 ",
-    "chart-3": "border-chart-3 hover:bg-chart-3/10",
-    "chart-4": "border-chart-4 hover:bg-chart-4/10 ",
-    "chart-5": "border-chart-5 hover:bg-chart-5/10 ",
+    'chart-1': 'border-chart-1 hover:bg-chart-1/10 ',
+    'chart-2': 'border-chart-2 hover:bg-chart-2/10 ',
+    'chart-3': 'border-chart-3 hover:bg-chart-3/10',
+    'chart-4': 'border-chart-4 hover:bg-chart-4/10 ',
+    'chart-5': 'border-chart-5 hover:bg-chart-5/10 ',
   };
-  const handleDragStart = (e: React.DragEvent, block: BlockDefinition) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData(
-      "application/reactflow",
+
+  const handleDragStart = (event: React.DragEvent, block: BlockDefinition) => {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(
+      'application/reactflow',
       JSON.stringify({
         type: block.type,
-        id: block.id,
+        blockId: block.blockId,
         label: block.label,
+        config: block.config,
       }),
     );
   };
 
   return (
-    <div className="w-64 bg-card border-r border-border overflow-y-auto h-full flex flex-col">
-      <div className="p-4 border-b border-border sticky top-0 bg-card">
+    <div className="flex h-full w-64 flex-col overflow-y-auto border-r border-border bg-card">
+      <div className="sticky top-0 border-b border-border bg-card p-4">
         <h2 className="font-semibold text-foreground">Block Library</h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Drag blocks to canvas
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">Drag blocks to canvas</p>
       </div>
 
-      <ScrollArea className="flex-1 overflow-y-auto p-4 space-y-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {Object.entries(BLOCKS).map(([category, blocks]) => (
           <div key={category}>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide mt-2">
+            <h3 className="mt-2 mb-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               {category}
             </h3>
 
@@ -228,16 +251,16 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
 
                 return (
                   <Card
-                    key={block.id}
+                    key={block.blockId}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, block)}
+                    onDragStart={(event) => handleDragStart(event, block)}
                     className={cn(
-                      "p-3 cursor-move hover:shadow-md transition-shadow rounded-lg bg-card border",
+                      'cursor-move rounded-lg border bg-card p-3 transition-shadow hover:shadow-md',
                       colorMap[block.color],
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className={cn("w-4 h-4", `text-${block.color}`)} />{" "}
+                      <Icon className={cn('h-4 w-4', `text-${block.color}`)} />
                       <span className="text-sm font-medium">{block.label}</span>
                     </div>
                   </Card>

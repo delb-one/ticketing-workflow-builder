@@ -4,7 +4,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import BlockLibrary from '@/components/BlockLibrary';
 import InspectorPanel from '@/components/InspectorPanel';
 import Toolbar from '@/components/Toolbar';
-import SimulationEngine from '@/components/SimulationEngine';
+import SimulationPanel from '@/components/SimulationPanel';
 import { useWorkflowStore } from '@/lib/store';
 import dynamic from 'next/dynamic';
 
@@ -23,7 +23,7 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden gap-4 p-4">
         {/* Left Sidebar */}
         <div className="w-64  rounded-lg shadow-sm border  overflow-hidden flex flex-col">
-          <BlockLibrary onBlockDrag={() => {}} />
+          <BlockLibrary onBlockDrag={() => { }} />
         </div>
 
         {/* Center Canvas */}
@@ -42,7 +42,7 @@ export default function Home() {
 
           {/* Simulation Controls */}
           <div className=" rounded-lg shadow-sm border border-red p-4">
-            <SimulationEngine />
+            <SimulationPanel />
           </div>
         </div>
       </div>

@@ -2,32 +2,14 @@
 
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
-import {
-  ArrowUpCircle,
-  Bell,
-  CheckCircle,
-  CheckCircle2,
-  Clock,
-  Cpu,
-  Filter,
-  GitBranch,
-  Headphones,
-  LucideIcon,
-  MessageSquare,
-  Play,
-  RotateCcw,
-  ShieldCheck,
-  Shuffle,
-  SlidersHorizontal,
-  User,
-  UserCog,
-} from 'lucide-react';
+import { getNodeIcon } from '@/lib/node-icons';
 import { NodeType, useWorkflowStore } from '@/lib/store';
 
 interface CanvasNodeProps {
   data: {
     label: string;
     type: NodeType;
+    blockId?: string;
     id?: string;
   };
   selected?: boolean;
@@ -77,37 +59,16 @@ const TYPE_THEME_MAP: Record<NodeType, NodeTheme> = {
     softText: 'text-chart-5/80',
     handle: '!bg-chart-5',
   },
-};
-
-const BLOCK_ICON_MAP: Record<string, LucideIcon> = {
-  start: Play,
-  end: CheckCircle2,
-  client: User,
-  'l1-tech': Headphones,
-  'l2-tech': UserCog,
-  'l3-specialist': Cpu,
-  supervisor: ShieldCheck,
-  decision: GitBranch,
-  condition: Filter,
-  'business-rules': SlidersHorizontal,
-  'auto-assign': Shuffle,
-  'sla-timer': Clock,
-  escalation: ArrowUpCircle,
-  notify: Bell,
-  reopen: RotateCcw,
-  resolve: CheckCircle,
-  validate: MessageSquare,
-  close: CheckCircle2,
-};
-
-const TYPE_ICON_MAP: Record<NodeType, LucideIcon> = {
-  actor: User,
-  decision: GitBranch,
-  condition: Filter,
-  automation: SlidersHorizontal,
-  action: CheckCircle,
-  start: Play,
-  end: CheckCircle2,
+  status: {
+    gradient: 'from-chart-1 to-chart-1',
+    softText: 'text-chart-1/80',
+    handle: '!bg-chart-1',
+  },
+  event: {
+    gradient: 'from-chart-2 to-chart-2',
+    softText: 'text-chart-2/80',
+    handle: '!bg-chart-2',
+  },
 };
 
 const TYPE_LABEL_MAP: Record<NodeType, string> = {
@@ -118,14 +79,8 @@ const TYPE_LABEL_MAP: Record<NodeType, string> = {
   action: 'Action',
   start: 'Start',
   end: 'End',
-};
-
-const getNodeIcon = (type: NodeType, blockId?: string): LucideIcon => {
-  if (blockId && BLOCK_ICON_MAP[blockId]) {
-    return BLOCK_ICON_MAP[blockId];
-  }
-
-  return TYPE_ICON_MAP[type];
+  status: 'Status',
+  event: 'Event',
 };
 
 export default function CanvasNode(props: CanvasNodeProps) {
@@ -133,9 +88,10 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const { data, selected, id, isConnecting } = props;
   const isActive = activeNodeId === id;
   const theme = TYPE_THEME_MAP[data.type];
-  const Icon = getNodeIcon(data.type, data.id);
+  const blockId = data.blockId ?? data.id;
+  const Icon = getNodeIcon(data.type, blockId);
   const isAutomation = data.type === 'automation';
-  const subtitle = data.id ? data.id.replace(/-/g, ' ') : TYPE_LABEL_MAP[data.type];
+  const subtitle = blockId ? blockId.replace(/-/g, ' ') : TYPE_LABEL_MAP[data.type];
 
   return (
     <motion.div
@@ -143,14 +99,10 @@ export default function CanvasNode(props: CanvasNodeProps) {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       onClick={() => setSelectedNode(id)}
-      className={`group relative min-w-55 cursor-pointer rounded-xl bg-linear-to-br p-px ${theme.gradient} shadow-lg transition-all ${
-        selected ? 'ring-2 ring-accent-foreground ring-offset-2' : ''
-      } ${isActive ? 'shadow-xl scale-[1.01]' : ''} ${isConnecting ? 'opacity-40' : ''}`}
+      className={`group relative min-w-55 cursor-pointer rounded-xl bg-linear-to-br p-px ${theme.gradient} shadow-lg transition-all ${selected ? 'ring-2 ring-accent-foreground ring-offset-2' : ''} ${isActive ? 'scale-[1.01] shadow-xl' : ''} ${isConnecting ? 'opacity-40' : ''}`}
     >
       <div
-        className={`relative rounded-[11px] border border-border/70 bg-card px-3 py-3 backdrop-blur-sm ${
-          isAutomation ? 'border-dashed' : ''
-        }`}
+        className={`relative rounded-[11px] border border-border/70 bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? 'border-dashed' : ''}`}
       >
         <div className="flex items-start gap-3">
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br ${theme.gradient} text-white`}>
