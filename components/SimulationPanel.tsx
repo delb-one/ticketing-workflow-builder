@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { SimulationEngine } from '@/lib/simulation';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { SimulationEngine } from "@/lib/simulation";
 import type {
   NodeConfig,
   NodeType,
@@ -12,10 +12,10 @@ import type {
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
-} from '@/lib/simulation';
-import { useWorkflowStore } from '@/lib/store';
-import type { CustomNode } from '@/lib/store';
-import { motion, AnimatePresence } from 'framer-motion';
+} from "@/lib/simulation";
+import { useWorkflowStore } from "@/lib/store";
+import type { CustomNode } from "@/lib/store";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
@@ -24,65 +24,75 @@ import {
   GitBranch,
   Play,
   Pause,
-} from 'lucide-react';
+  CircleStop,
+  CirclePlay,
+} from "lucide-react";
 
 const DEFAULT_STEP_DELAY_MS = 900;
 
-const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig => {
+const createDefaultNodeConfig = (
+  type: NodeType,
+  blockId?: string,
+): NodeConfig => {
   switch (type) {
-    case 'decision':
-      return { nodeType: 'decision', decisionType: 'manual', outcomes: [] };
-    case 'condition':
-      return { nodeType: 'condition' };
-    case 'automation': {
+    case "decision":
+      return { nodeType: "decision", decisionType: "manual", outcomes: [] };
+    case "condition":
+      return { nodeType: "condition" };
+    case "automation": {
       const automationType =
-        blockId === 'sla-timer' ||
-        blockId === 'escalation' ||
-        blockId === 'auto-assign' ||
-        blockId === 'notify' ||
-        blockId === 'business-rules' ||
-        blockId === 'reopen'
+        blockId === "sla-timer" ||
+        blockId === "escalation" ||
+        blockId === "auto-assign" ||
+        blockId === "notify" ||
+        blockId === "business-rules" ||
+        blockId === "reopen"
           ? blockId
-          : 'business-rules';
+          : "business-rules";
       return {
-        nodeType: 'automation',
+        nodeType: "automation",
         automationType,
-        duration: blockId === 'sla-timer' ? 60 : undefined,
+        duration: blockId === "sla-timer" ? 60 : undefined,
       };
     }
-    case 'action': {
+    case "action": {
       const ticketAction =
-        blockId === 'resolve' || blockId === 'validate' || blockId === 'close' ? blockId : 'validate';
-      return { nodeType: 'action', ticketAction };
+        blockId === "resolve" || blockId === "validate" || blockId === "close"
+          ? blockId
+          : "validate";
+      return { nodeType: "action", ticketAction };
     }
-    case 'actor': {
+    case "actor": {
       const agentLevel =
-        blockId === 'l1-tech'
-          ? 'l1'
-          : blockId === 'l2-tech'
-            ? 'l2'
-            : blockId === 'l3-specialist'
-              ? 'l3'
-              : blockId === 'client'
-                ? 'client'
-                : blockId === 'supervisor'
-                  ? 'supervisor'
+        blockId === "l1-tech"
+          ? "l1"
+          : blockId === "l2-tech"
+            ? "l2"
+            : blockId === "l3-specialist"
+              ? "l3"
+              : blockId === "client"
+                ? "client"
+                : blockId === "supervisor"
+                  ? "supervisor"
                   : undefined;
-      return { nodeType: 'actor', agentLevel };
+      return { nodeType: "actor", agentLevel };
     }
-    case 'status':
-      return { nodeType: 'status', statusValue: 'in_progress' };
-    case 'event':
-      return { nodeType: 'event', eventTrigger: 'manual' };
-    case 'start':
-      return { nodeType: 'start' };
-    case 'end':
+    case "status":
+      return { nodeType: "status", statusValue: "in_progress" };
+    case "event":
+      return { nodeType: "event", eventTrigger: "manual" };
+    case "start":
+      return { nodeType: "start" };
+    case "end":
     default:
-      return { nodeType: 'end' };
+      return { nodeType: "end" };
   }
 };
 
-const toWorkflowDefinition = (nodes: CustomNode[], edges: WorkflowEdge[]): WorkflowDefinition => {
+const toWorkflowDefinition = (
+  nodes: CustomNode[],
+  edges: WorkflowEdge[],
+): WorkflowDefinition => {
   const workflowNodes: WorkflowNode[] = nodes.map((node) => {
     const blockId = node.data.blockId ?? node.data.id;
 
@@ -95,7 +105,8 @@ const toWorkflowDefinition = (nodes: CustomNode[], edges: WorkflowEdge[]): Workf
         type: node.data.type,
         description: node.data.description,
         blockId,
-        config: node.data.config ?? createDefaultNodeConfig(node.data.type, blockId),
+        config:
+          node.data.config ?? createDefaultNodeConfig(node.data.type, blockId),
       },
     };
   });
@@ -104,38 +115,46 @@ const toWorkflowDefinition = (nodes: CustomNode[], edges: WorkflowEdge[]): Workf
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    label: typeof edge.label === 'string' ? edge.label : undefined,
+    label: typeof edge.label === "string" ? edge.label : undefined,
   }));
 
   return {
-    id: 'active-workflow',
-    name: 'Active Workflow',
+    id: "active-workflow",
+    name: "Active Workflow",
     nodes: workflowNodes,
     edges: workflowEdges,
   };
 };
 
-const getEventIcon = (eventType: SimulationEvent['type']) => {
-  if (eventType === 'workflow.started') return Play;
-  if (eventType === 'decision.required' || eventType === 'decision.made') return GitBranch;
-  if (eventType === 'workflow.completed' || eventType === 'ticket.closed') return CheckCircle2;
-  if (eventType === 'workflow.error') return AlertTriangle;
-  if (eventType === 'sla.started' || eventType === 'sla.breached') return Clock;
+const getEventIcon = (eventType: SimulationEvent["type"]) => {
+  if (eventType === "workflow.started") return Play;
+  if (eventType === "decision.required" || eventType === "decision.made")
+    return GitBranch;
+  if (eventType === "workflow.completed" || eventType === "ticket.closed")
+    return CheckCircle2;
+  if (eventType === "workflow.error") return AlertTriangle;
+  if (eventType === "sla.started" || eventType === "sla.breached") return Clock;
   return ArrowRight;
 };
 
 const getEventText = (event: SimulationEvent): string => {
-  if (event.type === 'decision.required') {
-    return `Decision required at ${event.nodeLabel ?? event.nodeId ?? 'unknown node'}`;
+  if (event.type === "decision.required") {
+    return `Decision required at ${event.nodeLabel ?? event.nodeId ?? "unknown node"}`;
   }
 
-  if (event.type === 'decision.made') {
-    const outcome = typeof event.payload?.newState === 'string' ? event.payload.newState : 'n/a';
+  if (event.type === "decision.made") {
+    const outcome =
+      typeof event.payload?.newState === "string"
+        ? event.payload.newState
+        : "n/a";
     return `Decision made: ${outcome}`;
   }
 
-  if (event.type === 'workflow.error') {
-    const message = typeof event.payload?.reason === 'string' ? event.payload.reason : 'Unknown error';
+  if (event.type === "workflow.error") {
+    const message =
+      typeof event.payload?.reason === "string"
+        ? event.payload.reason
+        : "Unknown error";
     return `Error: ${message}`;
   }
 
@@ -190,18 +209,22 @@ export default function SimulationPanel() {
     engineRef.current = engine;
 
     unsubscribeRef.current?.();
-    unsubscribeRef.current = engine.subscribe((nextRuntime: SimulationRuntime, event?: SimulationEvent) => {
-      setSimulationRuntime(nextRuntime);
-      setShowDecisionDialog(nextRuntime.paused && nextRuntime.pendingDecisionOutcomes.length > 0);
+    unsubscribeRef.current = engine.subscribe(
+      (nextRuntime: SimulationRuntime, event?: SimulationEvent) => {
+        setSimulationRuntime(nextRuntime);
+        setShowDecisionDialog(
+          nextRuntime.paused && nextRuntime.pendingDecisionOutcomes.length > 0,
+        );
 
-      if (event) {
-        addSimulationEvent(event);
-      }
+        if (event) {
+          addSimulationEvent(event);
+        }
 
-      if (nextRuntime.completed) {
-        endSimulation();
-      }
-    });
+        if (nextRuntime.completed) {
+          endSimulation();
+        }
+      },
+    );
 
     startSimulation();
     engine.start();
@@ -231,19 +254,27 @@ export default function SimulationPanel() {
     };
   }, []);
 
-  const pendingOutcomes = useMemo(() => runtime?.pendingDecisionOutcomes ?? [], [runtime]);
+  const pendingOutcomes = useMemo(
+    () => runtime?.pendingDecisionOutcomes ?? [],
+    [runtime],
+  );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
-          <label htmlFor="step-delay" className="whitespace-nowrap text-xs text-muted-foreground">
+          <label
+            htmlFor="step-delay"
+            className="whitespace-nowrap text-xs text-muted-foreground"
+          >
             Delay
           </label>
           <select
             id="step-delay"
             value={stepDelayMs}
-            onChange={(event) => setStepDelayMs(parseInt(event.target.value, 10))}
+            onChange={(event) =>
+              setStepDelayMs(parseInt(event.target.value, 10))
+            }
             className="h-8 rounded-md border border-border bg-background px-2 text-xs"
           >
             <option value={300}>300ms</option>
@@ -257,15 +288,15 @@ export default function SimulationPanel() {
         <Button
           onClick={startSimulationFlow}
           disabled={isSimulating || nodes.length === 0}
-          size="sm"
+          size="icon"
           className="bg-emerald-600 hover:bg-emerald-700"
         >
-          Start Simulation
+          <CirclePlay className=" h-4 w-4" />
         </Button>
 
         {isSimulating && (
-          <Button onClick={handleStop} size="sm" variant="destructive">
-            Stop
+          <Button onClick={handleStop} size="icon" variant="destructive">
+            <CircleStop className=" h-4 w-4" />
           </Button>
         )}
       </div>
@@ -314,13 +345,17 @@ export default function SimulationPanel() {
           >
             <Card className="max-w-sm p-6">
               <h3 className="mb-4 text-lg font-semibold">
-                {runtime.pausedAt ? `Decision at: ${runtime.pausedAt}` : 'What is your decision?'}
+                {runtime.pausedAt
+                  ? `Decision at: ${runtime.pausedAt}`
+                  : "What is your decision?"}
               </h3>
               <div className="flex flex-wrap gap-3">
                 {pendingOutcomes.map((outcome) => (
                   <Button
                     key={outcome.label}
-                    onClick={() => engineRef.current?.handleDecision(outcome.label)}
+                    onClick={() =>
+                      engineRef.current?.handleDecision(outcome.label)
+                    }
                     className="flex-1"
                   >
                     {outcome.label}

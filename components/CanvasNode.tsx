@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { getNodeIcon } from '@/lib/node-icons';
 import { useWorkflowStore } from '@/lib/store';
 import { CanvasNodeProps } from '@/lib/canvasNode/types';
-import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from '@/lib/canvasNode/registry';
+import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from '@/lib/canvasNode/color-map';
 
 
 
@@ -21,7 +21,6 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const isAutomation = data.type === 'automation';
   const subtitle = blockId ? blockId.replace(/-/g, ' ') : TYPE_LABEL_MAP[data.type];
 
-  console.log(data);
   
 
   return (
@@ -30,10 +29,10 @@ export default function CanvasNode(props: CanvasNodeProps) {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       onClick={() => setSelectedNode(id)}
-      className={`group relative min-w-55 cursor-pointer rounded-xl bg-linear-to-br p-px ${theme.gradient} shadow-lg transition-all ${selected ? 'ring-2 ring-accent-foreground ring-offset-2' : ''} ${isActive ? 'scale-[1.01] shadow-xl' : ''} ${isConnecting ? 'opacity-40' : ''}`}
+      className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? 'ring-2 ring-accent-foreground ring-offset-2' : ''} ${isActive ? 'scale-[1.01] shadow-xl' : ''} ${isConnecting ? 'opacity-40' : ''}`}
     >
       <div
-        className={`relative rounded-[11px] border border-border/70 bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? 'border-dashed' : ''}`}
+        className={`relative rounded-[11px] border border-border/70 border-${theme.color} bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? 'border-dashed' : ''}`}
       >
         <div className="flex items-start gap-3">
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br ${theme.gradient} text-white`}>

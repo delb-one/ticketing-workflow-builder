@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Edge,
@@ -18,11 +18,12 @@ import {
   NodeTypes,
   BackgroundVariant,
   useReactFlow,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { useWorkflowStore, CustomNode } from '@/lib/store';
-import type { NodeConfig } from '@/lib/simulation/types';
-import CanvasNode from './CanvasNode';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { useWorkflowStore, CustomNode } from "@/lib/store";
+import type { NodeConfig } from "@/lib/simulation/types";
+import CanvasNode from "./CanvasNode";
+import { useTheme } from "next-themes";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -33,7 +34,7 @@ interface WorkflowCanvasProps {
 }
 
 interface DragPayload {
-  type: CustomNode['data']['type'];
+  type: CustomNode["data"]["type"];
   blockId?: string;
   id?: string;
   label: string;
@@ -50,6 +51,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     setEdges: setStoreEdges,
     selectedNode,
   } = useWorkflowStore();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
   const { screenToFlowPosition } = useReactFlow();
 
   const [nodes, setNodes] = useNodesState<CustomNode>(storeNodes);
@@ -67,8 +70,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     (connection: Connection) => {
       const edge: Edge = {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
-        source: connection.source || '',
-        target: connection.target || '',
+        source: connection.source || "",
+        target: connection.target || "",
       };
       addStoreEdge(edge);
     },
@@ -78,7 +81,10 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const onNodesChange = useCallback(
     (changes: NodeChange<CustomNode>[]) => {
       setNodes((currentNodes) => {
-        const nextNodes = applyNodeChanges(changes, currentNodes) as CustomNode[];
+        const nextNodes = applyNodeChanges(
+          changes,
+          currentNodes,
+        ) as CustomNode[];
         setStoreNodes(nextNodes);
         return nextNodes;
       });
@@ -99,8 +105,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onEdgeDoubleClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
-      const currentLabel = typeof edge.label === 'string' ? edge.label : '';
-      const nextLabel = window.prompt('Inserisci label edge (vuoto per rimuoverla):', currentLabel);
+      const currentLabel = typeof edge.label === "string" ? edge.label : "";
+      const nextLabel = window.prompt(
+        "Inserisci label edge (vuoto per rimuoverla):",
+        currentLabel,
+      );
 
       if (nextLabel === null) return;
 
@@ -129,14 +138,14 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = "move";
   }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const data = event.dataTransfer.getData('application/reactflow');
+      const data = event.dataTransfer.getData("application/reactflow");
       if (!data) return;
 
       try {
@@ -158,12 +167,12 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             config: blockData.config,
           },
           position,
-          type: 'canvas',
+          type: "canvas",
         };
 
         addNode(newNode);
       } catch (error) {
-        console.error('[workflow-canvas] Error parsing dropped block:', error);
+        console.error("[workflow-canvas] Error parsing dropped block:", error);
       }
     },
     [addNode, screenToFlowPosition],
@@ -176,7 +185,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   }, [onNodeSelect, selectedNodeData]);
 
   return (
-    <div className="relative flex-1 bg-card" onDragOver={onDragOver} onDrop={onDrop}>
+    <div
+      className="relative flex-1 bg-card"
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <ReactFlow<CustomNode, Edge>
         nodes={nodes.map((node) => ({
           ...node,
@@ -189,29 +202,30 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         onEdgesDelete={onEdgesDelete}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
-        connectionMode={ConnectionMode.Loose}
-        deleteKeyCode={['Backspace', 'Delete']}
+        connectionMode={ConnectionMode.Strict}
+        deleteKeyCode={["Backspace", "Delete"]}
         fitView
+        colorMode={theme === "dark" ? "dark" : "light"}
       >
         <Background variant={BackgroundVariant.Dots} />
         <Controls />
         <MiniMap
           nodeColor={(node) => {
             switch (node.data.type) {
-              case 'actor':
-                return 'var(--chart-4)';
-              case 'decision':
-              case 'condition':
-                return 'var(--chart-3)';
-              case 'automation':
-                return 'var(--chart-2)';
-              case 'action':
-              case 'status':
-                return 'var(--chart-1)';
-              case 'event':
-                return 'var(--chart-2)';
+              case "actor":
+                return "var(--chart-4)";
+              case "decision":
+              case "condition":
+                return "var(--chart-3)";
+              case "automation":
+                return "var(--chart-2)";
+              case "action":
+              case "status":
+                return "var(--chart-1)";
+              case "event":
+                return "var(--chart-2)";
               default:
-                return 'var(--chart-5)';
+                return "var(--chart-5)";
             }
           }}
           maskColor="rgba(0, 0, 0, 0.1)"

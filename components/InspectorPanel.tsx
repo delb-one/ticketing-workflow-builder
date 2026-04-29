@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWorkflowStore, CustomNode } from '@/lib/store';
 import type { NodeConfig } from '@/lib/simulation/types';
+import { ScrollArea } from './ui/scroll-area';
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -82,8 +83,8 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </p>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        <Card className="p-4">
+      <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Card className="p-4 mb-4">
           <label className="mb-2 block text-sm font-semibold text-foreground">Label</label>
           <Input
             value={selectedNode.data.label}
@@ -93,14 +94,14 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </Card>
 
         {selectedNode.data.type === 'decision' && (
-          <Card className="p-4">
+          <Card className="p-4 mb-4">
             <label className="mb-2 block text-sm font-semibold text-foreground">Decision Type</label>
             <select
               value={config?.nodeType === 'decision' ? config.decisionType : 'boolean'}
               onChange={(event) =>
                 handleConfigChange({
                   nodeType: 'decision',
-                  decisionType: event.target.value as 'boolean' | 'custom',
+                  decisionType: event.target.value as 'manual' | 'rule-based',
                 })
               }
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
@@ -112,7 +113,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         )}
 
         {selectedNode.data.type === 'automation' && blockId?.includes('sla') && (
-          <Card className="p-4">
+          <Card className="p-4 mb-4">
             <label className="mb-2 block text-sm font-semibold text-foreground">SLA Duration (minutes)</label>
             <Input
               type="number"
@@ -131,7 +132,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         )}
 
         {selectedNode.data.type === 'automation' && blockId?.includes('assign') && (
-          <Card className="p-4">
+          <Card className="p-4 mb-4">
             <label className="mb-2 block text-sm font-semibold text-foreground">Assign To</label>
             <select
               value={config?.nodeType === 'automation' ? config.assignTo ?? 'l1' : 'l1'}
@@ -152,7 +153,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         )}
 
         {selectedNode.data.type === 'automation' && blockId?.includes('notify') && (
-          <Card className="p-4">
+          <Card className="p-4 mb-4">
             <label className="mb-2 block text-sm font-semibold text-foreground">Notification Channel</label>
             <select
               value={config?.nodeType === 'automation' ? config.channel ?? 'email' : 'email'}
@@ -171,6 +172,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
             </select>
           </Card>
         )}
+        
 
         <Card className="p-3">
           <p className="text-xs text-muted-foreground">
@@ -180,7 +182,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
             <strong>Position:</strong> {Math.round(selectedNode.position.x)}, {Math.round(selectedNode.position.y)}
           </p>
         </Card>
-      </div>
+      </ScrollArea>
 
       <div className="space-y-2 border-t border-border p-4">
         <Button

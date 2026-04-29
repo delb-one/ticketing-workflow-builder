@@ -15,6 +15,7 @@ export interface CanvasNodeProps {
 }
 
 export interface NodeTheme {
+  color: string;
   gradient: string;
   softText: string;
   handle: string;
