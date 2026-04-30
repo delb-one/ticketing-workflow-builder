@@ -1,5 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { NodeConfig, NodeType } from "../store";
+import { NodeConfig, NodeType } from "../simulation/types";
 
 
 type ChartColor = 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5';

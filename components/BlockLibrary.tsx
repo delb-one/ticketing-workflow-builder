@@ -14,6 +14,7 @@ interface BlockLibraryProps {
     blockId: string,
     blockLabel: string,
     blockConfig: NodeConfig,
+    blockDescription: string
   ) => void;
 }
 
@@ -21,6 +22,7 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
   void onBlockDrag;
 
   const handleDragStart = (event: React.DragEvent, block: BlockDefinition) => {
+    
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData(
       "application/reactflow",
@@ -29,6 +31,7 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
         blockId: block.blockId,
         label: block.label,
         config: block.config,
+        description: block.description,
       }),
     );
   };

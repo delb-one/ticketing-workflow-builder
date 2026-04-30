@@ -29,6 +29,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "start",
       color: "chart-5",
       icon: Play,
+      description: "Entry point of the workflow",
       config: { nodeType: "start" },
     },
     {
@@ -37,6 +38,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "end",
       color: "chart-5",
       icon: CheckCircle2,
+      description: "Termination point of the workflow",
       config: { nodeType: "end" },
     },
   ],
@@ -48,6 +50,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "actor",
       color: "chart-4",
       icon: User,
+      description: "Ticket requester / end user",
       config: { nodeType: "actor", agentLevel: "client" },
     },
     {
@@ -56,6 +59,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "actor",
       color: "chart-4",
       icon: Headphones,
+      description: "First level support - initial triage",
       config: { nodeType: "actor", agentLevel: "l1" },
     },
     {
@@ -64,6 +68,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "actor",
       color: "chart-4",
       icon: UserCog,
+      description: "Second level support - advanced troubleshooting",
       config: { nodeType: "actor", agentLevel: "l2" },
     },
     {
@@ -72,6 +77,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "actor",
       color: "chart-4",
       icon: Cpu,
+      description: "Third level support - developer / vendor escalation",
       config: { nodeType: "actor", agentLevel: "l3" },
     },
     {
@@ -80,25 +86,54 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "actor",
       color: "chart-4",
       icon: ShieldCheck,
+      description: "Manager with approval authority",
       config: { nodeType: "actor", agentLevel: "supervisor" },
     },
   ],
 
   "Logic Blocks": [
     {
-      blockId: "decision",
-      label: "Decision",
+      blockId: "decision-manual",
+      label: "Manual Decision",
       type: "decision",
       color: "chart-3",
       icon: GitBranch,
-      config: { nodeType: "decision", decisionType: "manual", outcomes: [] },
+      description: "Pauses workflow for human decision (Approve/Reject)",
+      config: {
+        nodeType: "decision",
+        decisionType: "manual",
+        outcomes: [],
+      },
     },
     {
-      blockId: "condition",
-      label: "Condition",
+      blockId: "decision-rule-based",
+      label: "Rule-Based Decision",
+      type: "decision",
+      color: "chart-3",
+      icon: GitBranch,
+      description: "Automatic routing based on ticket data",
+      config: {
+        nodeType: "decision",
+        decisionType: "rule-based",
+        outcomes: [],
+      },
+    },
+    {
+      blockId: "condition-category",
+      label: "Check Category",
       type: "condition",
       color: "chart-3",
       icon: Filter,
+      description: "Branch based on ticket category (incident/service-request)",
+      config: { nodeType: "condition" },
+    },
+    {
+      blockId: "condition-impact",
+      label: "Check Impact",
+      type: "condition",
+      color: "chart-3",
+      icon: Filter,
+      description: "Branch based on business impact",
       config: { nodeType: "condition" },
     },
   ],
@@ -110,6 +145,8 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "automation",
       color: "chart-2",
       icon: SlidersHorizontal,
+      description:
+        "Apply business rules (priority calculation, category mapping)",
       config: { nodeType: "automation", automationType: "business-rules" },
     },
     {
@@ -118,6 +155,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "automation",
       color: "chart-2",
       icon: Shuffle,
+      description: "Automatically assign ticket to first available Technician",
       config: {
         nodeType: "automation",
         automationType: "auto-assign",
@@ -129,6 +167,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       label: "SLA Timer",
       type: "automation",
       color: "chart-2",
+      description: "Start SLA timer for ticket",
       icon: Clock,
       config: {
         nodeType: "automation",
@@ -142,6 +181,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "automation",
       color: "chart-2",
       icon: ArrowUpCircle,
+      description: "Escalate ticket",
       config: { nodeType: "automation", automationType: "escalation" },
     },
     {
@@ -150,6 +190,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "automation",
       color: "chart-2",
       icon: Bell,
+      description: "Send notification to client/supervisor",
       config: {
         nodeType: "automation",
         automationType: "notify",
@@ -162,6 +203,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "automation",
       color: "chart-2",
       icon: RotateCcw,
+      description: "Reopen a previously resolved/closed ticket",
       config: { nodeType: "automation", automationType: "reopen" },
     },
   ],
@@ -173,6 +215,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "action",
       color: "chart-1",
       icon: CheckCircle,
+      description: "Mark ticket as resolved (solution provided)",
       config: { nodeType: "action", ticketAction: "resolve" },
     },
     {
@@ -181,6 +224,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "action",
       color: "chart-1",
       icon: MessageSquare,
+      description: "Client validates if resolution is satisfactory",
       config: { nodeType: "action", ticketAction: "validate" },
     },
     {
@@ -189,6 +233,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       type: "action",
       color: "chart-1",
       icon: CheckCircle2,
+      description: "Permanently close the ticket",
       config: { nodeType: "action", ticketAction: "close" },
     },
   ],

@@ -38,6 +38,7 @@ interface DragPayload {
   blockId?: string;
   id?: string;
   label: string;
+  description?: string;
   config?: NodeConfig;
 }
 
@@ -164,6 +165,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             label: blockData.label,
             type: blockData.type,
             blockId,
+            description: blockData.description,
             config: blockData.config,
           },
           position,
