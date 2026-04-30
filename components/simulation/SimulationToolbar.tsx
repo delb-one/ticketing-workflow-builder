@@ -1,0 +1,394 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { SimulationEngine } from "@/lib/simulation";
+import type {
+  EngineRuntimeState,
+  NodeConfig,
+  NodeType,
+  SimulationEvent,
+  WorkflowDefinition,
+  WorkflowEdge,
+  WorkflowNode,
+} from "@/lib/simulation";
+import { useWorkflowStore } from "@/lib/store";
+import type { CustomNode } from "@/lib/store";
+import { motion, AnimatePresence } from "framer-motion";
+import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward } from "lucide-react";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { Input } from "../ui/input";
+
+const DEFAULT_STEP_DELAY_MS = 900;
+
+const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig => {
+  switch (type) {
+    case "decision":
+      return { nodeType: "decision", decisionType: "manual", outcomes: [] };
+    case "condition":
+      return { nodeType: "condition" };
+    case "automation": {
+      const automationType =
+        blockId === "sla-timer" ||
+        blockId === "escalation" ||
+        blockId === "auto-assign" ||
+        blockId === "notify" ||
+        blockId === "business-rules" ||
+        blockId === "reopen"
+          ? blockId
+          : "business-rules";
+      return {
+        nodeType: "automation",
+        automationType,
+        duration: blockId === "sla-timer" ? 60 : undefined,
+      };
+    }
+    case "action": {
+      const ticketAction =
+        blockId === "resolve" || blockId === "validate" || blockId === "close"
+          ? blockId
+          : "validate";
+      return { nodeType: "action", ticketAction };
+    }
+    case "actor": {
+      const agentLevel =
+        blockId === "l1-tech"
+          ? "l1"
+          : blockId === "l2-tech"
+            ? "l2"
+            : blockId === "l3-specialist"
+              ? "l3"
+              : blockId === "client"
+                ? "client"
+                : blockId === "supervisor"
+                  ? "supervisor"
+                  : undefined;
+      return { nodeType: "actor", agentLevel };
+    }
+    case "status":
+      return { nodeType: "status", statusValue: "in_progress" };
+    case "event":
+      return { nodeType: "event", eventTrigger: "manual" };
+    case "start":
+      return { nodeType: "start" };
+    case "end":
+    default:
+      return { nodeType: "end" };
+  }
+};
+
+const toWorkflowDefinition = (
+  nodes: CustomNode[],
+  edges: WorkflowEdge[],
+): WorkflowDefinition => {
+  const workflowNodes: WorkflowNode[] = nodes.map((node) => {
+    const blockId = node.data.blockId ?? node.data.id;
+
+    return {
+      id: node.id,
+      type: node.data.type,
+      position: node.position,
+      data: {
+        label: node.data.label,
+        type: node.data.type,
+        description: node.data.description,
+        blockId,
+        config: node.data.config ?? createDefaultNodeConfig(node.data.type, blockId),
+      },
+    };
+  });
+
+  const workflowEdges: WorkflowEdge[] = edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    label: typeof edge.label === "string" ? edge.label : undefined,
+  }));
+
+  return {
+    id: "active-workflow",
+    name: "Active Workflow",
+    nodes: workflowNodes,
+    edges: workflowEdges,
+  };
+};
+
+export default function SimulationToolbar() {
+  const {
+    nodes,
+    edges,
+    isSimulating,
+    startSimulation,
+    endSimulation,
+    syncEngineState,
+    clearSimulationEvents,
+    addSimulationEvent,
+    engineState,
+  } = useWorkflowStore();
+
+  const [stepDelayMs, setStepDelayMs] = useState(DEFAULT_STEP_DELAY_MS);
+  const [showDecisionDialog, setShowDecisionDialog] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [ticketCount, setTicketCount] = useState(1);
+
+  const engineRef = useRef<SimulationEngine | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const [canvasHost, setCanvasHost] = useState<HTMLElement | null>(null);
+
+  const stopAndCleanup = (clearRuntime: boolean) => {
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+    engineRef.current?.stop();
+    engineRef.current = null;
+    endSimulation();
+
+    if (clearRuntime) {
+      syncEngineState(null);
+    }
+  };
+
+  const startSimulationFlow = () => {
+    clearSimulationEvents();
+    setShowDecisionDialog(false);
+    setIsPaused(false);
+
+    const workflow = toWorkflowDefinition(nodes, edges as WorkflowEdge[]);
+    const engine = new SimulationEngine(workflow);
+    engineRef.current = engine;
+
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = engine.subscribe((nextState: EngineRuntimeState, event?: SimulationEvent) => {
+      syncEngineState(nextState);
+
+      const pausedRuntime = Object.values(nextState.runtimes).find(
+        (runtime) => runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
+      );
+      setShowDecisionDialog(Boolean(pausedRuntime));
+
+      if (event) {
+        addSimulationEvent(event);
+      }
+
+      const runtimes = Object.values(nextState.runtimes);
+      const allCompleted = runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
+      if (allCompleted) {
+        endSimulation();
+      }
+    });
+
+    const initialAgents: Array<{
+      id: string;
+      level: "l1" | "l2" | "l3";
+      capacity: number;
+      status: "available";
+    }> = [];
+
+    workflow.nodes.forEach((node, index) => {
+      const config = node.data.config;
+      if (node.type === "actor" && config?.nodeType === "actor" && config.agentLevel) {
+        const level = config.agentLevel;
+        if (level === "l1" || level === "l2" || level === "l3") {
+          initialAgents.push({
+            id: `${node.data.label.replace(/\s+/g, "-")}-${index + 1}`,
+            level,
+            capacity: 1,
+            status: "available",
+          });
+        }
+      }
+    });
+
+    startSimulation();
+    engine.start(ticketCount, initialAgents);
+  };
+
+  const handleStop = () => {
+    stopAndCleanup(true);
+    setShowDecisionDialog(false);
+    setIsPaused(false);
+  };
+
+  useEffect(() => {
+    if (!isSimulating || !engineState) {
+      return;
+    }
+
+    const runtimes = Object.values(engineState.runtimes);
+    const allCompleted = runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
+    const anyPaused = runtimes.some((runtime) => runtime.paused);
+
+    if (allCompleted || anyPaused || isPaused) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      engineRef.current?.step();
+    }, stepDelayMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [isSimulating, engineState, stepDelayMs, isPaused]);
+
+  useEffect(() => {
+    return () => {
+      unsubscribeRef.current?.();
+      engineRef.current?.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!toolbarRef.current) return;
+    const host = toolbarRef.current.closest(".react-flow") as HTMLElement | null;
+    setCanvasHost(host);
+  }, []);
+
+  const pausedRuntime = useMemo(() => {
+    if (!engineState) return null;
+    return (
+      Object.values(engineState.runtimes).find(
+        (runtime) => runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
+      ) ?? null
+    );
+  }, [engineState]);
+
+  const pendingOutcomes = useMemo(
+    () => pausedRuntime?.pendingDecisionOutcomes ?? [],
+    [pausedRuntime],
+  );
+
+  return (
+    <>
+      <div
+        ref={toolbarRef}
+        className="flex flex-col gap-3 bg-card p-4 rounded-xl border border-border shadow-sm pointer-events-auto"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2 shrink-0">
+            {!isSimulating ? (
+              <Button
+                onClick={startSimulationFlow}
+                disabled={isSimulating || nodes.length === 0}
+                size="icon"
+                className="bg-emerald-600 hover:bg-emerald-700 h-8 w-8"
+                title="Start Simulation"
+              >
+                <CirclePlay className="h-4 w-4" />
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setIsPaused(!isPaused)}
+                  size="icon"
+                  className={`h-8 w-8 ${isPaused ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-amber-500 hover:bg-amber-600 text-white"}`}
+                  title={isPaused ? "Resume" : "Pause"}
+                >
+                  {isPaused ? (
+                    <CirclePlay className="h-4 w-4" />
+                  ) : (
+                    <CirclePause className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  onClick={() => engineRef.current?.step()}
+                  disabled={!isPaused}
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8 text-foreground"
+                  title="Step Forward"
+                >
+                  <StepForward className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={handleStop}
+                  size="icon"
+                  variant="destructive"
+                  className="h-8 w-8"
+                  title="Stop"
+                >
+                  <CircleStop className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+              Tickets
+            </label>
+            <Input
+              type="number"
+              min={1}
+              max={50}
+              value={ticketCount}
+              onChange={(event) => setTicketCount(parseInt(event.target.value, 10) || 1)}
+              className="h-8 text-xs"
+              disabled={isSimulating}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="step-delay"
+              className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider"
+            >
+              Speed
+            </label>
+            <select
+              id="step-delay"
+              value={stepDelayMs}
+              onChange={(event) => setStepDelayMs(parseInt(event.target.value, 10))}
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              disabled={isSimulating}
+            >
+              <option value={300}>Fast</option>
+              <option value={600}>Normal</option>
+              <option value={900}>Slow</option>
+            </select>
+          </div>
+        </div> */}
+      </div>
+
+      {canvasHost &&
+        createPortal(
+          <AnimatePresence>
+            {showDecisionDialog && pausedRuntime && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute inset-0 z-50 flex items-center justify-center bg-card/50 pointer-events-auto"
+              >
+                <Card className="max-w-sm p-6">
+                  <h3 className="mb-4 text-lg font-semibold">
+                    {pausedRuntime.pausedAt
+                      ? `Decision at: ${pausedRuntime.pausedAt} (${pausedRuntime.ticket.id})`
+                      : "What is your decision?"}
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {pendingOutcomes.map((outcome) => (
+                      <Button
+                        key={outcome.label}
+                        onClick={() =>
+                          engineRef.current?.handleDecision(
+                            pausedRuntime.ticket.id,
+                            outcome.label,
+                          )
+                        }
+                        className="flex-1"
+                      >
+                        <GitBranch className="h-4 w-4 mr-2" />
+                        {outcome.label}
+                      </Button>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          canvasHost,
+        )}
+    </>
+  );
+}

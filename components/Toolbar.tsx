@@ -6,6 +6,13 @@ import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
 import { Edge } from "@xyflow/react";
 import { useRef, useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
+import { Download, Trash2, Upload } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface ToolbarProps {
   onImport?: () => void;
@@ -117,33 +124,60 @@ export default function Toolbar({ onImport, onExport }: ToolbarProps) {
             </option>
           ))}
         </select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportWorkflow}
-          disabled={isExporting || nodes.length === 0}
-        >
-          Export JSON
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isExporting}
-        >
-          Import JSON
-        </Button>
+        <TooltipProvider>
+          <div className="flex gap-2">
+            {/* EXPORT */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportWorkflow}
+                  disabled={isExporting || nodes.length === 0}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                Export JSON
+              </TooltipContent>
+            </Tooltip>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            clearWorkflow();
-          }}
-          disabled={nodes.length === 0}
-        >
-          Clear
-        </Button>
+            {/* IMPORT */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isExporting}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                Import JSON
+              </TooltipContent>
+            </Tooltip>
+
+            {/* CLEAR */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => clearWorkflow()}
+                  disabled={nodes.length === 0}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                Clear workflow
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
         <ThemeToggle />
       </div>
     </div>

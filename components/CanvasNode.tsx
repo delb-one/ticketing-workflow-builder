@@ -28,14 +28,14 @@ export default function CanvasNode(props: CanvasNodeProps) {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       onClick={() => setSelectedNode(id)}
-      className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-2 ring-accent-foreground ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+      className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-2 ring-primary-foreground ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
     >
       <div
         className={`relative rounded-[11px] border border-border/70 border-${theme.color} bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? "border-dashed" : ""}`}
       >
         <div className="flex items-start gap-3">
           <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br ${theme.gradient} text-white`}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br ${theme.gradient} text-background`}
           >
             <Icon className="h-4 w-4" />
           </div>
@@ -60,7 +60,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
         )}
         
         {activeTicketCount > 0 && (
-          <div className="absolute -right-2 -top-2 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-white shadow-md ring-2 ring-background">
+          <div className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-primary shadow-md ring-2 ring-background">
             🎫 {activeTicketCount}
           </div>
         )}
