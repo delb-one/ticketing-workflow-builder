@@ -18,12 +18,16 @@ import {
   NodeTypes,
   BackgroundVariant,
   useReactFlow,
+  Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
 import { useTheme } from "next-themes";
+import { QueuePanel } from "./simulation/QueuePanel";
+import { AgentPanel } from "./simulation/AgentPanel";
+import { TicketMonitor } from "./simulation/TicketMonitor";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -51,6 +55,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
     selectedNode,
+    isSimulating,
   } = useWorkflowStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
 
@@ -118,9 +123,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = storeEdges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-              ...currentEdge,
-              label: trimmedLabel || undefined,
-            }
+            ...currentEdge,
+            label: trimmedLabel || undefined,
+          }
           : currentEdge,
       );
 
@@ -232,6 +237,23 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           }}
           maskColor="rgba(0, 0, 0, 0.1)"
         />
+
+        <>
+          <Panel position="top-left" className="w-72  pointer-events-auto">
+            <div className="h-1/2 min-h-50">
+              <QueuePanel />
+            </div>
+          </Panel>
+          <Panel position="top-right" className="w-72  pointer-events-auto">
+            <div className="h-1/2 min-h-50">
+              <AgentPanel />
+            </div>
+          </Panel>
+          <Panel position="bottom-center" className="w-200 max-w-[70%] max-h-[30%]  pointer-events-auto  mb-4">
+            <TicketMonitor />
+          </Panel>
+        </>
+
       </ReactFlow>
     </div>
   );

@@ -8,9 +8,12 @@ import { CanvasNodeProps } from "@/lib/canvasNode/types";
 import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from "@/lib/canvasNode/color-map";
 
 export default function CanvasNode(props: CanvasNodeProps) {
-  const { setSelectedNode, activeNodeId } = useWorkflowStore();
+  const { setSelectedNode, engineState } = useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
-  const isActive = activeNodeId === id;
+  const activeTicketCount = engineState
+    ? Object.values(engineState.runtimes).filter((r) => r.currentNodeId === id && !r.completed).length
+    : 0;
+  const isActive = activeTicketCount > 0;
   const theme = TYPE_THEME_MAP[data.type];
   const blockId = data.blockId ?? data.id;
   const Icon = getNodeIcon(data.type, blockId);
@@ -54,6 +57,12 @@ export default function CanvasNode(props: CanvasNodeProps) {
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
             className={`pointer-events-none absolute inset-0 rounded-[11px] bg-linear-to-r ${theme.gradient}`}
           />
+        )}
+        
+        {activeTicketCount > 0 && (
+          <div className="absolute -right-2 -top-2 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-white shadow-md ring-2 ring-background">
+            🎫 {activeTicketCount}
+          </div>
         )}
       </div>
 

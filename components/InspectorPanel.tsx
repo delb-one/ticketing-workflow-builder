@@ -47,7 +47,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   if (!selectedNode) {
     return (
-      <div className="flex h-full w-80 flex-col overflow-y-auto border-l border-border p-4">
+      <div className="flex h-full w-80 flex-col overflow-y-auto p-4">
         <div className="py-12 text-center">
           <p className="text-muted-foreground">Select a node to inspect</p>
         </div>
@@ -78,8 +78,8 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
   const config = selectedNode.data.config;
 
   return (
-    <div className="flex h-full w-80 flex-col overflow-y-auto border-l border-border bg-card">
-      <div className="sticky top-0 border-b border-border bg-card p-4">
+    <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
+      <div className="sticky top-0 border-border bg-card p-4">
         <h2 className="font-semibold text-foreground">Node Inspector</h2>
         <p
           className={`mt-1 text-xs font-medium ${getNodeTypeColor(selectedNode.data.type)}`}
@@ -227,7 +227,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </Card>
       </ScrollArea>
 
-      <div className="space-y-2 border-t border-border p-4">
+      {/* <div className="space-y-2 border-t border-border p-4">
         <Button
           variant="destructive"
           size="sm"
@@ -236,7 +236,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         >
           Delete Node
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

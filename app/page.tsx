@@ -36,12 +36,12 @@ export default function Home() {
         {/* Right Sidebar */}
         <div className="flex flex-col gap-4 w-80">
           {/* Inspector */}
-          <div className="flex-1 rounded-lg shadow-sm border border-border overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <InspectorPanel selectedNode={selectedNodeData} />
           </div>
 
           {/* Simulation Controls */}
-          <div className=" rounded-lg shadow-sm border border-red p-4">
+          <div className="p-2">
             <SimulationPanel />
           </div>
         </div>

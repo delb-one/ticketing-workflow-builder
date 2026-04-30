@@ -27,7 +27,13 @@ import {
   Pause,
   CircleStop,
   CirclePlay,
+  CirclePause,
+  StepForward,
+  Settings2,
 } from "lucide-react";
+import { Input } from "./ui/input";
+import { ScrollArea } from "./ui/scroll-area";
+
 
 const DEFAULT_STEP_DELAY_MS = 900;
 
@@ -43,11 +49,11 @@ const createDefaultNodeConfig = (
     case "automation": {
       const automationType =
         blockId === "sla-timer" ||
-        blockId === "escalation" ||
-        blockId === "auto-assign" ||
-        blockId === "notify" ||
-        blockId === "business-rules" ||
-        blockId === "reopen"
+          blockId === "escalation" ||
+          blockId === "auto-assign" ||
+          blockId === "notify" ||
+          blockId === "business-rules" ||
+          blockId === "reopen"
           ? blockId
           : "business-rules";
       return {
@@ -182,6 +188,8 @@ export default function SimulationPanel() {
 
   const [stepDelayMs, setStepDelayMs] = useState(DEFAULT_STEP_DELAY_MS);
   const [showDecisionDialog, setShowDecisionDialog] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [ticketCount, setTicketCount] = useState(2);
 
   const engineRef = useRef<SimulationEngine | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -201,6 +209,7 @@ export default function SimulationPanel() {
   const startSimulationFlow = () => {
     clearSimulationEvents();
     setShowDecisionDialog(false);
+    setIsPaused(false);
 
     const workflow = toWorkflowDefinition(nodes, edges as WorkflowEdge[]);
 
@@ -226,13 +235,30 @@ export default function SimulationPanel() {
       },
     );
 
+    const initialAgents: any[] = [];
+    workflow.nodes.forEach((node, index) => {
+      const config = node.data.config;
+      if (node.type === "actor" && config?.nodeType === "actor" && config.agentLevel) {
+        const level = config.agentLevel;
+        if (["l1", "l2", "l3"].includes(level)) {
+          initialAgents.push({
+            id: `${node.data.label.replace(/\s+/g, '-')}-${index + 1}`,
+            level: level,
+            capacity: 1,
+            status: "available"
+          });
+        }
+      }
+    });
+
     startSimulation();
-    engine.start();
+    engine.start(ticketCount, initialAgents);
   };
 
   const handleStop = () => {
     stopAndCleanup(true);
     setShowDecisionDialog(false);
+    setIsPaused(false);
   };
 
   useEffect(() => {
@@ -244,7 +270,7 @@ export default function SimulationPanel() {
     const allCompleted = runtimes.length > 0 && runtimes.every(r => r.completed);
     const anyPaused = runtimes.some(r => r.paused);
 
-    if (allCompleted || anyPaused) {
+    if (allCompleted || anyPaused || isPaused) {
       return;
     }
 
@@ -253,7 +279,7 @@ export default function SimulationPanel() {
     }, stepDelayMs);
 
     return () => clearTimeout(timeoutId);
-  }, [isSimulating, engineState, stepDelayMs]);
+  }, [isSimulating, engineState, stepDelayMs, isPaused]);
 
   useEffect(() => {
     return () => {
@@ -274,79 +300,129 @@ export default function SimulationPanel() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="step-delay"
-            className="whitespace-nowrap text-xs text-muted-foreground"
-          >
-            Delay
-          </label>
-          <select
-            id="step-delay"
-            value={stepDelayMs}
-            onChange={(event) =>
-              setStepDelayMs(parseInt(event.target.value, 10))
-            }
-            className="h-8 rounded-md border border-border bg-background px-2 text-xs"
-          >
-            <option value={300}>300ms</option>
-            <option value={600}>600ms</option>
-            <option value={900}>900ms</option>
-            <option value={1200}>1200ms</option>
-            <option value={1500}>1500ms</option>
-          </select>
+      {/* Simulation Toolbar */}
+      <div className="flex flex-col gap-3 bg-card p-4 rounded-xl border border-border shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">Simulation Settings</span>
+          <div className="flex gap-2 shrink-0">
+            {!isSimulating ? (
+              <Button
+                onClick={startSimulationFlow}
+                disabled={isSimulating || nodes.length === 0}
+                size="icon"
+                className="bg-emerald-600 hover:bg-emerald-700 h-8 w-8"
+                title="Start Simulation"
+              >
+                <CirclePlay className="h-4 w-4" />
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setIsPaused(!isPaused)}
+                  size="icon"
+                  className={`h-8 w-8 ${isPaused ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-amber-500 hover:bg-amber-600 text-white"}`}
+                  title={isPaused ? "Resume" : "Pause"}
+                >
+                  {isPaused ? <CirclePlay className="h-4 w-4" /> : <CirclePause className="h-4 w-4" />}
+                </Button>
+                <Button
+                  onClick={() => engineRef.current?.step()}
+                  disabled={!isPaused}
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8 text-foreground"
+                  title="Step Forward"
+                >
+                  <StepForward className="h-4 w-4" />
+                </Button>
+                <Button onClick={handleStop} size="icon" variant="destructive" className="h-8 w-8" title="Stop">
+                  <CircleStop className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
-        <Button
-          onClick={startSimulationFlow}
-          disabled={isSimulating || nodes.length === 0}
-          size="icon"
-          className="bg-emerald-600 hover:bg-emerald-700"
-        >
-          <CirclePlay className=" h-4 w-4" />
-        </Button>
-
-        {isSimulating && (
-          <Button onClick={handleStop} size="icon" variant="destructive">
-            <CircleStop className=" h-4 w-4" />
-          </Button>
-        )}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Tickets</label>
+            <Input
+              type="number"
+              min={1} max={50}
+              value={ticketCount}
+              onChange={(e) => setTicketCount(parseInt(e.target.value, 10) || 1)}
+              className="h-8 text-xs"
+              disabled={isSimulating}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="step-delay" className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Speed</label>
+            <select
+              id="step-delay"
+              value={stepDelayMs}
+              onChange={(e) => setStepDelayMs(parseInt(e.target.value, 10))}
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              disabled={isSimulating}
+            >
+              <option value={300}>Fast</option>
+              <option value={600}>Normal</option>
+              <option value={900}>Slow</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <Card className="max-h-72 overflow-y-auto bg-slate-900 p-4 text-white">
-        <h3 className="mb-3 font-semibold">Simulation Log</h3>
-        <div className="space-y-1 font-mono text-sm">
-          <AnimatePresence>
-            {simulationEvents.map((event, index) => {
-              const EventIcon = getEventIcon(event.type);
-              return (
-                <motion.div
-                  key={`${event.timestamp}-${event.type}-${index}`}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 text-slate-100"
-                >
-                  <EventIcon className="h-4 w-4 shrink-0 text-slate-300" />
-                  <span>{getEventText(event)}</span>
-                </motion.div>
-              );
-            })}
+      {/* Event Log */}
+      <div className="h-64">
+        <Card className="h-full flex flex-col overflow-hidden bg-card-900 border-card-800 text-primary p-0 gap-0">
+          <div className="p-4 border-b border-card-800 shrink-0">
+            <h3 className="font-semibold text-sm">Simulation Log</h3>
+          </div>
 
-            {simulationEvents.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-slate-400"
-              >
-                <Pause className="h-4 w-4" />
-                <span>Idle</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </Card>
+          <ScrollArea className="flex-1  overflow-y-auto p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
+
+
+
+            <div className="space-y-1.5 font-mono text-sm ">
+              <AnimatePresence>
+                {simulationEvents.map((event, index) => {
+                  const EventIcon = getEventIcon(event.type);
+                  return (
+                    <motion.div
+                      key={`${event.timestamp}-${event.type}-${index}`}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2 text-primary"
+                    >
+                      <EventIcon className="h-4 w-4 shrink-0 text-primary" />
+                      <span>{getEventText(event)}</span>
+                    </motion.div>
+                  );
+                })}
+
+
+
+                {simulationEvents.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center gap-2 text-primary"
+                  >
+                    <Pause className="h-4 w-4" />
+                    <span>Idle</span>
+                  </motion.div>
+                )}
+
+
+
+              </AnimatePresence>
+            </div>
+
+          </ScrollArea>
+        </Card>
+      </div>
 
       <AnimatePresence>
         {showDecisionDialog && pausedRuntime && (
@@ -354,7 +430,7 @@ export default function SimulationPanel() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-card/50"
           >
             <Card className="max-w-sm p-6">
               <h3 className="mb-4 text-lg font-semibold">

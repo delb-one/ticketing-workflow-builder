@@ -7,6 +7,9 @@ import { ScrollArea } from "./ui/scroll-area";
 import { BlockDefinition } from "@/lib/blocks/types";
 import { BLOCKS } from "@/lib/blocks/registry";
 import { colorMap } from "@/lib/blocks/color-map";
+import { Button } from "./ui/button";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useState } from "react";
 
 interface BlockLibraryProps {
   onBlockDrag: (
@@ -14,15 +17,15 @@ interface BlockLibraryProps {
     blockId: string,
     blockLabel: string,
     blockConfig: NodeConfig,
-    blockDescription: string
+    blockDescription: string,
   ) => void;
 }
 
 export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
   void onBlockDrag;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleDragStart = (event: React.DragEvent, block: BlockDefinition) => {
-    
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData(
       "application/reactflow",
@@ -38,11 +41,26 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
 
   return (
     <div className="flex h-full w-64 flex-col overflow-y-auto border-r border-border bg-card">
-      <div className="sticky top-0 border-b border-border bg-card p-4">
-        <h2 className="font-semibold text-foreground">Block Library</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Drag blocks to canvas
-        </p>
+      <div className="sticky top-0 border-b border-border bg-card p-4 flex items-center justify-between">
+        <div>
+          <h2 className="font-semibold text-foreground">Block Library</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Drag blocks to canvas
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:inline-flex"
+          onClick={() => {}}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
+        </Button>
       </div>
 
       <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
