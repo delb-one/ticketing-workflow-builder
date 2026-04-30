@@ -130,10 +130,7 @@ export interface Ticket {
     | "reopened";
   priority: "low" | "medium" | "high" | "critical";
   impact: "low" | "medium" | "high";
-  assignedAgent?: {
-    id: string;
-    level: "l1" | "l2" | "l3";
-  };
+  assignedAgent?: string;
   assignedGroup?: string;
   createdAt: number;
   updatedAt: number;
@@ -160,6 +157,26 @@ export interface SimulationRuntime {
   completed: boolean;
 }
 
+export interface Agent {
+  id: string;
+  level: "l1" | "l2" | "l3";
+  status: "available" | "busy";
+  currentTicketId?: string;
+  capacity: number;
+}
+
+export interface QueueState {
+  l1: string[];
+  l2: string[];
+  l3: string[];
+}
+
+export interface EngineRuntimeState {
+  runtimes: Record<string, SimulationRuntime>;
+  queues: QueueState;
+  agents: Agent[];
+}
+
 export type SimulationEventType =
   | "ticket.created"
   | "ticket.updated"
@@ -168,6 +185,10 @@ export type SimulationEventType =
   | "ticket.closed"
   | "ticket.escalated"
   | "ticket.reopened"
+  | "ticket.queued"
+  | "ticket.dequeued"
+  | "agent.assigned"
+  | "agent.released"
   | "sla.started"
   | "sla.breached"
   | "decision.required"
@@ -188,6 +209,8 @@ export interface SimulationEvent {
     newState?: string;
     assignedTo?: string;
     reason?: string;
+    queue?: string;
+    agentId?: string;
   };
 }
 
@@ -196,4 +219,6 @@ export interface ExecutionResult {
   ticketUpdates?: Partial<Ticket>;
   events?: SimulationEvent[];
   pause?: boolean;
+  releaseAgent?: boolean;
+  enqueueTo?: "l1" | "l2" | "l3";
 }

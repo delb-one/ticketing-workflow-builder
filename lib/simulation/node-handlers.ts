@@ -15,6 +15,8 @@ export interface HandlerResult {
   requiresInput?: boolean;
   inputOptions?: DecisionOutcome[];
   logMessage?: string;
+  releaseAgent?: boolean;
+  enqueueTo?: "l1" | "l2" | "l3";
 }
 
 export interface NodeHandler {
@@ -112,6 +114,7 @@ class ActionNodeHandler implements NodeHandler {
 
     if (config.ticketAction === 'resolve') {
       return {
+        releaseAgent: true,
         ticketUpdates: { state: 'resolved', updatedAt: Date.now() },
         events: [
           buildEvent('ticket.resolved', ticket.id, node),
@@ -122,6 +125,7 @@ class ActionNodeHandler implements NodeHandler {
 
     if (config.ticketAction === 'close') {
       return {
+        releaseAgent: true,
         ticketUpdates: { state: 'closed', updatedAt: Date.now() },
         events: [
           buildEvent('ticket.closed', ticket.id, node),
@@ -158,11 +162,16 @@ class AutomationNodeHandler implements NodeHandler {
       }
       case 'escalation':
         return {
+          releaseAgent: true,
+          enqueueTo: 'l2',
           events: [buildEvent('ticket.escalated', ticket.id, node)],
         };
       case 'auto-assign': {
-        const assignedGroup = (config.assignTo ?? 'l1').toUpperCase();
+        const assignedQueue = (config.assignTo ?? 'l1').toLowerCase() as "l1" | "l2" | "l3";
+        const assignedGroup = assignedQueue.toUpperCase();
         return {
+          releaseAgent: true,
+          enqueueTo: assignedQueue,
           ticketUpdates: {
             assignedGroup,
             updatedAt: Date.now(),

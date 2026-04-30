@@ -12,6 +12,7 @@ import type {
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
+  EngineRuntimeState,
 } from "@/lib/simulation";
 import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
@@ -172,11 +173,11 @@ export default function SimulationPanel() {
     isSimulating,
     startSimulation,
     endSimulation,
-    setSimulationRuntime,
+    syncEngineState,
     clearSimulationEvents,
     addSimulationEvent,
     simulationEvents,
-    simulationRuntime,
+    engineState,
   } = useWorkflowStore();
 
   const [stepDelayMs, setStepDelayMs] = useState(DEFAULT_STEP_DELAY_MS);
@@ -184,8 +185,6 @@ export default function SimulationPanel() {
 
   const engineRef = useRef<SimulationEngine | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
-
-  const runtime = simulationRuntime;
 
   const stopAndCleanup = (clearRuntime: boolean) => {
     unsubscribeRef.current?.();
@@ -195,7 +194,7 @@ export default function SimulationPanel() {
     endSimulation();
 
     if (clearRuntime) {
-      setSimulationRuntime(null);
+      syncEngineState(null);
     }
   };
 
@@ -210,17 +209,18 @@ export default function SimulationPanel() {
 
     unsubscribeRef.current?.();
     unsubscribeRef.current = engine.subscribe(
-      (nextRuntime: SimulationRuntime, event?: SimulationEvent) => {
-        setSimulationRuntime(nextRuntime);
-        setShowDecisionDialog(
-          nextRuntime.paused && nextRuntime.pendingDecisionOutcomes.length > 0,
-        );
+      (nextState: EngineRuntimeState, event?: SimulationEvent) => {
+        syncEngineState(nextState);
+
+        const pausedRuntime = Object.values(nextState.runtimes).find(r => r.paused && r.pendingDecisionOutcomes.length > 0);
+        setShowDecisionDialog(!!pausedRuntime);
 
         if (event) {
           addSimulationEvent(event);
         }
 
-        if (nextRuntime.completed) {
+        const allCompleted = Object.values(nextState.runtimes).every(r => r.completed);
+        if (allCompleted && Object.keys(nextState.runtimes).length > 0) {
           endSimulation();
         }
       },
@@ -236,7 +236,15 @@ export default function SimulationPanel() {
   };
 
   useEffect(() => {
-    if (!isSimulating || !runtime || runtime.paused || runtime.completed) {
+    if (!isSimulating || !engineState) {
+      return;
+    }
+
+    const runtimes = Object.values(engineState.runtimes);
+    const allCompleted = runtimes.length > 0 && runtimes.every(r => r.completed);
+    const anyPaused = runtimes.some(r => r.paused);
+
+    if (allCompleted || anyPaused) {
       return;
     }
 
@@ -245,7 +253,7 @@ export default function SimulationPanel() {
     }, stepDelayMs);
 
     return () => clearTimeout(timeoutId);
-  }, [isSimulating, runtime, stepDelayMs]);
+  }, [isSimulating, engineState, stepDelayMs]);
 
   useEffect(() => {
     return () => {
@@ -254,9 +262,14 @@ export default function SimulationPanel() {
     };
   }, []);
 
+  const pausedRuntime = useMemo(() => {
+    if (!engineState) return null;
+    return Object.values(engineState.runtimes).find(r => r.paused && r.pendingDecisionOutcomes.length > 0) || null;
+  }, [engineState]);
+
   const pendingOutcomes = useMemo(
-    () => runtime?.pendingDecisionOutcomes ?? [],
-    [runtime],
+    () => pausedRuntime?.pendingDecisionOutcomes ?? [],
+    [pausedRuntime],
   );
 
   return (
@@ -336,7 +349,7 @@ export default function SimulationPanel() {
       </Card>
 
       <AnimatePresence>
-        {showDecisionDialog && runtime && (
+        {showDecisionDialog && pausedRuntime && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -345,17 +358,19 @@ export default function SimulationPanel() {
           >
             <Card className="max-w-sm p-6">
               <h3 className="mb-4 text-lg font-semibold">
-                {runtime.pausedAt
-                  ? `Decision at: ${runtime.pausedAt}`
+                {pausedRuntime.pausedAt
+                  ? `Decision at: ${pausedRuntime.pausedAt} (${pausedRuntime.ticket.id})`
                   : "What is your decision?"}
               </h3>
               <div className="flex flex-wrap gap-3">
                 {pendingOutcomes.map((outcome) => (
                   <Button
                     key={outcome.label}
-                    onClick={() =>
-                      engineRef.current?.handleDecision(outcome.label)
-                    }
+                    onClick={() => {
+                      if (pausedRuntime) {
+                        engineRef.current?.handleDecision(pausedRuntime.ticket.id, outcome.label);
+                      }
+                    }}
                     className="flex-1"
                   >
                     {outcome.label}

@@ -5,6 +5,9 @@ import type {
   NodeType,
   SimulationEvent,
   SimulationRuntime,
+  EngineRuntimeState,
+  Agent,
+  QueueState,
 } from '@/lib/simulation/types';
 
 export type { NodeType, NodeConfig } from '@/lib/simulation/types';
@@ -30,7 +33,9 @@ export interface WorkflowStore {
   simulationStep: number;
   activeNodeId: string | null;
   simulationLog: string[];
-  simulationRuntime: SimulationRuntime | null;
+  simulationRuntime: SimulationRuntime | null; // Keep for legacy UI compatibility
+  engineState: EngineRuntimeState | null;
+  schedulingMode: "fifo" | "priority";
   simulationEvents: SimulationEvent[];
 
   addNode: (node: CustomNode) => void;
@@ -51,6 +56,8 @@ export interface WorkflowStore {
   addSimulationLog: (message: string) => void;
   clearSimulationLog: () => void;
   setSimulationRuntime: (runtime: SimulationRuntime | null) => void;
+  syncEngineState: (state: EngineRuntimeState | null) => void;
+  setSchedulingMode: (mode: "fifo" | "priority") => void;
   addSimulationEvent: (event: SimulationEvent) => void;
   clearSimulationEvents: () => void;
 
@@ -67,6 +74,8 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
   activeNodeId: null,
   simulationLog: [],
   simulationRuntime: null,
+  engineState: null,
+  schedulingMode: "fifo",
   simulationEvents: [],
 
   addNode: (node) =>
@@ -108,6 +117,7 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       simulationLog: ['Simulation started...'],
       activeNodeId: null,
       simulationRuntime: null,
+      engineState: null,
       simulationEvents: [],
     }),
 
@@ -142,6 +152,16 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       activeNodeId: runtime?.currentNodeId ?? null,
     }),
 
+  syncEngineState: (state) =>
+    set({
+      engineState: state,
+      // For backward compatibility with UI, we can try to find the first active runtime
+      simulationRuntime: state ? Object.values(state.runtimes)[0] ?? null : null,
+      activeNodeId: state ? Object.values(state.runtimes)[0]?.currentNodeId ?? null : null,
+    }),
+
+  setSchedulingMode: (mode) => set({ schedulingMode: mode }),
+
   addSimulationEvent: (event) =>
     set((state) => ({
       simulationEvents: [...state.simulationEvents, event],
@@ -159,6 +179,7 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       activeNodeId: null,
       simulationLog: [],
       simulationRuntime: null,
+      engineState: null,
       simulationEvents: [],
     }),
 
@@ -169,6 +190,7 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       selectedNode: null,
       activeNodeId: null,
       simulationRuntime: null,
+      engineState: null,
       simulationEvents: [],
       simulationLog: [],
     }),

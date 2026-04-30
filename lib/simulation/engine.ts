@@ -1,8 +1,11 @@
 import { SimulationEventBus } from "./event-bus";
 import { NODE_HANDLER_REGISTRY } from "./node-handlers";
 import type {
+  Agent,
   DecisionOutcome,
+  EngineRuntimeState,
   NodeConfig,
+  QueueState,
   SimulationEvent,
   SimulationRuntime,
   Ticket,
@@ -12,15 +15,15 @@ import type {
 } from "./types";
 
 export type EngineStateListener = (
-  runtime: SimulationRuntime,
+  state: EngineRuntimeState,
   event?: SimulationEvent,
 ) => void;
 
-const createDefaultTicket = (): Ticket => {
+const createDefaultTicket = (index: number = 0): Ticket => {
   const now = Date.now();
 
   return {
-    id: `ticket-${now}`,
+    id: `ticket-${now}-${index}`,
     state: "open",
     priority: "medium",
     impact: "medium",
@@ -33,9 +36,9 @@ const createDefaultTicket = (): Ticket => {
   };
 };
 
-const createDefaultRuntime = (): SimulationRuntime => ({
+const createDefaultRuntime = (ticket: Ticket): SimulationRuntime => ({
   currentNodeId: null,
-  ticket: createDefaultTicket(),
+  ticket,
   history: [],
   paused: false,
   pausedAt: null,
@@ -71,7 +74,10 @@ const createDefaultConfig = (
 
 export class SimulationEngine {
   private workflow: WorkflowDefinition;
-  private runtime: SimulationRuntime;
+  private runtimes: Record<string, SimulationRuntime> = {};
+  private queues: QueueState = { l1: [], l2: [], l3: [] };
+  private agents: Agent[] = [];
+  
   private eventBus: SimulationEventBus;
   private listeners: EngineStateListener[] = [];
   private eventLog: SimulationEvent[] = [];
@@ -87,7 +93,6 @@ export class SimulationEngine {
         },
       })),
     };
-    this.runtime = createDefaultRuntime();
     this.eventBus = new SimulationEventBus();
     this.eventBus.subscribe((event) => {
       this.eventLog.push(event);
@@ -95,70 +100,105 @@ export class SimulationEngine {
     });
   }
 
-  start(): void {
+  start(ticketCount: number = 1, initialAgents: Agent[] = []): void {
     const startNode = this.resolveStartNode();
 
+    this.runtimes = {};
+    this.queues = { l1: [], l2: [], l3: [] };
+    this.agents = initialAgents.map(a => ({...a, status: 'available', currentTicketId: undefined}));
+    
     if (!startNode) {
-      this.runtime = {
-        ...this.runtime,
-        completed: true,
-        currentNodeId: null,
-        paused: false,
-        pausedAt: null,
-        pendingDecisionOutcomes: [],
-      };
       this.emit({
         type: "workflow.error",
-        ticketId: this.runtime.ticket.id,
+        ticketId: "system",
         timestamp: Date.now(),
         payload: { reason: "No start node found" },
       });
+      this.notify();
       return;
     }
 
-    this.runtime = {
-      ...createDefaultRuntime(),
-      ticket: {
-        ...createDefaultTicket(),
-      },
-      currentNodeId: startNode.id,
-    };
+    for (let i = 0; i < ticketCount; i++) {
+      const ticket = createDefaultTicket(i);
+      ticket.queue = "l1";
+      this.queues.l1.push(ticket.id);
+
+      this.runtimes[ticket.id] = {
+        ...createDefaultRuntime(ticket),
+        currentNodeId: startNode.id,
+      };
+
+      this.emit({
+        type: "ticket.queued",
+        ticketId: ticket.id,
+        timestamp: Date.now(),
+        payload: { queue: "l1" }
+      });
+    }
 
     this.notify();
   }
 
   step(): void {
-    if (
-      !this.runtime.currentNodeId ||
-      this.runtime.completed ||
-      this.runtime.paused
-    ) {
-      return;
+    // 1. Scheduler: Assign tickets from queues to available agents
+    for (const agent of this.agents) {
+      if (agent.status === "available") {
+        const queue = this.queues[agent.level];
+        if (queue && queue.length > 0) {
+          const ticketId = queue.shift()!; // FIFO scheduling
+          agent.status = "busy";
+          agent.currentTicketId = ticketId;
+          
+          const runtime = this.runtimes[ticketId];
+          if (runtime) {
+            runtime.ticket.assignedAgent = agent.id;
+            this.emit({ type: "ticket.dequeued", ticketId, timestamp: Date.now(), payload: { queue: agent.level } });
+            this.emit({ type: "agent.assigned", ticketId, timestamp: Date.now(), payload: { agentId: agent.id } });
+          }
+        }
+      }
     }
 
+    // 2. Execution: Execute node for each active runtime
+    const activeTicketIds = Object.keys(this.runtimes).filter(id => {
+      const rt = this.runtimes[id];
+      return !rt.completed && !rt.paused && rt.currentNodeId;
+    });
+
+    for (const ticketId of activeTicketIds) {
+      this.stepRuntime(ticketId);
+    }
+    
+    this.notify();
+  }
+
+  private stepRuntime(ticketId: string): void {
+    const runtime = this.runtimes[ticketId];
+    if (!runtime || !runtime.currentNodeId) return;
+
     const currentNode = this.workflow.nodes.find(
-      (node) => node.id === this.runtime.currentNodeId,
+      (node) => node.id === runtime.currentNodeId,
     );
 
     if (!currentNode) {
       this.emit({
         type: "workflow.error",
-        ticketId: this.runtime.ticket.id,
+        ticketId,
         timestamp: Date.now(),
-        payload: { reason: `Node not found: ${this.runtime.currentNodeId}` },
+        payload: { reason: `Node not found: ${runtime.currentNodeId}` },
       });
-      this.runtime = { ...this.runtime, completed: true, currentNodeId: null };
-      this.notify();
+      runtime.completed = true;
+      runtime.currentNodeId = null;
       return;
     }
 
-    this.recordHistory(currentNode);
+    this.recordHistory(ticketId, currentNode);
 
     const handler = NODE_HANDLER_REGISTRY[currentNode.data.type];
     if (!handler) {
       this.emit({
         type: "workflow.error",
-        ticketId: this.runtime.ticket.id,
+        ticketId,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
@@ -166,72 +206,74 @@ export class SimulationEngine {
           reason: `No handler for node type ${currentNode.data.type}`,
         },
       });
-      this.runtime = { ...this.runtime, completed: true, currentNodeId: null };
-      this.notify();
+      runtime.completed = true;
+      runtime.currentNodeId = null;
       return;
     }
 
     const result = handler.execute(
       currentNode,
       this.workflow.edges,
-      this.runtime.ticket,
-      this.runtime.ticket.context,
+      runtime.ticket,
+      runtime.ticket.context,
     );
 
     if (result.ticketUpdates) {
-      this.runtime = {
-        ...this.runtime,
-        ticket: {
-          ...this.runtime.ticket,
-          ...result.ticketUpdates,
-          context: {
-            ...this.runtime.ticket.context,
-            ...(result.ticketUpdates.context ?? {}),
-          },
+      runtime.ticket = {
+        ...runtime.ticket,
+        ...result.ticketUpdates,
+        context: {
+          ...runtime.ticket.context,
+          ...(result.ticketUpdates.context ?? {}),
         },
       };
     }
 
     result.events?.forEach((event) => this.emit(event));
 
+    if (result.releaseAgent) {
+      const agent = this.agents.find(a => a.currentTicketId === ticketId);
+      if (agent) {
+        agent.status = "available";
+        agent.currentTicketId = undefined;
+        runtime.ticket.assignedAgent = undefined;
+        this.emit({ type: "agent.released", ticketId, timestamp: Date.now(), payload: { agentId: agent.id } });
+      }
+    }
+
+    if (result.enqueueTo) {
+      this.queues[result.enqueueTo].push(ticketId);
+      runtime.ticket.queue = result.enqueueTo;
+      this.emit({ type: "ticket.queued", ticketId, timestamp: Date.now(), payload: { queue: result.enqueueTo } });
+    }
+
     if (result.requiresInput) {
-      this.runtime = {
-        ...this.runtime,
-        paused: true,
-        pausedAt: currentNode.data.label,
-        pendingDecisionOutcomes: result.inputOptions ?? [],
-      };
-      this.notify();
+      runtime.paused = true;
+      runtime.pausedAt = currentNode.data.label;
+      runtime.pendingDecisionOutcomes = result.inputOptions ?? [];
       return;
     }
 
     if (currentNode.data.type === "end") {
-      this.runtime = {
-        ...this.runtime,
-        completed: true,
-        currentNodeId: null,
-        paused: false,
-        pausedAt: null,
-        pendingDecisionOutcomes: [],
-      };
-      this.notify();
+      runtime.completed = true;
+      runtime.currentNodeId = null;
+      runtime.paused = false;
+      runtime.pausedAt = null;
+      runtime.pendingDecisionOutcomes = [];
       return;
     }
 
     const nextNode = this.resolveNextNode(currentNode.id);
 
     if (!nextNode) {
-      this.runtime = {
-        ...this.runtime,
-        completed: true,
-        currentNodeId: null,
-        paused: false,
-        pausedAt: null,
-        pendingDecisionOutcomes: [],
-      };
+      runtime.completed = true;
+      runtime.currentNodeId = null;
+      runtime.paused = false;
+      runtime.pausedAt = null;
+      runtime.pendingDecisionOutcomes = [];
       this.emit({
         type: "workflow.completed",
-        ticketId: this.runtime.ticket.id,
+        ticketId,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
@@ -240,29 +282,26 @@ export class SimulationEngine {
       return;
     }
 
-    this.runtime = {
-      ...this.runtime,
-      currentNodeId: nextNode.id,
-      paused: false,
-      pausedAt: null,
-      pendingDecisionOutcomes: [],
-    };
-    this.notify();
+    runtime.currentNodeId = nextNode.id;
+    runtime.paused = false;
+    runtime.pausedAt = null;
+    runtime.pendingDecisionOutcomes = [];
   }
 
-  handleDecision(outcomeLabel: string): void {
-    if (!this.runtime.paused || !this.runtime.currentNodeId) {
+  handleDecision(ticketId: string, outcomeLabel: string): void {
+    const runtime = this.runtimes[ticketId];
+    if (!runtime || !runtime.paused || !runtime.currentNodeId) {
       return;
     }
 
     const currentNode = this.workflow.nodes.find(
-      (node) => node.id === this.runtime.currentNodeId,
+      (node) => node.id === runtime.currentNodeId,
     );
     if (!currentNode) {
       return;
     }
 
-    const selectedOutcome = this.runtime.pendingDecisionOutcomes.find(
+    const selectedOutcome = runtime.pendingDecisionOutcomes.find(
       (outcome) => outcome.label === outcomeLabel,
     );
 
@@ -277,7 +316,7 @@ export class SimulationEngine {
     if (!nextNode) {
       this.emit({
         type: "workflow.error",
-        ticketId: this.runtime.ticket.id,
+        ticketId,
         timestamp: Date.now(),
         nodeId: currentNode.id,
         nodeLabel: currentNode.data.label,
@@ -286,24 +325,15 @@ export class SimulationEngine {
       return;
     }
 
-    this.runtime = {
-      ...this.runtime,
-      currentNodeId: nextNode.id,
-      paused: false,
-      pausedAt: null,
-      pendingDecisionOutcomes: [],
-      ticket: {
-        ...this.runtime.ticket,
-        context: {
-          ...this.runtime.ticket.context,
-          lastDecisionOutcome: outcomeLabel,
-        },
-      },
-    };
+    runtime.currentNodeId = nextNode.id;
+    runtime.paused = false;
+    runtime.pausedAt = null;
+    runtime.pendingDecisionOutcomes = [];
+    runtime.ticket.context.lastDecisionOutcome = outcomeLabel;
 
     this.emit({
       type: "decision.made",
-      ticketId: this.runtime.ticket.id,
+      ticketId,
       timestamp: Date.now(),
       nodeId: currentNode.id,
       nodeLabel: currentNode.data.label,
@@ -314,28 +344,36 @@ export class SimulationEngine {
   }
 
   stop(): void {
-    this.runtime = {
-      ...this.runtime,
-      completed: true,
-      paused: false,
-      pausedAt: null,
-      pendingDecisionOutcomes: [],
-      currentNodeId: null,
-    };
+    for (const id of Object.keys(this.runtimes)) {
+      const runtime = this.runtimes[id];
+      runtime.completed = true;
+      runtime.paused = false;
+      runtime.pausedAt = null;
+      runtime.pendingDecisionOutcomes = [];
+      runtime.currentNodeId = null;
+    }
     this.notify();
   }
 
-  getRuntime(): SimulationRuntime {
+  getEngineState(): EngineRuntimeState {
+    const runtimesCopy: Record<string, SimulationRuntime> = {};
+    for (const [id, runtime] of Object.entries(this.runtimes)) {
+      runtimesCopy[id] = {
+        ...runtime,
+        ticket: { ...runtime.ticket, context: { ...runtime.ticket.context } },
+        history: [...runtime.history],
+        pendingDecisionOutcomes: [...runtime.pendingDecisionOutcomes],
+      };
+    }
+
     return {
-      ...this.runtime,
-      ticket: {
-        ...this.runtime.ticket,
-        context: {
-          ...this.runtime.ticket.context,
-        },
+      runtimes: runtimesCopy,
+      queues: {
+        l1: [...this.queues.l1],
+        l2: [...this.queues.l2],
+        l3: [...this.queues.l3],
       },
-      history: [...this.runtime.history],
-      pendingDecisionOutcomes: [...this.runtime.pendingDecisionOutcomes],
+      agents: this.agents.map(a => ({ ...a })),
     };
   }
 
@@ -345,7 +383,7 @@ export class SimulationEngine {
 
   subscribe(listener: EngineStateListener): () => void {
     this.listeners.push(listener);
-    listener(this.getRuntime());
+    listener(this.getEngineState());
 
     return () => {
       this.listeners = this.listeners.filter(
@@ -359,7 +397,7 @@ export class SimulationEngine {
   }
 
   private notify(event?: SimulationEvent): void {
-    const snapshot = this.getRuntime();
+    const snapshot = this.getEngineState();
     this.listeners.forEach((listener) => listener(snapshot, event));
   }
 
@@ -387,17 +425,20 @@ export class SimulationEngine {
     return this.workflow.nodes.find((node) => node.id === edge?.target);
   }
 
-  private recordHistory(node: WorkflowNode): void {
-    this.runtime.history.push({
-      nodeId: node.id,
-      nodeLabel: node.data.label,
-      timestamp: Date.now(),
-      ticketSnapshot: {
-        ...this.runtime.ticket,
-        context: {
-          ...this.runtime.ticket.context,
+  private recordHistory(ticketId: string, node: WorkflowNode): void {
+    const runtime = this.runtimes[ticketId];
+    if (runtime) {
+      runtime.history.push({
+        nodeId: node.id,
+        nodeLabel: node.data.label,
+        timestamp: Date.now(),
+        ticketSnapshot: {
+          ...runtime.ticket,
+          context: {
+            ...runtime.ticket.context,
+          },
         },
-      },
-    });
+      });
+    }
   }
 }
