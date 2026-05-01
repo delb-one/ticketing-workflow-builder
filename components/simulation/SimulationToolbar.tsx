@@ -15,10 +15,10 @@ import type {
 import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward } from "lucide-react";
+import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { Input } from "../ui/input";
+
 
 const DEFAULT_STEP_DELAY_MS = 900;
 
@@ -31,11 +31,11 @@ const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig =
     case "automation": {
       const automationType =
         blockId === "sla-timer" ||
-        blockId === "escalation" ||
-        blockId === "auto-assign" ||
-        blockId === "notify" ||
-        blockId === "business-rules" ||
-        blockId === "reopen"
+          blockId === "escalation" ||
+          blockId === "auto-assign" ||
+          blockId === "notify" ||
+          blockId === "business-rules" ||
+          blockId === "reopen"
           ? blockId
           : "business-rules";
       return {
@@ -125,12 +125,12 @@ export default function SimulationToolbar() {
     clearSimulationEvents,
     addSimulationEvent,
     engineState,
+    simulationConfig,
+    updateSimulationConfig,
   } = useWorkflowStore();
 
-  const [stepDelayMs, setStepDelayMs] = useState(DEFAULT_STEP_DELAY_MS);
   const [showDecisionDialog, setShowDecisionDialog] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [ticketCount, setTicketCount] = useState(1);
 
   const engineRef = useRef<SimulationEngine | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -185,23 +185,21 @@ export default function SimulationToolbar() {
       status: "available";
     }> = [];
 
-    workflow.nodes.forEach((node, index) => {
-      const config = node.data.config;
-      if (node.type === "actor" && config?.nodeType === "actor" && config.agentLevel) {
-        const level = config.agentLevel;
-        if (level === "l1" || level === "l2" || level === "l3") {
-          initialAgents.push({
-            id: `${node.data.label.replace(/\s+/g, "-")}-${index + 1}`,
-            level,
-            capacity: 1,
-            status: "available",
-          });
-        }
+    const { agents } = simulationConfig;
+    (['l1', 'l2', 'l3'] as const).forEach(level => {
+      const count = agents[level];
+      for (let i = 0; i < count; i++) {
+        initialAgents.push({
+          id: `Agent-${level.toUpperCase()}-${i + 1}`,
+          level,
+          capacity: 1,
+          status: "available",
+        });
       }
     });
 
     startSimulation();
-    engine.start(ticketCount, initialAgents);
+    engine.start(simulationConfig.ticketCount, initialAgents);
   };
 
   const handleStop = () => {
@@ -225,10 +223,10 @@ export default function SimulationToolbar() {
 
     const timeoutId = setTimeout(() => {
       engineRef.current?.step();
-    }, stepDelayMs);
+    }, simulationConfig.stepDelayMs);
 
     return () => clearTimeout(timeoutId);
-  }, [isSimulating, engineState, stepDelayMs, isPaused]);
+  }, [isSimulating, engineState, simulationConfig.stepDelayMs, isPaused]);
 
   useEffect(() => {
     return () => {
@@ -313,22 +311,36 @@ export default function SimulationToolbar() {
           </div>
         </div>
 
-        {/* <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2">
           <div className="flex flex-col gap-1">
             <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
               Tickets
             </label>
-            <Input
-              type="number"
-              min={1}
-              max={50}
-              value={ticketCount}
-              onChange={(event) => setTicketCount(parseInt(event.target.value, 10) || 1)}
-              className="h-8 text-xs"
-              disabled={isSimulating}
-            />
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => updateSimulationConfig({ ticketCount: Math.max(1, simulationConfig.ticketCount - 1) })}
+                disabled={isSimulating || simulationConfig.ticketCount <= 1}
+              >
+                <Minus className="h-3 w-3" />
+              </Button>
+              <div className="flex-1 h-8 w-28 flex items-center justify-center bg-background/50 border rounded-md text-xs font-medium">
+                {simulationConfig.ticketCount}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => updateSimulationConfig({ ticketCount: Math.min(50, simulationConfig.ticketCount + 1) })}
+                disabled={isSimulating || simulationConfig.ticketCount >= 50}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
+          {/* <div className="flex flex-col gap-1">
             <label
               htmlFor="step-delay"
               className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider"
@@ -337,8 +349,8 @@ export default function SimulationToolbar() {
             </label>
             <select
               id="step-delay"
-              value={stepDelayMs}
-              onChange={(event) => setStepDelayMs(parseInt(event.target.value, 10))}
+              value={simulationConfig.stepDelayMs}
+              onChange={(event) => updateSimulationConfig({ stepDelayMs: parseInt(event.target.value, 10) })}
               className="h-8 rounded-md border border-input bg-background px-2 text-xs"
               disabled={isSimulating}
             >
@@ -346,8 +358,8 @@ export default function SimulationToolbar() {
               <option value={600}>Normal</option>
               <option value={900}>Slow</option>
             </select>
-          </div>
-        </div> */}
+          </div> */}
+        </div>
       </div>
 
       {canvasHost &&

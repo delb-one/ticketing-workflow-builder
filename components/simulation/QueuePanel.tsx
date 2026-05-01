@@ -59,7 +59,7 @@ export function QueuePanel() {
                           transition={{ duration: 0.2 }}
                           className="text-[10px] font-mono p-1.5 rounded bg-card-700/50 border border-card-600/30 text-primary-300 truncate"
                         >
-                          {ticketId.replace("ticket-", "")}
+                          {ticketId.split("-").pop()}
                         </motion.div>
                       ))}
                     </AnimatePresence>

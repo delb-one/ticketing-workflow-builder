@@ -120,20 +120,11 @@ export class SimulationEngine {
 
     for (let i = 0; i < ticketCount; i++) {
       const ticket = createDefaultTicket(i);
-      ticket.queue = "l1";
-      this.queues.l1.push(ticket.id);
 
       this.runtimes[ticket.id] = {
         ...createDefaultRuntime(ticket),
         currentNodeId: startNode.id,
       };
-
-      this.emit({
-        type: "ticket.queued",
-        ticketId: ticket.id,
-        timestamp: Date.now(),
-        payload: { queue: "l1" }
-      });
     }
 
     this.notify();
@@ -152,6 +143,9 @@ export class SimulationEngine {
           const runtime = this.runtimes[ticketId];
           if (runtime) {
             runtime.ticket.assignedAgent = agent.id;
+            runtime.ticket.queue = undefined;
+            runtime.paused = false; // Resume execution now that we have an agent
+            runtime.pausedAt = null;
             this.emit({ type: "ticket.dequeued", ticketId, timestamp: Date.now(), payload: { queue: agent.level } });
             this.emit({ type: "agent.assigned", ticketId, timestamp: Date.now(), payload: { agentId: agent.id } });
           }
@@ -190,6 +184,13 @@ export class SimulationEngine {
       runtime.completed = true;
       runtime.currentNodeId = null;
       return;
+    }
+
+    const isWaitingInQueue = runtime.ticket.queue && !runtime.ticket.assignedAgent;
+    const nodeRequiresAgent = currentNode.data.type === 'actor' || currentNode.data.type === 'action';
+    
+    if (isWaitingInQueue && nodeRequiresAgent) {
+      return; // Pause execution for this runtime until an agent picks it up
     }
 
     this.recordHistory(ticketId, currentNode);
@@ -244,6 +245,8 @@ export class SimulationEngine {
     if (result.enqueueTo) {
       this.queues[result.enqueueTo].push(ticketId);
       runtime.ticket.queue = result.enqueueTo;
+      runtime.paused = true; // Pause until an agent picks it up
+      runtime.pausedAt = new Date().toISOString();
       this.emit({ type: "ticket.queued", ticketId, timestamp: Date.now(), payload: { queue: result.enqueueTo } });
     }
 

@@ -10,6 +10,16 @@ import type {
   QueueState,
 } from '@/lib/simulation/types';
 
+export interface SimulationConfig {
+  ticketCount: number;
+  agents: {
+    l1: number;
+    l2: number;
+    l3: number;
+  };
+  stepDelayMs: number;
+}
+
 export type { NodeType, NodeConfig } from '@/lib/simulation/types';
 
 export interface CustomNodeData {
@@ -37,6 +47,7 @@ export interface WorkflowStore {
   engineState: EngineRuntimeState | null;
   schedulingMode: "fifo" | "priority";
   simulationEvents: SimulationEvent[];
+  simulationConfig: SimulationConfig;
 
   addNode: (node: CustomNode) => void;
   setNodes: (nodes: CustomNode[]) => void;
@@ -60,6 +71,7 @@ export interface WorkflowStore {
   setSchedulingMode: (mode: "fifo" | "priority") => void;
   addSimulationEvent: (event: SimulationEvent) => void;
   clearSimulationEvents: () => void;
+  updateSimulationConfig: (config: Partial<SimulationConfig>) => void;
 
   clearWorkflow: () => void;
   loadWorkflow: (nodes: CustomNode[], edges: Edge[]) => void;
@@ -77,6 +89,11 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
   engineState: null,
   schedulingMode: "fifo",
   simulationEvents: [],
+  simulationConfig: {
+    ticketCount: 1,
+    agents: { l1: 1, l2: 1, l3: 1 },
+    stepDelayMs: 900,
+  },
 
   addNode: (node) =>
     set((state) => ({
@@ -168,6 +185,11 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
     })),
 
   clearSimulationEvents: () => set({ simulationEvents: [] }),
+
+  updateSimulationConfig: (config) =>
+    set((state) => ({
+      simulationConfig: { ...state.simulationConfig, ...config },
+    })),
 
   clearWorkflow: () =>
     set({

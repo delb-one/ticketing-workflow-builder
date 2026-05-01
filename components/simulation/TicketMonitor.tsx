@@ -35,7 +35,7 @@ export function TicketMonitor() {
           <AccordionContent className="flex-1 overflow-hidden pb-0">
             <ScrollArea className="h-75">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-primary border-b  sticky top-0 z-10 ">
+                <thead className="text-xs text-primary bg-card sticky top-0 z-10 ">
                   <tr>
                     <th className="px-4 py-2 font-bold">Ticket ID</th>
                     <th className="px-4 py-2 font-bold">State</th>
@@ -59,7 +59,7 @@ export function TicketMonitor() {
                         className="hover:bg-card-800/30 transition-colors"
                       >
                         <td className="px-4 py-2.5 font-mono text-xs">
-                          {rt.ticket.id.replace("ticket-", "")}
+                          {rt.ticket.id}
                         </td>
 
                         <td className="px-4 py-2.5">

@@ -93,6 +93,18 @@ class ActorNodeHandler implements NodeHandler {
       };
     }
 
+    if (!ticket.assignedAgent) {
+      return {
+        enqueueTo: agentLevel as "l1" | "l2" | "l3",
+        ticketUpdates: {
+          queue: agentLevel as "l1" | "l2" | "l3",
+        },
+        events: [
+          buildEvent("ticket.queued", ticket.id, node, { queue: agentLevel }),
+        ],
+      };
+    }
+
     const assignedGroup = agentLevel.toUpperCase();
 
     return {
@@ -101,8 +113,8 @@ class ActorNodeHandler implements NodeHandler {
         updatedAt: Date.now(),
       },
       events: [
-        buildEvent('ticket.assigned', ticket.id, node, { assignedGroup }),
-        buildEvent('workflow.step', ticket.id, node),
+        buildEvent("ticket.assigned", ticket.id, node, { assignedGroup }),
+        buildEvent("workflow.step", ticket.id, node),
       ],
     };
   }
