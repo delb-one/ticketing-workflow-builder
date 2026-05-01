@@ -22,13 +22,14 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
-import type { NodeConfig } from "@/lib/simulation/types";
+import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
 import { useTheme } from "next-themes";
 import { QueuePanel } from "./simulation/QueuePanel";
 import { AgentPanel } from "./simulation/AgentPanel";
 import { TicketMonitor } from "./simulation/TicketMonitor";
 import SimulationToolbar from "./simulation/SimulationToolbar";
+import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -46,6 +47,20 @@ interface DragPayload {
   description?: string;
   config?: NodeConfig;
 }
+
+const isNodeType = (value: unknown): value is NodeType =>
+  typeof value === "string" &&
+  [
+    "start",
+    "end",
+    "actor",
+    "action",
+    "automation",
+    "decision",
+    "condition",
+    "status",
+    "event",
+  ].includes(value);
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const {
@@ -218,24 +233,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         <Background variant={BackgroundVariant.Dots} />
         <Controls />
         <MiniMap
-          nodeColor={(node) => {
-            switch (node.data.type) {
-              case "actor":
-                return "var(--chart-4)";
-              case "decision":
-              case "condition":
-                return "var(--chart-3)";
-              case "automation":
-                return "var(--chart-2)";
-              case "action":
-              case "status":
-                return "var(--chart-1)";
-              case "event":
-                return "var(--chart-2)";
-              default:
-                return "var(--chart-5)";
-            }
-          }}
+          nodeColor={(node) =>
+            isNodeType(node.data?.type)
+              ? getNodeTypeColorVar(node.data.type)
+              : getNodeTypeColorVar("start")
+          }
           maskColor="rgba(0, 0, 0, 0.1)"
         />
 

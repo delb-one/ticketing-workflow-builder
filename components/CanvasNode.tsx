@@ -6,12 +6,15 @@ import { getNodeIcon } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
 import { CanvasNodeProps } from "@/lib/canvasNode/types";
 import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from "@/lib/canvasNode/color-map";
+import { getCssVarColor } from "@/lib/colors/color-map";
 
 export default function CanvasNode(props: CanvasNodeProps) {
   const { setSelectedNode, engineState } = useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
   const activeTicketCount = engineState
-    ? Object.values(engineState.runtimes).filter((r) => r.currentNodeId === id && !r.completed).length
+    ? Object.values(engineState.runtimes).filter(
+        (r) => r.currentNodeId === id && !r.completed,
+      ).length
     : 0;
   const isActive = activeTicketCount > 0;
   const theme = TYPE_THEME_MAP[data.type];
@@ -28,14 +31,16 @@ export default function CanvasNode(props: CanvasNodeProps) {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       onClick={() => setSelectedNode(id)}
-      className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-2 ring-primary-foreground ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+      className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-1 ring-primary ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
     >
       <div
-        className={`relative rounded-[11px] border border-border/70 border-${theme.color} bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? "border-dashed" : ""}`}
+        className={`relative rounded-[11px] border border-border/70  bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? "border-dashed" : ""}`}
+        style={{ borderColor: getCssVarColor(theme.color) }}
       >
         <div className="flex items-start gap-3">
           <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br ${theme.gradient} text-background`}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br  text-background`}
+            style={{ backgroundColor: getCssVarColor(theme.gradient) }}
           >
             <Icon className="h-4 w-4" />
           </div>
@@ -44,7 +49,8 @@ export default function CanvasNode(props: CanvasNodeProps) {
               {data.label}
             </div>
             <div
-              className={`mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] ${theme.softText}`}
+              className={`mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] `}
+              style={{ color: getCssVarColor(theme.softText) }}
             >
               {subtitle}
             </div>
@@ -55,26 +61,29 @@ export default function CanvasNode(props: CanvasNodeProps) {
           <motion.div
             animate={{ opacity: [0.16, 0.35, 0.16] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-            className={`pointer-events-none absolute inset-0 rounded-[11px] bg-linear-to-r ${theme.gradient}`}
+            className="pointer-events-none absolute inset-0 rounded-[11px]"
+            style={{ backgroundColor: getCssVarColor(theme.gradient) }}
           />
         )}
-        
+
         {activeTicketCount > 0 && (
-          <div className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-primary shadow-md ring-2 ring-background">
-            🎫 {activeTicketCount}
-          </div>
+         <div className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-white shadow-md ring-2 ring-background">
+  🎫 {activeTicketCount}
+</div>
         )}
       </div>
 
       <Handle
         type="target"
         position={Position.Top}
-        className={`-top-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! ${theme.handle}`}
+        className={`-top-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! `}
+        style={{ backgroundColor: getCssVarColor(theme.handle) }}
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className={`-bottom-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! ${theme.handle}`}
+        className={`-bottom-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! `}
+        style={{ backgroundColor: getCssVarColor(theme.handle) }}
       />
     </motion.div>
   );

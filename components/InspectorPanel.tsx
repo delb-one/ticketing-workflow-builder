@@ -6,27 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig } from "@/lib/simulation/types";
 import { ScrollArea } from "./ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Bell, GitBranch, UserCog } from "lucide-react";
+import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
 }
-
-const getNodeTypeColor = (type: string) => {
-  switch (type) {
-    case "actor":
-      return "text-chart-4";
-    case "decision":
-    case "condition":
-      return "text-chart-3";
-    case "automation":
-      return "text-chart-2";
-    case "action":
-    case "status":
-      return "text-chart-1";
-    default:
-      return "text-chart-5";
-  }
-};
 
 const mergeNodeConfig = (
   base: NodeConfig | undefined,
@@ -79,18 +73,34 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-      <div className="sticky top-0 border-border bg-card p-4">
-        <h2 className="font-semibold text-foreground">Node Inspector</h2>
-        <p
-          className={`mt-1 text-xs font-medium ${getNodeTypeColor(selectedNode.data.type)}`}
-        >
-          Type: {selectedNode.data.type.toUpperCase()}
-        </p>
-      </div>
+     <div className="sticky top-0 border-b border-border bg-card p-4 space-y-2">
+  
+  <h2 className="font-semibold text-foreground">
+    Node Inspector
+  </h2>
+
+  <div className="flex items-center gap-2 text-xs">
+    
+    <span className="text-muted-foreground">
+      Type:
+    </span>
+
+    <span
+      className="px-2 py-0.5 rounded-full text-[10px] uppercase font-semibold text-background"
+      style={{
+        backgroundColor: getNodeTypeColorVar(selectedNode.data.type),
+      }}
+    >
+      {selectedNode.data.type}
+    </span>
+
+  </div>
+
+</div>
 
       <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Card className="p-4 mb-4">
-          <label className="mb-2 block text-sm font-semibold text-foreground">
+          <label className=" block text-sm font-semibold text-foreground">
             Label
           </label>
           <Input
@@ -101,7 +111,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </Card>
 
         <Card className="p-4 mb-4">
-          <label className="mb-2 block text-sm font-semibold text-foreground">
+          <label className="block text-sm font-semibold text-foreground">
             Description
           </label>
           <p className="text-sm text-muted-foreground">
@@ -111,26 +121,38 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
         {selectedNode.data.type === "decision" && (
           <Card className="p-4 mb-4">
-            <label className="mb-2 block text-sm font-semibold text-foreground">
+            <label className="block text-sm font-semibold text-foreground">
               Decision Type
             </label>
-            <select
+
+            <Select
               value={
                 config?.nodeType === "decision"
-                  ? config.decisionType
+                  ? (config.decisionType ?? "boolean")
                   : "boolean"
               }
-              onChange={(event) =>
+              onValueChange={(value) =>
                 handleConfigChange({
                   nodeType: "decision",
-                  decisionType: event.target.value as "manual" | "rule-based",
+                  decisionType: value as "manual" | "rule-based",
                 })
               }
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             >
-              <option value="boolean">Boolean (Yes/No)</option>
-              <option value="custom">Custom Expression</option>
-            </select>
+              <SelectTrigger className="w-full max-w-48  flex items-center gap-2">
+                <GitBranch className="h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Select decision type..." />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Decision</SelectLabel>
+
+                  <SelectItem value="manual">Boolean (Yes/No)</SelectItem>
+
+                  <SelectItem value="rule-based">Custom Expression</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </Card>
         )}
 
@@ -163,60 +185,83 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         {selectedNode.data.type === "automation" &&
           blockId?.includes("assign") && (
             <Card className="p-4 mb-4">
-              <label className="mb-2 block text-sm font-semibold text-foreground">
+              <label className="block text-sm font-semibold text-foreground">
                 Assign To
               </label>
-              <select
+
+              <Select
                 value={
                   config?.nodeType === "automation"
                     ? (config.assignTo ?? "l1")
                     : "l1"
                 }
-                onChange={(event) =>
+                onValueChange={(value) =>
                   handleConfigChange({
                     nodeType: "automation",
                     automationType: "auto-assign",
-                    assignTo: event.target.value as "l1" | "l2" | "l3",
+                    assignTo: value as "l1" | "l2" | "l3",
                   })
                 }
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
               >
-                <option value="l1">L1 Technician</option>
-                <option value="l2">L2 Technician</option>
-                <option value="l3">L3 Specialist</option>
-              </select>
+                <SelectTrigger className="w-full max-w-48 flex items-center gap-2 [&>span]:truncate">
+                  {" "}
+                  <UserCog className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Assign to..." />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Automation</SelectLabel>
+
+                    <SelectItem value="l1">L1 Technician</SelectItem>
+                    <SelectItem value="l2">L2 Technician</SelectItem>
+                    <SelectItem value="l3">L3 Specialist</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Card>
           )}
 
         {selectedNode.data.type === "automation" &&
           blockId?.includes("notify") && (
             <Card className="p-4 mb-4">
-              <label className="mb-2 block text-sm font-semibold text-foreground">
+              <label className=" block text-sm font-semibold text-foreground">
                 Notification Channel
               </label>
-              <select
+
+              <Select
                 value={
                   config?.nodeType === "automation"
                     ? (config.channel ?? "email")
                     : "email"
                 }
-                onChange={(event) =>
+                onValueChange={(value) =>
                   handleConfigChange({
                     nodeType: "automation",
                     automationType: "notify",
-                    channel: event.target.value,
+                    channel: value as "email" | "sms" | "portal",
                   })
                 }
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
               >
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
-                <option value="portal">Portal</option>
-              </select>
+                <SelectTrigger className="w-full max-w-48 flex items-center gap-2 [&>span]:truncate">
+                  <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Select channel..." />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Notification</SelectLabel>
+
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="portal">Portal</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Card>
           )}
 
-        <Card className="p-3">
+        {/* <Card className="p-3">
           <p className="text-xs text-muted-foreground">
             <strong>ID:</strong> {selectedNode.id}
           </p>
@@ -224,7 +269,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
             <strong>Position:</strong> {Math.round(selectedNode.position.x)},{" "}
             {Math.round(selectedNode.position.y)}
           </p>
-        </Card>
+        </Card> */}
       </ScrollArea>
 
       {/* <div className="space-y-2 border-t border-border p-4">
