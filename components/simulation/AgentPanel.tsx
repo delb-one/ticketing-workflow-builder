@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflowStore } from "@/lib/store";
-import { Users, Briefcase, Settings2, Minus, Plus } from "lucide-react";
+import { Users, Briefcase, Settings2, Minus, Plus, Headphones, UserCog, Cpu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import {
@@ -11,6 +11,11 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 
+const levelIcons = {
+  l1: Headphones,
+  l2: UserCog,
+  l3: Cpu,
+};
 export function AgentPanel() {
   const { engineState, isSimulating, simulationConfig, updateSimulationConfig } = useWorkflowStore();
   const agents = engineState?.agents ?? [];
@@ -32,38 +37,69 @@ export function AgentPanel() {
                   <Settings2 className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground font-medium">Pool Configuration</span>
                 </div>
-                {(['l1', 'l2', 'l3'] as const).map((level) => (
-                  <div key={level} className="flex items-center justify-between gap-3 bg-card-800/30 p-2 rounded-lg border border-card-700/30">
-                    <label className="text-xs font-bold text-muted-foreground uppercase w-8">
-                      {level}
-                    </label>
-                    <div className="flex items-center gap-1 flex-1 max-w-[100px]">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0 hover:bg-card-700/50"
-                        onClick={() => updateSimulationConfig({
-                          agents: { ...simulationConfig.agents, [level]: Math.max(0, simulationConfig.agents[level] - 1) }
-                        })}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <div className="flex-1 h-7 flex items-center justify-center bg-background/30 border border-card-700/50 rounded-md text-xs font-medium min-w-[30px]">
-                        {simulationConfig.agents[level]}
+                {(['l1', 'l2', 'l3'] as const).map((level) => {
+                  const Icon = levelIcons[level];
+
+                  return (
+                    <div
+                      key={level}
+                      className="flex justify-between items-center gap-2 bg-card-800/30 px-2 py-1.5 rounded-md border border-card-700/30"
+                    >
+                      {/* ICON + LABEL */}
+                      <div className="flex items-center gap-1 w-16 shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground">
+                          {level}
+                        </span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0 hover:bg-card-700/50"
-                        onClick={() => updateSimulationConfig({
-                          agents: { ...simulationConfig.agents, [level]: Math.min(20, simulationConfig.agents[level] + 1) }
-                        })}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
+
+                      {/* STEPPER */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:bg-card-700/50"
+                          onClick={() =>
+                            updateSimulationConfig({
+                              agents: {
+                                ...simulationConfig.agents,
+                                [level]: Math.max(
+                                  0,
+                                  simulationConfig.agents[level] - 1
+                                ),
+                              },
+                            })
+                          }
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+
+                        <div className="h-6 min-w-[24px] px-1 flex items-center justify-center bg-background/30 border border-card-700/50 rounded-md text-[10px] font-medium">
+                          {simulationConfig.agents[level]}
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:bg-card-700/50"
+                          onClick={() =>
+                            updateSimulationConfig({
+                              agents: {
+                                ...simulationConfig.agents,
+                                [level]: Math.min(
+                                  20,
+                                  simulationConfig.agents[level] + 1
+                                ),
+                              },
+                            })
+                          }
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="overflow-y-auto space-y-2 flex-1 pr-1 custom-scrollbar">

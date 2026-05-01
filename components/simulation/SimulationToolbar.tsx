@@ -15,9 +15,11 @@ import type {
 import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus } from "lucide-react";
+import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus, SlidersHorizontal, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 
 const DEFAULT_STEP_DELAY_MS = 900;
@@ -236,10 +238,21 @@ export default function SimulationToolbar() {
   }, []);
 
   useEffect(() => {
-    if (!toolbarRef.current) return;
-    const host = toolbarRef.current.closest(".react-flow") as HTMLElement | null;
-    setCanvasHost(host);
-  }, []);
+    // Try to find the host through the ref first (most accurate for nested flows)
+    if (toolbarRef.current) {
+      const host = toolbarRef.current.closest(".react-flow") as HTMLElement | null;
+      if (host) {
+        setCanvasHost(host);
+        return;
+      }
+    }
+
+    // Fallback: search globally if the ref isn't available yet or isn't in a flow
+    const globalHost = document.querySelector(".react-flow") as HTMLElement | null;
+    if (globalHost) {
+      setCanvasHost(globalHost);
+    }
+  }, [isSimulating]);
 
   const pausedRuntime = useMemo(() => {
     if (!engineState) return null;
@@ -257,110 +270,148 @@ export default function SimulationToolbar() {
 
   return (
     <>
-      <div
-        ref={toolbarRef}
-        className="flex flex-col gap-3 bg-card/70 p-4 rounded-xl border border-border/80 backdrop-blur-md shadow-sm pointer-events-auto"
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full pointer-events-auto"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2 shrink-0">
-            {!isSimulating ? (
-              <Button
-                onClick={startSimulationFlow}
-                disabled={isSimulating || nodes.length === 0}
-                size="icon"
-                className="bg-emerald-600 hover:bg-emerald-700 h-8 w-8"
-                title="Start Simulation"
-              >
-                <CirclePlay className="h-4 w-4" />
-              </Button>
-            ) : (
-              <>
-                <Button
-                  onClick={() => setIsPaused(!isPaused)}
-                  size="icon"
-                  className={`h-8 w-8 ${isPaused ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-amber-500 hover:bg-amber-600 text-white"}`}
-                  title={isPaused ? "Resume" : "Pause"}
-                >
-                  {isPaused ? (
-                    <CirclePlay className="h-4 w-4" />
-                  ) : (
-                    <CirclePause className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  onClick={() => engineRef.current?.step()}
-                  disabled={!isPaused}
-                  size="icon"
-                  variant="outline"
-                  className="h-8 w-8 text-foreground"
-                  title="Step Forward"
-                >
-                  <StepForward className="h-4 w-4" />
-                </Button>
-                <Button
-                  onClick={handleStop}
-                  size="icon"
-                  variant="destructive"
-                  className="h-8 w-8"
-                  title="Stop"
-                >
-                  <CircleStop className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-2">
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-              Tickets
-            </label>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0"
-                onClick={() => updateSimulationConfig({ ticketCount: Math.max(1, simulationConfig.ticketCount - 1) })}
-                disabled={isSimulating || simulationConfig.ticketCount <= 1}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              <div className="flex-1 h-8 w-28 flex items-center justify-center bg-background/50 border rounded-md text-xs font-medium">
-                {simulationConfig.ticketCount}
+        <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+          <AccordionItem
+            value="controls"
+            className="border-0"
+          >
+            <AccordionTrigger className="py-0 mb-4 hover:no-underline">
+              <div className="flex items-center gap-2 flex-1">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                <span>Simulation Controls</span>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0"
-                onClick={() => updateSimulationConfig({ ticketCount: Math.min(50, simulationConfig.ticketCount + 1) })}
-                disabled={isSimulating || simulationConfig.ticketCount >= 50}
+            </AccordionTrigger>
+
+            <AccordionContent className="pb-0">
+              <div
+                ref={toolbarRef}
+                className="flex flex-col gap-4"
               >
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-          {/* <div className="flex flex-col gap-1">
-            <label
-              htmlFor="step-delay"
-              className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider"
-            >
-              Speed
-            </label>
-            <select
-              id="step-delay"
-              value={simulationConfig.stepDelayMs}
-              onChange={(event) => updateSimulationConfig({ stepDelayMs: parseInt(event.target.value, 10) })}
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
-              disabled={isSimulating}
-            >
-              <option value={300}>Fast</option>
-              <option value={600}>Normal</option>
-              <option value={900}>Slow</option>
-            </select>
-          </div> */}
+                {/* TICKETS */}
+                <div className="flex flex-col gap-1">
+                  <TooltipProvider>
+                    <div className="flex items-center gap-1">
+                      {/* REMOVE */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() =>
+                              updateSimulationConfig({
+                                ticketCount: Math.max(
+                                  1,
+                                  simulationConfig.ticketCount - 1
+                                ),
+                              })
+                            }
+                            disabled={isSimulating || simulationConfig.ticketCount <= 1}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                          Remove ticket
+                        </TooltipContent>
+                      </Tooltip>
+
+                      {/* COUNT */}
+                      <div className="flex-1 h-8 w-auto flex items-center justify-center bg-background/50 border rounded-md text-xs font-medium">
+                        {simulationConfig.ticketCount}
+                      </div>
+
+                      {/* ADD */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() =>
+                              updateSimulationConfig({
+                                ticketCount: Math.min(
+                                  50,
+                                  simulationConfig.ticketCount + 1
+                                ),
+                              })
+                            }
+                            disabled={isSimulating || simulationConfig.ticketCount >= 50}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                          Add ticket
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
+                </div>
+
+                {/* CONTROLLI */}
+                <div className="flex justify-center items-center gap-2">
+                  {!isSimulating ? (
+                    <Button
+                      onClick={startSimulationFlow}
+                      disabled={nodes.length === 0}
+                      size="icon"
+                      className="bg-emerald-600 hover:bg-emerald-700 h-8 w-8"
+                      title="Start Simulation"
+                    >
+                      <CirclePlay className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={() => setIsPaused(!isPaused)}
+                        size="icon"
+                        className={`h-8 w-8 ${isPaused
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : "bg-amber-500 hover:bg-amber-600 text-white"
+                          }`}
+                        title={isPaused ? "Resume" : "Pause"}
+                      >
+                        {isPaused ? (
+                          <CirclePlay className="h-4 w-4" />
+                        ) : (
+                          <CirclePause className="h-4 w-4" />
+                        )}
+                      </Button>
+
+                      <Button
+                        onClick={() => engineRef.current?.step()}
+                        disabled={!isPaused}
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        title="Step Forward"
+                      >
+                        <StepForward className="h-4 w-4" />
+                      </Button>
+
+                      <Button
+                        onClick={handleStop}
+                        size="icon"
+                        variant="destructive"
+                        className="h-8 w-8"
+                        title="Stop"
+                      >
+                        <CircleStop className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         </div>
-      </div>
+      </Accordion>
 
       {canvasHost &&
         createPortal(
