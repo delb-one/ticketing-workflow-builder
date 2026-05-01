@@ -16,7 +16,7 @@ export function AgentPanel() {
 
   return (
     <Accordion type="single" collapsible>
-      <div className="bg-card rounded-xl p-4 border border-card-800 flex flex-col h-full overflow-hidden">
+      <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
         <AccordionItem value="agent-pool" className="border-0">
           <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex gap-2 items-center">
@@ -34,7 +34,7 @@ export function AgentPanel() {
                 agents.map((agent) => (
                   <div
                     key={agent.id}
-                    className="flex flex-col p-3 rounded-lg bg-card-800 border border-card-700/50"
+                    className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md"
                   >
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-semibold text-primary-300">

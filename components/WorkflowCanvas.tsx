@@ -242,24 +242,27 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         />
 
         <>
-          <Panel position="top-left" className="w-72 pointer-events-auto">
-            <div className="h-1/2 min-h-50">
-              <QueuePanel />
-            </div>
+          <Panel
+            position="top-left"
+            className="w-72 pointer-events-auto "
+          >
+            <QueuePanel />
           </Panel>
-          <Panel position="top-center">
-            <div className="h-1/2 min-h-50">
-              <SimulationToolbar />
-            </div>
+          <Panel
+            position="top-center"
+            className="pointer-events-auto "
+          >
+            <SimulationToolbar />
           </Panel>
-          <Panel position="top-right" className="w-72  pointer-events-auto">
-            <div className="h-1/2 min-h-50">
-              <AgentPanel />
-            </div>
+          <Panel
+            position="top-right"
+            className="w-72 pointer-events-auto "
+          >
+            <AgentPanel />
           </Panel>
           <Panel
             position="bottom-center"
-            className="w-200 max-w-[70%] max-h-[30%]  pointer-events-auto  mb-4"
+            className="w-200 max-w-[70%] max-h-[40%] pointer-events-auto mb-4 "
           >
             <TicketMonitor />
           </Panel>

@@ -23,7 +23,7 @@ const createDefaultTicket = (index: number = 0): Ticket => {
   const now = Date.now();
 
   return {
-    id: `ticket-${now}-${index}`,
+    id: `tkt-${index}`,
     state: "open",
     priority: "medium",
     impact: "medium",

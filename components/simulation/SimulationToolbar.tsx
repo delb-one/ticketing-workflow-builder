@@ -261,7 +261,7 @@ export default function SimulationToolbar() {
     <>
       <div
         ref={toolbarRef}
-        className="flex flex-col gap-3 bg-card p-4 rounded-xl border border-border shadow-sm pointer-events-auto"
+        className="flex flex-col gap-3 bg-card/70 p-4 rounded-xl border border-border/80 backdrop-blur-md shadow-sm pointer-events-auto"
       >
         <div className="flex items-center justify-between">
           <div className="flex gap-2 shrink-0">

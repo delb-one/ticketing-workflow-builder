@@ -23,7 +23,7 @@ export function TicketMonitor() {
 
   return (
     <Accordion type="single" collapsible>
-      <div className="bg-card rounded-xl border border-card-800 flex flex-col h-full overflow-hidden">
+      <div className="bg-card/70 rounded-xl border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
         <AccordionItem value="ticket-monitor" className="border-0">
           <AccordionTrigger className="p-4 border-b border-card-800 hover:no-underline">
             <div className="flex gap-2 items-center">
@@ -35,13 +35,13 @@ export function TicketMonitor() {
           <AccordionContent className="flex-1 overflow-hidden pb-0">
             <ScrollArea className="h-75">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-primary bg-card sticky top-0 z-10">
+                <thead className="text-xs text-primary border-b  sticky top-0 z-10 ">
                   <tr>
-                    <th className="px-4 py-2 font-medium">Ticket ID</th>
-                    <th className="px-4 py-2 font-medium">State</th>
-                    <th className="px-4 py-2 font-medium">Current Step</th>
-                    <th className="px-4 py-2 font-medium">Agent</th>
-                    <th className="px-4 py-2 font-medium">Queue</th>
+                    <th className="px-4 py-2 font-bold">Ticket ID</th>
+                    <th className="px-4 py-2 font-bold">State</th>
+                    <th className="px-4 py-2 font-bold">Current Step</th>
+                    <th className="px-4 py-2 font-bold">Agent</th>
+                    <th className="px-4 py-2 font-bold">Queue</th>
                   </tr>
                 </thead>
 
@@ -65,7 +65,7 @@ export function TicketMonitor() {
                         <td className="px-4 py-2.5">
                           <Badge
                             variant="outline"
-                            className="bg-card-800 text-[10px] uppercase border-card-700"
+                            className="bg-card-800/60 text-[10px] uppercase border-card-700/80 backdrop-blur-md"
                           >
                             {rt.ticket.state}
                           </Badge>

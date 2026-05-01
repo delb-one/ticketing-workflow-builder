@@ -38,7 +38,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
       className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-1 ring-primary ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
     >
       <div
-        className={`relative rounded-[11px] border border-border/70  bg-card px-3 py-3 backdrop-blur-sm ${isAutomation ? "border-dashed" : ""}`}
+        className={`relative rounded-[11px] border border-border/70  bg-card px-3 py-3 backdrop-blur-sm `}
         style={{
           borderColor: getCssVarColor(theme.color),
           backgroundImage: getNodeTypeBackgroundGradient(data.type),

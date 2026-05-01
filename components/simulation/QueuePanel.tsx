@@ -18,7 +18,7 @@ export function QueuePanel() {
 
   return (
     <Accordion type="single" collapsible>
-      <div className="bg-card rounded-xl p-4 border border-card-800 flex flex-col h-full overflow-hidden">
+      <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
         <AccordionItem value="queues" className="border-0">
           <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex items-center justify-between w-full pr-2">
@@ -27,7 +27,7 @@ export function QueuePanel() {
                 <h3 className="font-semibold text-primary text-sm">Queues</h3>
               </div>
 
-              <div className="text-xs font-mono bg-card-800 px-2 py-0.5 rounded text-primary border border-card-700">
+              <div className="text-xs font-mono bg-card-800/60 px-2 py-0.5 rounded text-primary border border-card-700/80 backdrop-blur-md">
                 Total: {totalWaiting}
               </div>
             </div>
@@ -38,7 +38,7 @@ export function QueuePanel() {
               {(["l1", "l2", "l3"] as const).map((level) => (
                 <div
                   key={level}
-                  className="flex flex-col bg-card rounded-lg border border-card-700/50 p-2 overflow-hidden"
+                  className="flex flex-col bg-card/60 rounded-lg border border-card-700/60 p-2 overflow-hidden backdrop-blur-md"
                 >
                   <div className="flex justify-between items-center mb-2 px-1">
                     <span className="text-[10px] font-bold text-primary uppercase tracking-wider">

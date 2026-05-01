@@ -126,7 +126,7 @@ export default function Home() {
             rightCollapsed ? "w-12" : "w-80",
           )}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-border p-1">
             {/* {!rightCollapsed && (
               <span className="text-sm font-semibold">Inspector</span>
             )} */}

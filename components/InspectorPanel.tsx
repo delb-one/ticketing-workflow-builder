@@ -74,7 +74,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-      <div className="sticky top-0   bg-card p-4 space-y-2">
+      <div className="sticky top-0 bg-card  space-y-2">
         <h2 className="font-semibold text-foreground">Node Inspector</h2>
 
         <div className="flex items-center gap-2 text-xs">
