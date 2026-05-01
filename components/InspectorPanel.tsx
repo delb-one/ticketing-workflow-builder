@@ -17,6 +17,7 @@ import {
 } from "./ui/select";
 import { Bell, GitBranch, UserCog } from "lucide-react";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
+import { Badge } from "./ui/badge";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -73,30 +74,25 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-     <div className="sticky top-0 border-b border-border bg-card p-4 space-y-2">
-  
-  <h2 className="font-semibold text-foreground">
-    Node Inspector
-  </h2>
+      <div className="sticky top-0   bg-card p-4 space-y-2">
+        <h2 className="font-semibold text-foreground">Node Inspector</h2>
 
-  <div className="flex items-center gap-2 text-xs">
-    
-    <span className="text-muted-foreground">
-      Type:
-    </span>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-muted-foreground">Type:</span>
 
-    <span
-      className="px-2 py-0.5 rounded-full text-[10px] uppercase font-semibold text-background"
-      style={{
-        backgroundColor: getNodeTypeColorVar(selectedNode.data.type),
-      }}
-    >
-      {selectedNode.data.type}
-    </span>
-
-  </div>
-
-</div>
+          <Badge
+            variant="outline"
+            className="text-[10px] uppercase font-semibold w-fit"
+            style={{
+              backgroundColor: `color-mix(in oklab, ${getNodeTypeColorVar(selectedNode.data.type)} 10%, transparent)`,
+              color: `color-mix(in oklab, ${getNodeTypeColorVar(selectedNode.data.type)} 50%, white)`,
+              border: `1px solid color-mix(in oklab, ${getNodeTypeColorVar(selectedNode.data.type)} 50%, transparent)`,
+            }}
+          >
+            {selectedNode.data.type}{" "}
+          </Badge>
+        </div>
+      </div>
 
       <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Card className="p-4 mb-4">

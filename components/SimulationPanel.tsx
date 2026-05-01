@@ -4,11 +4,9 @@ import { useWorkflowStore } from "@/lib/store";
 import type { SimulationEvent } from "@/lib/simulation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
-  ChevronsUpDown,
   Clock,
   GitBranch,
   Pause,
@@ -17,14 +15,12 @@ import {
 } from "lucide-react";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-import SimulationToolbar from "./simulation/SimulationToolbar";
-import { useState } from "react";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-import { Button } from "./ui/button";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 const getEventIcon = (eventType: SimulationEvent["type"]) => {
   if (eventType === "workflow.started") return Play;
@@ -66,61 +62,56 @@ const getEventText = (event: SimulationEvent): string => {
 
 export default function SimulationPanel() {
   const { simulationEvents } = useWorkflowStore();
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Accordion type="single" collapsible>
       <Card className="flex flex-col overflow-hidden bg-card-900 border-card-800 text-primary p-0 gap-0">
-        {/* HEADER */}
-        <div className="p-4 border-b border-card-800 flex items-center justify-between shrink-0">
-          <div className="flex gap-2 items-center">
-            <Terminal  className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Simulation Log</h3>
-          </div>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <ChevronsUpDown />
-            </Button>
-          </CollapsibleTrigger>
-        </div>
+        <AccordionItem value="simulation-log" className="border-0">
+          <AccordionTrigger className="p-4 border-b border-card-800 shrink-0 hover:no-underline">
+            <div className="flex gap-2 items-center">
+              <Terminal className="h-4 w-4 text-muted-foreground" />
+              <h3 className="font-semibold text-sm">Simulation Log</h3>
+            </div>
+          </AccordionTrigger>
 
-        <CollapsibleContent>
-          <div className="h-64">
-            <ScrollArea className="h-full p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="space-y-1.5 font-mono text-sm">
-                <AnimatePresence>
-                  {simulationEvents.map((event, index) => {
-                    const EventIcon = getEventIcon(event.type);
-                    return (
+          <AccordionContent>
+            <div className="h-64">
+              <ScrollArea className="h-full p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="space-y-1.5 font-mono text-sm">
+                  <AnimatePresence>
+                    {simulationEvents.map((event, index) => {
+                      const EventIcon = getEventIcon(event.type);
+                      return (
+                        <motion.div
+                          key={`${event.timestamp}-${event.type}-${index}`}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center gap-2 text-primary"
+                        >
+                          <EventIcon className="h-4 w-4 shrink-0 text-primary" />
+                          <span>{getEventText(event)}</span>
+                        </motion.div>
+                      );
+                    })}
+
+                    {simulationEvents.length === 0 && (
                       <motion.div
-                        key={`${event.timestamp}-${event.type}-${index}`}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         className="flex items-center gap-2 text-primary"
                       >
-                        <EventIcon className="h-4 w-4 shrink-0 text-primary" />
-                        <span>{getEventText(event)}</span>
+                        <Pause className="h-4 w-4" />
+                        <span>Idle</span>
                       </motion.div>
-                    );
-                  })}
-
-                  {simulationEvents.length === 0 && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center gap-2 text-primary"
-                    >
-                      <Pause className="h-4 w-4" />
-                      <span>Idle</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </ScrollArea>
-          </div>
-        </CollapsibleContent>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </ScrollArea>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
       </Card>
-    </Collapsible>
+    </Accordion>
   );
 }

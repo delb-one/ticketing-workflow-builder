@@ -11,7 +11,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { getNodeTypeColorVar } from "@/lib/colors/color-map";
+import { getNodeTypeColorVar, getNodeTypeIconGradient } from "@/lib/colors/color-map";
+import { Badge } from "./ui/badge";
 
 interface BlockLibraryProps {
   onBlockDrag: (
@@ -62,10 +63,10 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
                           className="p-2 flex items-center justify-center bg-transparent border-none shadow-none hover:bg-muted/60 rounded-md cursor-move"
                         >
                           <div
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-background"
-                            style={{ backgroundColor: blockColor }}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg "
+                            style={{ backgroundImage: getNodeTypeIconGradient(block.type) }}
                           >
-                            <Icon className="h-4 w-4 text-background" />
+                            <Icon className="h-4 w-4 text-primary" />
                           </div>
                         </Card>
                       </TooltipTrigger>
@@ -76,12 +77,16 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
                       >
                         <div className="flex flex-col gap-2">
                           {/* TYPE PILL */}
-                          <span
-                            className="px-2 py-0.5 rounded-full text-[10px] uppercase font-semibold text-background w-fit"
-                            style={{ backgroundColor: blockColor }}
+                          <Badge
+                            className="text-[10px] uppercase font-semibold w-fit border-0"
+                            style={{
+                              backgroundColor: `color-mix(in oklab, ${blockColor} 10%, transparent)`,
+                              color: `color-mix(in oklab, ${blockColor} 50%, white)`,
+                              border: `1px solid color-mix(in oklab, ${blockColor} 50%, transparent)`,
+                            }}
                           >
                             {block.type}
-                          </span>
+                          </Badge>
 
                           {/* DIVIDER */}
                           <div className="h-px w-full bg-border" />
