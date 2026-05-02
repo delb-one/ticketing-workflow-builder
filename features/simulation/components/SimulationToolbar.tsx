@@ -16,10 +16,10 @@ import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus, SlidersHorizontal, Settings } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 const DEFAULT_STEP_DELAY_MS = 900;

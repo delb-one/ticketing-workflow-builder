@@ -3,13 +3,13 @@
 import { useWorkflowStore } from "@/lib/store";
 import { Users, Briefcase, Settings2, Minus, Plus, Headphones, UserCog, Cpu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
+} from "@/components/ui/accordion";
 
 const levelIcons = {
   l1: Headphones,

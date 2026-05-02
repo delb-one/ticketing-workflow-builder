@@ -1,11 +1,10 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig } from "@/lib/simulation/types";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -14,10 +13,11 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "@/components/ui/select";
 import { Bell, GitBranch, UserCog } from "lucide-react";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
-import { Badge } from "./ui/badge";
+import { Badge } from "@/components/ui/badge";
+import { PropertyCard } from "@/components/molecules/PropertyCard";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -74,7 +74,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-      <div className="sticky top-0 bg-card  space-y-2">
+      <div className="sticky top-0 bg-card ml-4 mb-2 space-y-2">
         <h2 className="font-semibold text-foreground">Node Inspector</h2>
 
         <div className="flex items-center gap-2 text-xs">
@@ -95,32 +95,22 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
       </div>
 
       <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <Card className="p-4 mb-4">
-          <label className=" block text-sm font-semibold text-foreground">
-            Label
-          </label>
+        <PropertyCard label="Label">
           <Input
             value={selectedNode.data.label}
             onChange={(event) => handleLabelChange(event.target.value)}
             className="text-sm"
           />
-        </Card>
+        </PropertyCard>
 
-        <Card className="p-4 mb-4">
-          <label className="block text-sm font-semibold text-foreground">
-            Description
-          </label>
+        <PropertyCard label="Description">
           <p className="text-sm text-muted-foreground">
             {selectedNode.data.description ?? "No description available"}
           </p>
-        </Card>
+        </PropertyCard>
 
         {selectedNode.data.type === "decision" && (
-          <Card className="p-4 mb-4">
-            <label className="block text-sm font-semibold text-foreground">
-              Decision Type
-            </label>
-
+          <PropertyCard label="Decision Type">
             <Select
               value={
                 config?.nodeType === "decision"
@@ -142,22 +132,17 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Decision</SelectLabel>
-
                   <SelectItem value="manual">Boolean (Yes/No)</SelectItem>
-
                   <SelectItem value="rule-based">Custom Expression</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </Card>
+          </PropertyCard>
         )}
 
         {selectedNode.data.type === "automation" &&
           blockId?.includes("sla") && (
-            <Card className="p-4 mb-4">
-              <label className="mb-2 block text-sm font-semibold text-foreground">
-                SLA Duration (minutes)
-              </label>
+            <PropertyCard label="SLA Duration (minutes)">
               <Input
                 type="number"
                 value={
@@ -175,16 +160,12 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
                 min="1"
                 className="text-sm"
               />
-            </Card>
+            </PropertyCard>
           )}
 
         {selectedNode.data.type === "automation" &&
           blockId?.includes("assign") && (
-            <Card className="p-4 mb-4">
-              <label className="block text-sm font-semibold text-foreground">
-                Assign To
-              </label>
-
+            <PropertyCard label="Assign To">
               <Select
                 value={
                   config?.nodeType === "automation"
@@ -208,23 +189,18 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Automation</SelectLabel>
-
                     <SelectItem value="l1">L1 Technician</SelectItem>
                     <SelectItem value="l2">L2 Technician</SelectItem>
                     <SelectItem value="l3">L3 Specialist</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </Card>
+            </PropertyCard>
           )}
 
         {selectedNode.data.type === "automation" &&
           blockId?.includes("notify") && (
-            <Card className="p-4 mb-4">
-              <label className=" block text-sm font-semibold text-foreground">
-                Notification Channel
-              </label>
-
+            <PropertyCard label="Notification Channel">
               <Select
                 value={
                   config?.nodeType === "automation"
@@ -247,14 +223,13 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Notification</SelectLabel>
-
                     <SelectItem value="email">Email</SelectItem>
                     <SelectItem value="sms">SMS</SelectItem>
                     <SelectItem value="portal">Portal</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </Card>
+            </PropertyCard>
           )}
 
         {/* <Card className="p-3">

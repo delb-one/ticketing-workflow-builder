@@ -5,14 +5,14 @@ import { CustomNode, useWorkflowStore } from "@/lib/store";
 import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
 import { Edge } from "@xyflow/react";
 import { useRef, useState } from "react";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "@/components/molecules/theme-toggle";
 import { Download, Trash2, Upload } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
+} from "@/components/ui/tooltip";
 
 interface ToolbarProps {
   onImport?: () => void;

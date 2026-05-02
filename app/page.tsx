@@ -1,10 +1,9 @@
 "use client";
 
 import { ReactFlowProvider } from "@xyflow/react";
-import BlockLibrary from "@/components/BlockLibrary";
-import InspectorPanel from "@/components/InspectorPanel";
-import Toolbar from "@/components/Toolbar";
-import SimulationPanel from "@/components/SimulationPanel";
+import { BlockLibrary, InspectorPanel, Toolbar } from "@/features/workflow-editor";
+import { SimulationPanel } from "@/features/simulation";
+import { WorkflowEditorTemplate } from "@/components/templates/WorkflowEditorTemplate";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
 import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
 import dynamic from "next/dynamic";
@@ -24,10 +23,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/molecules/theme-toggle";
 import { Edge } from "@xyflow/react";
 
-const WorkflowCanvas = dynamic(() => import("@/components/WorkflowCanvas"), {
+const WorkflowCanvas = dynamic(() => import("@/features/workflow-editor/components/WorkflowCanvas"), {
   ssr: false,
 });
 
@@ -105,158 +104,91 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen ">
-      {/* <Toolbar /> */}
-
-      <div className="flex flex-1 overflow-hidden gap-4 p-4">
-        {/* Left Sidebar */}
-        <BlockLibrary onBlockDrag={() => {}} />
-
-        {/* Center Canvas */}
-        <div className="flex-1 flex flex-col rounded-lg shadow-sm border border-border overflow-hidden">
-          <ReactFlowProvider>
-            <WorkflowCanvas />
-          </ReactFlowProvider>
-        </div>
-
-        {/* Right Sidebar */}
-        <div
-          className={cn(
-            "flex flex-col gap-4 transition-all duration-300",
-            rightCollapsed ? "w-12" : "w-80",
-          )}
-        >
-          <div className="flex items-center justify-between border-b border-border p-1">
-            {/* {!rightCollapsed && (
-              <span className="text-sm font-semibold">Inspector</span>
-            )} */}
-
-            <TooltipProvider>
+    <WorkflowEditorTemplate
+      leftSidebar={<BlockLibrary onBlockDrag={() => { }} />}
+      canvas={
+        <ReactFlowProvider>
+          <WorkflowCanvas />
+        </ReactFlowProvider>
+      }
+      rightCollapsed={rightCollapsed}
+      onToggleRightSidebar={() => setRightCollapsed((p) => !p)}
+      rightSidebarHeaderActions={
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={handleImportWorkflow}
+          />
+          <TooltipProvider>
+            <div className="flex gap-1 shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-8"
-                    onClick={() => setRightCollapsed((p) => !p)}
+                    size="sm"
+                    onClick={handleExportWorkflow}
+                    disabled={isExporting || nodes.length === 0}
                   >
-                    {rightCollapsed ? (
-                      <PanelLeftOpen className="h-4 w-4 rotate-180" />
-                    ) : (
-                      <PanelLeftClose className="h-4 w-4 rotate-180" />
-                    )}
+                    <Download className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-
-                <TooltipContent
-                  side="left"
-                  className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border"
-                >
-                  {rightCollapsed ? "Show inspector" : "Hide inspector"}
+                <TooltipContent className="text-xs bg-background text-primary border border-border">
+                  Export JSON
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
-            {!rightCollapsed && (
-              <div className="flex items-center gap-2 flex-nowrap min-w-0">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/json,.json"
-                  className="hidden"
-                  onChange={handleImportWorkflow}
-                />
 
-                {/* <select
-                  value={selectedTemplateId}
-                  onChange={(e) => {
-                    const nextTemplateId = e.target.value;
-                    setSelectedTemplateId(nextTemplateId);
-                    loadTemplate(nextTemplateId);
-                  }}
-                  className="h-9 w-45 shrink-0 rounded-md border border-border bg-background px-3 text-sm"
-                  title="Select and load a workflow template"
-                >
-                  <option value="" disabled>
-                    Select Template
-                  </option>
-                  {WORKFLOW_TEMPLATES.map((template) => (
-                    <option key={template.id} value={template.id}>
-                      {template.name}
-                    </option>
-                  ))}
-                </select> */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isExporting}
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs bg-background text-primary border border-border">
+                  Import JSON
+                </TooltipContent>
+              </Tooltip>
 
-                {/* ACTIONS */}
-                <TooltipProvider>
-                  <div className="flex gap-1 shrink-0">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleExportWorkflow}
-                          disabled={isExporting || nodes.length === 0}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs bg-background text-primary border border-border">
-                        Export JSON
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isExporting}
-                        >
-                          <Upload className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs bg-background text-primary border border-border">
-                        Import JSON
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => clearWorkflow()}
-                          disabled={nodes.length === 0}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs bg-background text-primary border border-border">
-                        Clear workflow
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TooltipProvider>
-                <ThemeToggle />
-              </div>
-            )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => clearWorkflow()}
+                    disabled={nodes.length === 0}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs bg-background text-primary border border-border">
+                  Clear workflow
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+          <ThemeToggle />
+        </>
+      }
+      rightSidebar={
+        <>
+          <div className="flex-1 overflow-hidden">
+            <InspectorPanel selectedNode={selectedNodeData} />
           </div>
-          {!rightCollapsed && (
-            <>
-              {/* Inspector */}
-              <div className="flex-1 overflow-hidden">
-                <InspectorPanel selectedNode={selectedNodeData} />
-              </div>
-
-              {/* Simulation Controls */}
-              <div className="p-2">
-                <SimulationPanel />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+          <div className="p-2">
+            <SimulationPanel />
+          </div>
+        </>
+      }
+    // Passing the toggle button as part of the header logic in the template
+    // For now, I'll update the template to accept the toggle button separately or handle it better
+    />
   );
 }
+

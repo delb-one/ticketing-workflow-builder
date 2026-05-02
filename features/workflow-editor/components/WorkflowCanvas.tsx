@@ -25,10 +25,12 @@ import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
 import { useTheme } from "next-themes";
-import { QueuePanel } from "./simulation/QueuePanel";
-import { AgentPanel } from "./simulation/AgentPanel";
-import { TicketMonitor } from "./simulation/TicketMonitor";
-import SimulationToolbar from "./simulation/SimulationToolbar";
+import {
+  QueuePanel,
+  AgentPanel,
+  TicketMonitor,
+  SimulationToolbar,
+} from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 
 const nodeTypes: NodeTypes = {

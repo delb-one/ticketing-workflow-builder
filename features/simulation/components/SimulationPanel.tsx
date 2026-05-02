@@ -13,14 +13,14 @@ import {
   Play,
   Terminal,
 } from "lucide-react";
-import { Card } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "./ui/accordion";
+} from "@/components/ui/accordion";
 
 const getEventIcon = (eventType: SimulationEvent["type"]) => {
   if (eventType === "workflow.started") return Play;
