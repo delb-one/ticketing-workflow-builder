@@ -6,10 +6,6 @@ import {
   Edge,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
-  applyNodeChanges,
-  applyEdgeChanges,
   Connection,
   EdgeChange,
   NodeChange,
@@ -82,10 +78,11 @@ export default function WorkflowCanvas({
   onNodeSelect,
 }: WorkflowCanvasProps) {
   const {
-    nodes: storeNodes,
-    edges: storeEdges,
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
     addNode,
-    setNodes: setStoreNodes,
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
     selectedNode,
@@ -94,17 +91,6 @@ export default function WorkflowCanvas({
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const { screenToFlowPosition } = useReactFlow();
-
-  const [nodes, setNodes] = useNodesState<CustomNode>(storeNodes);
-  const [edges, setCanvasEdges] = useEdgesState<Edge>(storeEdges);
-
-  useEffect(() => {
-    setNodes(storeNodes);
-  }, [storeNodes, setNodes]);
-
-  useEffect(() => {
-    setCanvasEdges(storeEdges);
-  }, [storeEdges, setCanvasEdges]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -118,31 +104,6 @@ export default function WorkflowCanvas({
     [addStoreEdge],
   );
 
-  const onNodesChange = useCallback(
-    (changes: NodeChange<CustomNode>[]) => {
-      setNodes((currentNodes) => {
-        const nextNodes = applyNodeChanges(
-          changes,
-          currentNodes,
-        ) as CustomNode[];
-        setStoreNodes(nextNodes);
-        return nextNodes;
-      });
-    },
-    [setNodes, setStoreNodes],
-  );
-
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange<Edge>[]) => {
-      setCanvasEdges((currentEdges) => {
-        const nextEdges = applyEdgeChanges(changes, currentEdges);
-        setStoreEdges(nextEdges);
-        return nextEdges;
-      });
-    },
-    [setCanvasEdges, setStoreEdges],
-  );
-
   const onEdgeDoubleClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
       const currentLabel = typeof edge.label === "string" ? edge.label : "";
@@ -154,7 +115,7 @@ export default function WorkflowCanvas({
       if (nextLabel === null) return;
 
       const trimmedLabel = nextLabel.trim();
-      const updatedEdges = storeEdges.map((currentEdge) =>
+      const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
             ...currentEdge,
@@ -165,15 +126,15 @@ export default function WorkflowCanvas({
 
       setStoreEdges(updatedEdges);
     },
-    [setStoreEdges, storeEdges],
+    [setStoreEdges, edges],
   );
 
   const onEdgesDelete = useCallback(
     (deletedEdges: Edge[]) => {
       const deletedIds = new Set(deletedEdges.map((edge) => edge.id));
-      setStoreEdges(storeEdges.filter((edge) => !deletedIds.has(edge.id)));
+      setStoreEdges(edges.filter((edge) => !deletedIds.has(edge.id)));
     },
-    [setStoreEdges, storeEdges],
+    [setStoreEdges, edges],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -219,7 +180,7 @@ export default function WorkflowCanvas({
     [addNode, screenToFlowPosition],
   );
 
-  const selectedNodeData = storeNodes.find((node) => node.id === selectedNode);
+  const selectedNodeData = nodes.find((node) => node.id === selectedNode);
 
   useEffect(() => {
     onNodeSelect?.(selectedNodeData ?? null);

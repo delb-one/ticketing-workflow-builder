@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import type { Edge, Node } from '@xyflow/react';
 import type {
   NodeConfig,
   NodeType,
@@ -9,6 +8,14 @@ import type {
   Agent,
   QueueState,
 } from '@/lib/simulation/types';
+import {
+  applyNodeChanges,
+  applyEdgeChanges,
+  type Edge,
+  type Node,
+  type NodeChange,
+  type EdgeChange,
+} from '@xyflow/react';
 
 export interface SimulationConfig {
   ticketCount: number;
@@ -75,9 +82,11 @@ export interface WorkflowStore {
 
   clearWorkflow: () => void;
   loadWorkflow: (nodes: CustomNode[], edges: Edge[]) => void;
+  onNodesChange: (changes: NodeChange<CustomNode>[]) => void;
+  onEdgesChange: (changes: EdgeChange[]) => void;
 }
 
-export const useWorkflowStore = create<WorkflowStore>((set) => ({
+export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
   selectedNode: null,
@@ -216,4 +225,16 @@ export const useWorkflowStore = create<WorkflowStore>((set) => ({
       simulationEvents: [],
       simulationLog: [],
     }),
+
+  onNodesChange: (changes) => {
+    set({
+      nodes: applyNodeChanges(changes, get().nodes) as CustomNode[],
+    });
+  },
+
+  onEdgesChange: (changes) => {
+    set({
+      edges: applyEdgeChanges(changes, get().edges),
+    });
+  },
 }));
