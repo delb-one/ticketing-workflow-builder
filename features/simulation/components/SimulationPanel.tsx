@@ -69,8 +69,8 @@ export default function SimulationPanel() {
         <AccordionItem value="simulation-log" className="border-0">
           <AccordionTrigger className="p-4 border-b border-card-800 shrink-0 hover:no-underline">
             <div className="flex gap-2 items-center">
-              <Terminal className="h-4 w-4 text-muted-foreground" />
-              <h3 className="font-semibold text-sm">Simulation Log</h3>
+              <Terminal className="h-4 w-4 text-primary" />
+              {/* <h3 className="font-semibold text-sm">Simulation Log</h3> */}
             </div>
           </AccordionTrigger>
 

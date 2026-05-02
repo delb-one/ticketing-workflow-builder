@@ -9,7 +9,7 @@ interface PropertyCardProps {
 export function PropertyCard({ label, children }: PropertyCardProps) {
   return (
     <Card className="p-4 mb-4">
-      <label className="block text-sm font-semibold text-foreground mb-2">
+      <label className="block text-sm font-semibold text-foreground">
         {label}
       </label>
       {children}

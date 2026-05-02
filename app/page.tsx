@@ -13,6 +13,7 @@ import {
   Download,
   PanelLeftClose,
   PanelLeftOpen,
+  Terminal,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -181,8 +182,16 @@ export default function Home() {
           <div className="flex-1 overflow-hidden">
             <InspectorPanel selectedNode={selectedNodeData} />
           </div>
-          <div className="p-2">
+          <div className="px-2 pb-4">
             <SimulationPanel />
+          </div>
+        </>
+      }
+      rightSidebarCollapsedContent={
+        <>
+          <div className="flex-1" />
+          <div className="px-2 py-4 text-muted-foreground transition-colors border border-border rounded-lg bg-background">
+            <Terminal className="h-4 w-4 text-primary" />
           </div>
         </>
       }
@@ -191,4 +200,3 @@ export default function Home() {
     />
   );
 }
-

@@ -12,6 +12,7 @@ interface WorkflowEditorTemplateProps {
   rightCollapsed: boolean;
   onToggleRightSidebar: () => void;
   rightSidebarHeaderActions?: React.ReactNode;
+  rightSidebarCollapsedContent?: React.ReactNode;
 }
 
 export function WorkflowEditorTemplate({
@@ -21,6 +22,7 @@ export function WorkflowEditorTemplate({
   rightCollapsed,
   onToggleRightSidebar,
   rightSidebarHeaderActions,
+  rightSidebarCollapsedContent,
 }: WorkflowEditorTemplateProps) {
   return (
     <div className="flex flex-col h-screen">
@@ -36,8 +38,8 @@ export function WorkflowEditorTemplate({
         {/* Right Sidebar */}
         <aside
           className={cn(
-            "flex flex-col gap-4 transition-all duration-300 bg-card rounded-lg border border-border overflow-hidden",
-            rightCollapsed ? "w-12" : "w-80"
+            "flex flex-col transition-all duration-300 bg-card rounded-lg border border-border overflow-hidden",
+            rightCollapsed ? "w-12 gap-0" : "w-80 gap-4"
           )}
         >
           <div className="flex items-center justify-between border-b border-border p-1 bg-muted/20">
@@ -70,9 +72,13 @@ export function WorkflowEditorTemplate({
             )}
           </div>
 
-          {!rightCollapsed && (
+          {!rightCollapsed ? (
             <div className="flex-1 flex flex-col overflow-hidden">
               {rightSidebar}
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center py-4 gap-4 overflow-hidden">
+              {rightSidebarCollapsedContent}
             </div>
           )}
         </aside>
