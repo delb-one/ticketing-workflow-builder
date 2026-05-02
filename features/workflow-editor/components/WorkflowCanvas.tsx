@@ -32,9 +32,23 @@ import {
   SimulationToolbar,
 } from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
+import Draggable from "react-draggable";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
+};
+
+const DraggablePanel = ({ children }: { children: React.ReactNode }) => {
+  const nodeRef = React.useRef(null);
+  return (
+    <Draggable
+      nodeRef={nodeRef}
+      handle=".panel-drag-handle"
+      bounds=".react-flow"
+    >
+      <div ref={nodeRef}>{children}</div>
+    </Draggable>
+  );
 };
 
 interface WorkflowCanvasProps {
@@ -64,7 +78,9 @@ const isNodeType = (value: unknown): value is NodeType =>
     "event",
   ].includes(value);
 
-export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
+export default function WorkflowCanvas({
+  onNodeSelect,
+}: WorkflowCanvasProps) {
   const {
     nodes: storeNodes,
     edges: storeEdges,
@@ -141,9 +157,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = storeEdges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-              ...currentEdge,
-              label: trimmedLabel || undefined,
-            }
+            ...currentEdge,
+            label: trimmedLabel || undefined,
+          }
           : currentEdge,
       );
 
@@ -246,27 +262,46 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         <>
           <Panel
             position="top-left"
-            className="w-72 pointer-events-auto "
+            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <QueuePanel />
+            <div className="pointer-events-auto">
+              <DraggablePanel>
+                <QueuePanel />
+              </DraggablePanel>
+            </div>
           </Panel>
+
           <Panel
-            position="top-center"
-            className="pointer-events-auto "
+            position="top-left"
+            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <SimulationToolbar />
+            <div className="pointer-events-auto ml-[350px]">
+              <DraggablePanel>
+                <SimulationToolbar />
+              </DraggablePanel>
+            </div>
           </Panel>
+
           <Panel
-            position="top-right"
-            className="w-72 pointer-events-auto "
+            position="top-left"
+            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <AgentPanel />
+            <div className="pointer-events-auto ml-[800px]">
+              <DraggablePanel>
+                <AgentPanel />
+              </DraggablePanel>
+            </div>
           </Panel>
+
           <Panel
-            position="bottom-center"
-            className="w-200 max-w-[70%] max-h-[40%] pointer-events-auto mb-4 "
+            position="top-left"
+            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <TicketMonitor />
+            <div className="pointer-events-auto mt-[500px] ml-[150px] max-w-[90%] max-h-[40%]">
+              <DraggablePanel>
+                <TicketMonitor />
+              </DraggablePanel>
+            </div>
           </Panel>
         </>
       </ReactFlow>

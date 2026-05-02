@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflowStore } from "@/lib/store";
-import { Activity } from "lucide-react";
+import { Activity, GripHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -22,10 +22,13 @@ export function TicketMonitor() {
   };
 
   return (
-    <Accordion type="single" collapsible>
-      <div className="bg-card/70 rounded-xl border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+    <Accordion type="single" className="w-full pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
+      <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+        <div className=" flex justify-center pb-2  mb-1">
+          <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
+        </div>
         <AccordionItem value="ticket-monitor" className="border-0">
-          <AccordionTrigger className="p-4 border-b border-card-800 hover:no-underline">
+          <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex gap-2 items-center">
               <Activity className="w-4 h-4 text-primary" />
               <h3 className="font-semibold text-primary text-sm">Ticket Monitor</h3>
@@ -33,7 +36,7 @@ export function TicketMonitor() {
           </AccordionTrigger>
 
           <AccordionContent className="flex-1 overflow-hidden pb-0">
-            <ScrollArea className="h-75">
+            <ScrollArea className="h-[250px] w-[800px] max-w-full">
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-primary bg-card sticky top-0 z-10 ">
                   <tr>
@@ -90,6 +93,7 @@ export function TicketMonitor() {
             </ScrollArea>
           </AccordionContent>
         </AccordionItem>
+
       </div>
     </Accordion>
   );

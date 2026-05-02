@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflowStore } from "@/lib/store";
-import { Users, Briefcase, Settings2, Minus, Plus, Headphones, UserCog, Cpu } from "lucide-react";
+import { Users, Briefcase, Settings2, Minus, Plus, Headphones, UserCog, Cpu, GripHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +21,11 @@ export function AgentPanel() {
   const agents = engineState?.agents ?? [];
 
   return (
-    <Accordion type="single" collapsible >
+    <Accordion type="single" className="w-full pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible >
       <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+        <div className=" flex justify-center pb-2 mb-1">
+          <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
+        </div>
         <AccordionItem value="agent-pool" className="border-0">
           <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex gap-2 items-center">

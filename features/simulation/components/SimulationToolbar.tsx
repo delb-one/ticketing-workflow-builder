@@ -15,7 +15,7 @@ import type {
 import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus, SlidersHorizontal, Settings } from "lucide-react";
+import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus, SlidersHorizontal, Settings, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -273,9 +273,12 @@ export default function SimulationToolbar() {
       <Accordion
         type="single"
         collapsible
-        className="w-full pointer-events-auto"
+        className="w-full pointer-events-auto panel-drag-handle  active:cursor-grabbing"
       >
         <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+          <div className="flex justify-center pb-2 mb-1">
+            <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
+          </div>
           <AccordionItem
             value="controls"
             className="border-0"

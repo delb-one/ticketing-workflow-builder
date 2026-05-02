@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflowStore } from "@/lib/store";
-import { ListFilter } from "lucide-react";
+import { ListFilter, GripHorizontal } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Accordion,
@@ -17,8 +17,11 @@ export function QueuePanel() {
   const totalWaiting = queues.l1.length + queues.l2.length + queues.l3.length;
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" className="w-full pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
       <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
+        <div className="flex justify-center pb-2 mb-1">
+          <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
+        </div>
         <AccordionItem value="queues" className="border-0">
           <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex items-center justify-between w-full pr-2">
@@ -27,13 +30,14 @@ export function QueuePanel() {
                 <h3 className="font-semibold text-primary text-sm">Queues</h3>
               </div>
 
-              <div className="text-xs font-mono bg-card-800/60 px-2 py-0.5 rounded text-primary border border-card-700/80 backdrop-blur-md">
-                Total: {totalWaiting}
-              </div>
+
             </div>
           </AccordionTrigger>
 
           <AccordionContent className="pb-0">
+            <div className="w-fit text-xs mb-2 font-mono bg-card-800/60 px-2 py-0.5  text-primary  backdrop-blur-md">
+              Total: {totalWaiting}
+            </div>
             <div className="flex-1 grid grid-cols-3 gap-2 overflow-hidden">
               {(["l1", "l2", "l3"] as const).map((level) => (
                 <div
