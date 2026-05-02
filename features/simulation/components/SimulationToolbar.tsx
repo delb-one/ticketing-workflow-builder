@@ -273,7 +273,7 @@ export default function SimulationToolbar() {
       <Accordion
         type="single"
         collapsible
-        className="w-full pointer-events-auto panel-drag-handle  active:cursor-grabbing"
+        className=" pointer-events-auto panel-drag-handle active:cursor-grabbing"
       >
         <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
           <div className="flex justify-center pb-2 mb-1">
@@ -281,12 +281,12 @@ export default function SimulationToolbar() {
           </div>
           <AccordionItem
             value="controls"
-            className="border-0"
+            className="border-0 flex flex-col h-full"
           >
             <AccordionTrigger className="py-0 mb-4 hover:no-underline">
-              <div className="flex items-center gap-2 flex-1">
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                <span>Simulation Controls</span>
+              <div className="flex items-center gap-2 ">
+                <Settings className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-primary text-sm">Simulation Controls</h3>
               </div>
             </AccordionTrigger>
 

@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const levelIcons = {
   l1: Headphones,
@@ -21,12 +22,16 @@ export function AgentPanel() {
   const agents = engineState?.agents ?? [];
 
   return (
-    <Accordion type="single" className="w-full pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible >
+    <Accordion
+      type="single"
+      collapsible
+      className=" h-full pointer-events-auto panel-drag-handle active:cursor-grabbing"
+    >
       <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
         <div className=" flex justify-center pb-2 mb-1">
           <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
         </div>
-        <AccordionItem value="agent-pool" className="border-0">
+        <AccordionItem value="agent-pool" className="border-0 flex flex-col h-full">
           <AccordionTrigger className="py-0 mb-4 hover:no-underline">
             <div className="flex gap-2 items-center">
               <Users className="w-4 h-4 text-primary" />
@@ -105,46 +110,45 @@ export function AgentPanel() {
                 })}
               </div>
             ) : (
-              <div className="overflow-y-auto space-y-2 flex-1 pr-1 custom-scrollbar">
-                {agents.length === 0 ? (
-                  <div className="text-xs text-primary-500 text-center py-4">
-                    No agents active
-                  </div>
-                ) : (
-                  agents.map((agent) => (
-                    <div
-                      key={agent.id}
-                      className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md"
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-primary-300">
-                          {agent.level.toUpperCase()} Agent
-                        </span>
-                        <Badge
-                          variant={
-                            agent.status === "available" ? "secondary" : "default"
-                          }
-                          className={
-                            agent.status === "available"
-                              ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20"
-                          }
-                        >
-                          {agent.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-primary-400">
-                        <Briefcase className="w-3 h-3" />
-                        <span className="truncate">
-                          {agent.currentTicketId
-                            ? agent.currentTicketId.replace("ticket-", "")
-                            : "Idle"}
-                        </span>
-                      </div>
+              <ScrollArea className="h-[300px] pr-2">
+                <div className="space-y-2">
+                  {agents.length === 0 ? (
+                    <div className="text-xs text-primary-500 text-center py-4">
+                      No agents active
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    agents.map((agent) => (
+                      <div
+                        key={agent.id}
+                        className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs font-semibold text-primary-300">
+                            {agent.level.toUpperCase()} Agent
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full ${agent.status === "available"
+                                ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                                : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)] animate-pulse"
+                                }`}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs text-primary-400">
+                          <Briefcase className="w-3 h-3" />
+                          <span className="truncate">
+                            {agent.currentTicketId
+                              ? agent.currentTicketId.replace("ticket-", "")
+                              : "Idle"}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
             )}
           </AccordionContent>
         </AccordionItem>

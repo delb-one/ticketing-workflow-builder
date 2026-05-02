@@ -15,11 +15,13 @@ import {
   BackgroundVariant,
   useReactFlow,
   Panel,
+  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
+import LabelEdge from "./LabelEdge";
 import { useTheme } from "next-themes";
 import {
   QueuePanel,
@@ -32,6 +34,10 @@ import Draggable from "react-draggable";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
+};
+
+const edgeTypes = {
+  label: LabelEdge,
 };
 
 const DraggablePanel = ({ children }: { children: React.ReactNode }) => {
@@ -83,6 +89,7 @@ export default function WorkflowCanvas({
     onNodesChange,
     onEdgesChange,
     addNode,
+    setSelectedNode,
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
     selectedNode,
@@ -92,16 +99,45 @@ export default function WorkflowCanvas({
 
   const { screenToFlowPosition } = useReactFlow();
 
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null);
+  }, [setSelectedNode]);
+
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: CustomNode) => {
+      setSelectedNode(node.id);
+      // Clear edge selection when a node is selected
+      setStoreEdges(edges.map((e) => ({ ...e, selected: false })));
+    },
+    [setSelectedNode, setStoreEdges, edges],
+  );
+
+  const onEdgeClick = useCallback(() => {
+    // Clear node selection when an edge is selected
+    setSelectedNode(null);
+  }, [setSelectedNode]);
+
   const onConnect = useCallback(
     (connection: Connection) => {
+      const sourceNode = nodes.find((n) => n.id === connection.source);
+      const color = sourceNode
+        ? getNodeTypeColorVar(sourceNode.data.type)
+        : "var(--primary)";
+
       const edge: Edge = {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
         source: connection.source || "",
         target: connection.target || "",
+        style: {
+          stroke: color,
+          strokeWidth: 1,
+        },
+        animated: true,
+
       };
       addStoreEdge(edge);
     },
-    [addStoreEdge],
+    [addStoreEdge, nodes],
   );
 
   const onEdgeDoubleClick = useCallback(
@@ -197,13 +233,35 @@ export default function WorkflowCanvas({
           ...node,
           selected: node.id === selectedNode,
         }))}
-        edges={edges}
+        edges={edges.map((edge) => {
+          const sourceNode = nodes.find((n) => n.id === edge.source);
+          const color = sourceNode
+            ? getNodeTypeColorVar(sourceNode.data.type)
+            : "var(--primary)";
+
+          const isSelected = edge.selected;
+
+          return {
+            ...edge,
+            type: "label",
+            animated: edge.animated ?? true,
+            style: {
+              ...edge.style,
+              stroke: isSelected ? "var(--primary)" : color,
+              strokeWidth: isSelected ? 3 : 1,
+            },
+          };
+        })}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
+        onPaneClick={onPaneClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
         onEdgesDelete={onEdgesDelete}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         connectionMode={ConnectionMode.Strict}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView

@@ -17,8 +17,8 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const { data, selected, id, isConnecting } = props;
   const activeTicketCount = engineState
     ? Object.values(engineState.runtimes).filter(
-        (r) => r.currentNodeId === id && !r.completed,
-      ).length
+      (r) => r.currentNodeId === id && !r.completed,
+    ).length
     : 0;
   const isActive = activeTicketCount > 0;
   const theme = TYPE_THEME_MAP[data.type];
@@ -74,24 +74,28 @@ export default function CanvasNode(props: CanvasNodeProps) {
         )}
 
         {activeTicketCount > 0 && (
-         <div className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-white shadow-md ring-2 ring-background">
-  🎫 {activeTicketCount}
-</div>
+          <div className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-bold text-white shadow-md ring-2 ring-background">
+            🎫 {activeTicketCount}
+          </div>
         )}
       </div>
-
-      <Handle
-        type="target"
-        position={Position.Top}
-        className={`-top-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! `}
-        style={{ backgroundColor: getCssVarColor(theme.handle) }}
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className={`-bottom-1.5! h-3! w-3! border-2! border-card! transition-transform group-hover:scale-110! `}
-        style={{ backgroundColor: getCssVarColor(theme.handle) }}
-      />
+      { }
+      {data.type !== "start" && (
+        <Handle
+          type="target"
+          position={Position.Top}
+        // className={`-top-1! h-2! w-2!   `}
+        // style={{ backgroundColor: getCssVarColor(theme.handle) }}
+        />
+      )}
+      {data.type !== "end" && (
+        <Handle
+          type="source"
+          position={Position.Bottom}
+        // className={`-bottom-1! h-2! w-2! `}
+        // style={{ backgroundColor: getCssVarColor(theme.handle) }}
+        />
+      )}
     </motion.div>
   );
 }

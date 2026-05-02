@@ -22,7 +22,8 @@ export function TicketMonitor() {
   };
 
   return (
-    <Accordion type="single" className="w-full pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
+    <Accordion type="single" className=" pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
+
       <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
         <div className=" flex justify-center pb-2  mb-1">
           <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
