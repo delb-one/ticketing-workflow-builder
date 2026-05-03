@@ -131,6 +131,8 @@ export class SimulationEngine {
   }
 
   step(): void {
+    const dequeuedThisStep = new Set<string>();
+
     // 1. Scheduler: Assign tickets from queues to available agents
     for (const agent of this.agents) {
       if (agent.status === "available") {
@@ -145,8 +147,15 @@ export class SimulationEngine {
             runtime.ticket.assignedAgent = agent.id;
             runtime.ticket.state = "assigned";
             runtime.ticket.queue = undefined;
+            const nextNode = runtime.currentNodeId
+              ? this.resolveNextNode(runtime.currentNodeId)
+              : undefined;
+            if (nextNode) {
+              runtime.currentNodeId = nextNode.id;
+            }
             runtime.paused = false; // Resume execution now that we have an agent
             runtime.pausedAt = null;
+            dequeuedThisStep.add(ticketId);
             this.emit({ type: "ticket.dequeued", ticketId, timestamp: Date.now(), payload: { queue: agent.level } });
             this.emit({ type: "agent.assigned", ticketId, timestamp: Date.now(), payload: { agentId: agent.id } });
           }
@@ -157,7 +166,7 @@ export class SimulationEngine {
     // 2. Execution: Execute node for each active runtime
     const activeTicketIds = Object.keys(this.runtimes).filter(id => {
       const rt = this.runtimes[id];
-      return !rt.completed && !rt.paused && rt.currentNodeId;
+      return !rt.completed && !rt.paused && rt.currentNodeId && !dequeuedThisStep.has(id);
     });
 
     for (const ticketId of activeTicketIds) {
@@ -249,6 +258,7 @@ export class SimulationEngine {
       runtime.paused = true; // Pause until an agent picks it up
       runtime.pausedAt = new Date().toISOString();
       this.emit({ type: "ticket.queued", ticketId, timestamp: Date.now(), payload: { queue: result.enqueueTo } });
+      return;
     }
 
     if (result.requiresInput) {

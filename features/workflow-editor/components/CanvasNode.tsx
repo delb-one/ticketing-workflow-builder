@@ -11,15 +11,22 @@ import {
   getNodeTypeBackgroundGradient,
   getNodeTypeIconGradient,
 } from "@/lib/colors/color-map";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function CanvasNode(props: CanvasNodeProps) {
   const { setSelectedNode, engineState } = useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
-  const activeTicketCount = engineState
+  const activeTickets = engineState
     ? Object.values(engineState.runtimes).filter(
       (r) => r.currentNodeId === id && !r.completed,
-    ).length
-    : 0;
+    )
+    : [];
+  const activeTicketCount = activeTickets.length;
   const isActive = activeTicketCount > 0;
   const theme = TYPE_THEME_MAP[data.type];
   const blockId = data.blockId ?? data.id;
@@ -30,7 +37,10 @@ export default function CanvasNode(props: CanvasNodeProps) {
     : TYPE_LABEL_MAP[data.type];
 
   return (
-    <motion.div
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div
       initial={{ scale: 0.92, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
@@ -79,7 +89,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
           </div>
         )}
       </div>
-      { }
+      {}
       {data.type !== "start" && (
         <Handle
           type="target"
@@ -97,5 +107,23 @@ export default function CanvasNode(props: CanvasNodeProps) {
         />
       )}
     </motion.div>
+        </TooltipTrigger>
+        {isActive && (
+          <TooltipContent
+            side="top"
+            className="max-w-64 text-xs bg-background text-primary border border-border"
+          >
+            <div className="font-semibold mb-1">Tickets in this node</div>
+            <div className="space-y-1">
+              {activeTickets.map((runtime) => (
+                <div key={runtime.ticket.id} className="font-mono text-[11px]">
+                  {runtime.ticket.id} ({runtime.ticket.state})
+                </div>
+              ))}
+            </div>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
   );
 }

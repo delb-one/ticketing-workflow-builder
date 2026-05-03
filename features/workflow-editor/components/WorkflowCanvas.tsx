@@ -40,8 +40,6 @@ const edgeTypes = {
   label: LabelEdge,
 };
 
-
-
 type Props = {
   children: React.ReactNode;
   initial?: { x: number; y: number };
@@ -56,14 +54,15 @@ const DraggablePanel = ({ children, initial }: Props) => {
       handle=".panel-drag-handle"
       defaultPosition={initial}
     >
-      <div ref={nodeRef} className="absolute pointer-events-auto z-50 w-fit h-fit">
+      <div
+        ref={nodeRef}
+        className="absolute pointer-events-auto z-50 w-fit h-fit"
+      >
         {children}
       </div>
     </Draggable>
   );
 };
-
-
 
 interface WorkflowCanvasProps {
   onNodeSelect?: (node: CustomNode | null) => void;
@@ -291,25 +290,23 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           maskColor="rgba(0, 0, 0, 0.1)"
         />
 
-       <div className="absolute inset-0 pointer-events-none z-10">
-  
-  <DraggablePanel initial={{ x: 16, y: 16 }}>
-    <QueuePanel />
-  </DraggablePanel>
+        <div className="absolute inset-0 pointer-events-none z-10">
+          <DraggablePanel initial={{ x: 16, y: 16 }}>
+            <QueuePanel />
+          </DraggablePanel>
 
-  <DraggablePanel initial={{ x: 350, y: 16 }}>
-    <SimulationToolbar />
-  </DraggablePanel>
+          <DraggablePanel initial={{ x: 350, y: 16 }}>
+            <SimulationToolbar />
+          </DraggablePanel>
 
-  <DraggablePanel initial={{ x: 800, y: 16 }}>
-    <AgentPanel />
-  </DraggablePanel>
+          <DraggablePanel initial={{ x: 800, y: 16 }}>
+            <AgentPanel />
+          </DraggablePanel>
 
-  <DraggablePanel initial={{ x: 150, y: 500 }}>
-    <TicketMonitor />
-  </DraggablePanel>
-
-</div>
+          <DraggablePanel initial={{ x: 150, y: 500 }}>
+            <TicketMonitor />
+          </DraggablePanel>
+        </div>
       </ReactFlow>
     </div>
   );
