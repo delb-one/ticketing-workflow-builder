@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Card } from "@/components/ui/card";
 
 export function QueuePanel() {
   const { engineState } = useWorkflowStore();
@@ -18,30 +19,32 @@ export function QueuePanel() {
   const totalWaiting = queues.l1.length + queues.l2.length + queues.l3.length;
 
   return (
-    <Accordion type="single" className=" pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
-      <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
-        <div className="flex justify-center pb-2 mb-1">
-          <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
-        </div>
-        <AccordionItem value="queues" className="border-0">
-          <AccordionTrigger className="py-0 mb-4 hover:no-underline">
-            <div className="flex items-center justify-between w-full pr-2">
-              <div className="flex items-center gap-2">
-                <ListFilter className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-primary text-sm">Queues</h3>
-                <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-[20px] flex items-center justify-center rounded-full"
-                >
-                  {totalWaiting}
-                </Badge>
-              </div>
-
-
+    <Accordion
+      type="single"
+      className=" h-full pointer-events-auto  active:cursor-grabbing"
+      collapsible
+    >
+      <Card className="w-50 panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
+        <AccordionItem value="queues" className=" flex flex-col h-full">
+          <div className="flex justify-center bg-secondary/50">
+            <GripHorizontal className="w-4 h-4 text-primary/70" />
+          </div>
+          <AccordionTrigger
+            value="queues"
+            className="p-4  shrink-0 hover:no-underline"
+          >
+            <div className="flex items-center gap-2">
+              <ListFilter className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-primary text-sm">Queues</h3>
+              <Badge
+                variant="secondary"
+                className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-[20px] flex items-center justify-center rounded-full"
+              >
+                {totalWaiting}
+              </Badge>
             </div>
           </AccordionTrigger>
-
-          <AccordionContent className="pb-0">
+          <AccordionContent className="p-2">
             <div className="flex-1 grid grid-cols-3 gap-2 overflow-hidden">
               {(["l1", "l2", "l3"] as const).map((level) => (
                 <div
@@ -65,7 +68,7 @@ export function QueuePanel() {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ duration: 0.2 }}
-                          className="text-[10px] font-mono p-1.5 rounded bg-card-700/50 border border-card-600/30 text-primary-300 truncate"
+                          className="text-[10px] font-mono  bg-card-700/50  text-primary-300 truncate"
                         >
                           {ticketId}
                         </motion.div>
@@ -77,7 +80,7 @@ export function QueuePanel() {
             </div>
           </AccordionContent>
         </AccordionItem>
-      </div>
+      </Card>
     </Accordion>
   );
 }

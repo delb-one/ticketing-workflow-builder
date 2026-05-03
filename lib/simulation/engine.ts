@@ -59,7 +59,7 @@ const createDefaultConfig = (
     case "actor":
       return { nodeType: "actor" };
     case "status":
-      return { nodeType: "status", statusValue: "in_progress" };
+      return { nodeType: "status", statusValue: "assigned" };
     case "event":
       return { nodeType: "event", eventTrigger: "manual" };
     case "condition":
@@ -143,6 +143,7 @@ export class SimulationEngine {
           const runtime = this.runtimes[ticketId];
           if (runtime) {
             runtime.ticket.assignedAgent = agent.id;
+            runtime.ticket.state = "assigned";
             runtime.ticket.queue = undefined;
             runtime.paused = false; // Resume execution now that we have an agent
             runtime.pausedAt = null;

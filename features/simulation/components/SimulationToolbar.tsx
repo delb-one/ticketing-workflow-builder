@@ -15,16 +15,39 @@ import type {
 import { useWorkflowStore } from "@/lib/store";
 import type { CustomNode } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { CirclePause, CirclePlay, CircleStop, GitBranch, StepForward, Minus, Plus, SlidersHorizontal, Settings, GripHorizontal } from "lucide-react";
+import {
+  CirclePause,
+  CirclePlay,
+  CircleStop,
+  GitBranch,
+  StepForward,
+  Minus,
+  Plus,
+  SlidersHorizontal,
+  Settings,
+  GripHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const DEFAULT_STEP_DELAY_MS = 900;
 
-const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig => {
+const createDefaultNodeConfig = (
+  type: NodeType,
+  blockId?: string,
+): NodeConfig => {
   switch (type) {
     case "decision":
       return { nodeType: "decision", decisionType: "manual", outcomes: [] };
@@ -33,11 +56,11 @@ const createDefaultNodeConfig = (type: NodeType, blockId?: string): NodeConfig =
     case "automation": {
       const automationType =
         blockId === "sla-timer" ||
-          blockId === "escalation" ||
-          blockId === "auto-assign" ||
-          blockId === "notify" ||
-          blockId === "business-rules" ||
-          blockId === "reopen"
+        blockId === "escalation" ||
+        blockId === "auto-assign" ||
+        blockId === "notify" ||
+        blockId === "business-rules" ||
+        blockId === "reopen"
           ? blockId
           : "business-rules";
       return {
@@ -96,7 +119,8 @@ const toWorkflowDefinition = (
         type: node.data.type,
         description: node.data.description,
         blockId,
-        config: node.data.config ?? createDefaultNodeConfig(node.data.type, blockId),
+        config:
+          node.data.config ?? createDefaultNodeConfig(node.data.type, blockId),
       },
     };
   });
@@ -161,24 +185,28 @@ export default function SimulationToolbar() {
     engineRef.current = engine;
 
     unsubscribeRef.current?.();
-    unsubscribeRef.current = engine.subscribe((nextState: EngineRuntimeState, event?: SimulationEvent) => {
-      syncEngineState(nextState);
+    unsubscribeRef.current = engine.subscribe(
+      (nextState: EngineRuntimeState, event?: SimulationEvent) => {
+        syncEngineState(nextState);
 
-      const pausedRuntime = Object.values(nextState.runtimes).find(
-        (runtime) => runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
-      );
-      setShowDecisionDialog(Boolean(pausedRuntime));
+        const pausedRuntime = Object.values(nextState.runtimes).find(
+          (runtime) =>
+            runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
+        );
+        setShowDecisionDialog(Boolean(pausedRuntime));
 
-      if (event) {
-        addSimulationEvent(event);
-      }
+        if (event) {
+          addSimulationEvent(event);
+        }
 
-      const runtimes = Object.values(nextState.runtimes);
-      const allCompleted = runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
-      if (allCompleted) {
-        endSimulation();
-      }
-    });
+        const runtimes = Object.values(nextState.runtimes);
+        const allCompleted =
+          runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
+        if (allCompleted) {
+          endSimulation();
+        }
+      },
+    );
 
     const initialAgents: Array<{
       id: string;
@@ -188,7 +216,7 @@ export default function SimulationToolbar() {
     }> = [];
 
     const { agents } = simulationConfig;
-    (['l1', 'l2', 'l3'] as const).forEach(level => {
+    (["l1", "l2", "l3"] as const).forEach((level) => {
       const count = agents[level];
       for (let i = 0; i < count; i++) {
         initialAgents.push({
@@ -216,7 +244,8 @@ export default function SimulationToolbar() {
     }
 
     const runtimes = Object.values(engineState.runtimes);
-    const allCompleted = runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
+    const allCompleted =
+      runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
     const anyPaused = runtimes.some((runtime) => runtime.paused);
 
     if (allCompleted || anyPaused || isPaused) {
@@ -240,7 +269,9 @@ export default function SimulationToolbar() {
   useEffect(() => {
     // Try to find the host through the ref first (most accurate for nested flows)
     if (toolbarRef.current) {
-      const host = toolbarRef.current.closest(".react-flow") as HTMLElement | null;
+      const host = toolbarRef.current.closest(
+        ".react-flow",
+      ) as HTMLElement | null;
       if (host) {
         setCanvasHost(host);
         return;
@@ -248,7 +279,9 @@ export default function SimulationToolbar() {
     }
 
     // Fallback: search globally if the ref isn't available yet or isn't in a flow
-    const globalHost = document.querySelector(".react-flow") as HTMLElement | null;
+    const globalHost = document.querySelector(
+      ".react-flow",
+    ) as HTMLElement | null;
     if (globalHost) {
       setCanvasHost(globalHost);
     }
@@ -258,7 +291,8 @@ export default function SimulationToolbar() {
     if (!engineState) return null;
     return (
       Object.values(engineState.runtimes).find(
-        (runtime) => runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
+        (runtime) =>
+          runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
       ) ?? null
     );
   }, [engineState]);
@@ -273,28 +307,26 @@ export default function SimulationToolbar() {
       <Accordion
         type="single"
         collapsible
-        className=" pointer-events-auto panel-drag-handle active:cursor-grabbing"
+        className=" h-full pointer-events-auto  active:cursor-grabbing"
       >
-        <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
-          <div className="flex justify-center pb-2 mb-1">
-            <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
-          </div>
-          <AccordionItem
-            value="controls"
-            className="border-0 flex flex-col h-full"
-          >
-            <AccordionTrigger className="py-0 mb-4 hover:no-underline">
-              <div className="flex items-center gap-2 ">
-                <Settings className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-primary text-sm">Simulation Controls</h3>
+        <Card className="w-50 panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
+          <AccordionItem value="controls" className=" flex flex-col h-full">
+            <div className="flex justify-center bg-secondary/50">
+              <GripHorizontal className="w-4 h-4 text-primary/70" />
+            </div>
+            <AccordionTrigger
+              value="controls"
+              className="p-4  shrink-0 hover:no-underline"
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-primary text-sm">
+                   Controls
+                </h3>
               </div>
             </AccordionTrigger>
-
-            <AccordionContent className="pb-0">
-              <div
-                ref={toolbarRef}
-                className="flex flex-col gap-4"
-              >
+            <AccordionContent className="p-2">
+              <div ref={toolbarRef} className="flex flex-col gap-4">
                 {/* TICKETS */}
                 <div className="flex flex-col gap-1">
                   <TooltipProvider>
@@ -310,16 +342,21 @@ export default function SimulationToolbar() {
                               updateSimulationConfig({
                                 ticketCount: Math.max(
                                   1,
-                                  simulationConfig.ticketCount - 1
+                                  simulationConfig.ticketCount - 1,
                                 ),
                               })
                             }
-                            disabled={isSimulating || simulationConfig.ticketCount <= 1}
+                            disabled={
+                              isSimulating || simulationConfig.ticketCount <= 1
+                            }
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="left" className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                        <TooltipContent
+                          side="left"
+                          className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border"
+                        >
                           Remove ticket
                         </TooltipContent>
                       </Tooltip>
@@ -340,16 +377,21 @@ export default function SimulationToolbar() {
                               updateSimulationConfig({
                                 ticketCount: Math.min(
                                   50,
-                                  simulationConfig.ticketCount + 1
+                                  simulationConfig.ticketCount + 1,
                                 ),
                               })
                             }
-                            disabled={isSimulating || simulationConfig.ticketCount >= 50}
+                            disabled={
+                              isSimulating || simulationConfig.ticketCount >= 50
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border">
+                        <TooltipContent
+                          side="right"
+                          className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border"
+                        >
                           Add ticket
                         </TooltipContent>
                       </Tooltip>
@@ -374,10 +416,11 @@ export default function SimulationToolbar() {
                       <Button
                         onClick={() => setIsPaused(!isPaused)}
                         size="icon"
-                        className={`h-8 w-8 ${isPaused
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                          : "bg-amber-500 hover:bg-amber-600 text-white"
-                          }`}
+                        className={`h-8 w-8 ${
+                          isPaused
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            : "bg-amber-500 hover:bg-amber-600 text-white"
+                        }`}
                         title={isPaused ? "Resume" : "Pause"}
                       >
                         {isPaused ? (
@@ -413,7 +456,7 @@ export default function SimulationToolbar() {
               </div>
             </AccordionContent>
           </AccordionItem>
-        </div>
+        </Card>
       </Accordion>
 
       {canvasHost &&

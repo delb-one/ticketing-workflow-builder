@@ -42,7 +42,7 @@ export function WorkflowEditorTemplate({
             rightCollapsed ? "w-12 gap-0" : "w-80 gap-4"
           )}
         >
-          <div className="flex items-center justify-between border-b border-border p-1 bg-muted/20">
+          <div className="flex items-center justify-between border-b border-border p-1 bg-secondary/50">
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>

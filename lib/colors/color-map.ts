@@ -1,4 +1,4 @@
-import type { NodeType } from "@/lib/simulation/types";
+import type { NodeType, Ticket } from "@/lib/simulation/types";
 export type NodeColor =
   | "node-1"
   | "node-2"
@@ -41,3 +41,15 @@ export const getNodeTypeBackgroundGradient = (type: NodeType): string => {
   const clear = "transparent";
   return `linear-gradient(160deg, ${wash} 0%, ${clear} 70%)`;
 };
+
+const TICKET_STATE_BADGE_CLASS_MAP: Record<Ticket["state"], string> = {
+  open: "bg-sky-500/15 text-sky-300 border-sky-500/40",
+  assigned: "bg-indigo-500/15 text-indigo-300 border-indigo-500/40",
+  pending: "bg-amber-500/15 text-amber-300 border-amber-500/40",
+  resolved: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+  closed: "bg-slate-500/20 text-slate-300 border-slate-500/40",
+  reopened: "bg-rose-500/15 text-rose-300 border-rose-500/40",
+};
+
+export const getTicketStateBadgeClass = (state: Ticket["state"]): string =>
+  TICKET_STATE_BADGE_CLASS_MAP[state];

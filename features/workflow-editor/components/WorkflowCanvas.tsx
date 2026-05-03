@@ -305,7 +305,7 @@ export default function WorkflowCanvas({
             position="top-left"
             className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <div className="pointer-events-auto ml-[800px]">
+            <div className="pointer-events-auto ml-[800px]  ">
               <DraggablePanel>
                 <AgentPanel />
               </DraggablePanel>
@@ -316,7 +316,7 @@ export default function WorkflowCanvas({
             position="top-left"
             className="inset-0 pointer-events-none p-4 flex items-start justify-start"
           >
-            <div className="pointer-events-auto mt-[500px] ml-[150px] max-w-[90%] max-h-[40%]">
+            <div className="pointer-events-auto mt-[500px] ml-[150px]">
               <DraggablePanel>
                 <TicketMonitor />
               </DraggablePanel>

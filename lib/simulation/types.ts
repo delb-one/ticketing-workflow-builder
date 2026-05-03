@@ -49,7 +49,7 @@ export type NodeConfig =
     }
   | {
       nodeType: "status";
-      statusValue: "open" | "in_progress" | "pending" | "resolved" | "closed"| "reopened";
+      statusValue: "open" | "assigned" | "pending" | "resolved" | "closed"| "reopened";
       startsSla?: boolean;
       stopsSla?: boolean;
       isFinal?: boolean;
@@ -123,7 +123,7 @@ export interface Ticket {
   id: string;
   state:
     | "open"
-    | "in_progress"
+    | "assigned"
     | "pending"
     | "resolved"
     | "closed"

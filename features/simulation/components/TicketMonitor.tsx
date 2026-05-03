@@ -10,6 +10,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { getTicketStateBadgeClass } from "@/lib/colors/color-map";
 
 export function TicketMonitor() {
   const { engineState, nodes } = useWorkflowStore();
@@ -22,30 +24,40 @@ export function TicketMonitor() {
   };
 
   return (
-    <Accordion type="single" className=" pointer-events-auto panel-drag-handle active:cursor-grabbing" collapsible>
+    <Accordion
+      type="single"
+      collapsible
+      className="h-full pointer-events-auto active:cursor-grabbing w-120 "
+    >
+      <Card className="w-full panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
+        <AccordionItem
+          value="ticket-monitor"
+          className="min-w-0 flex flex-col h-full"
+        >
+          <div className="flex justify-center bg-secondary/50 shrink-0">
+            <GripHorizontal className="w-4 h-4 text-primary/70" />
+          </div>
 
-      <div className="bg-card/70 rounded-xl p-4 border border-card-800/80 backdrop-blur-md flex flex-col h-full overflow-hidden">
-        <div className=" flex justify-center pb-2  mb-1">
-          <GripHorizontal className="w-4 h-4 text-muted-foreground/40" />
-        </div>
-        <AccordionItem value="ticket-monitor" className="border-0">
-          <AccordionTrigger className="py-0 mb-4 hover:no-underline">
+          <AccordionTrigger className="p-4 shrink-0 hover:no-underline">
             <div className="flex gap-2 items-center">
               <Activity className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-primary text-sm">Ticket Monitor</h3>
+              <h3 className="font-semibold text-primary text-sm">
+                Ticket Monitor
+              </h3>
             </div>
           </AccordionTrigger>
 
-          <AccordionContent className="flex-1 overflow-hidden pb-0">
-            <ScrollArea className="h-[250px] w-[800px] max-w-full">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-primary bg-card sticky top-0 z-10 ">
+          <AccordionContent className="p-2 min-h-0 flex-1 overflow-hidden">
+            <ScrollArea className="w-full">
+              <div className="max-h-80 ">
+                <table className="min-w-max text-sm text-left">
+                <thead className="text-xs text-primary bg-card sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-2 font-bold">Ticket ID</th>
-                    <th className="px-4 py-2 font-bold">State</th>
-                    <th className="px-4 py-2 font-bold">Current Step</th>
-                    <th className="px-4 py-2 font-bold">Agent</th>
-                    <th className="px-4 py-2 font-bold">Queue</th>
+                    <th className="px-2 py-2 w-22.5">Ticket ID</th>
+                    <th className="px-2 py-2 w-20">State</th>
+                    <th className="px-2 py-2 w-35">Current Step</th>
+                    <th className="px-2 py-2 w-17.5">Agent</th>
+                    <th className="px-2 py-2 w-17.5">Queue</th>
                   </tr>
                 </thead>
 
@@ -62,28 +74,30 @@ export function TicketMonitor() {
                         key={rt.ticket.id}
                         className="hover:bg-card-800/30 transition-colors"
                       >
-                        <td className="px-4 py-2.5 font-mono text-xs">
+                        <td className="px-2 py-2 font-mono text-xs truncate">
                           {rt.ticket.id}
                         </td>
 
-                        <td className="px-4 py-2.5">
+                        <td className="px-2 py-2">
                           <Badge
                             variant="outline"
-                            className="bg-card-800/60 text-[10px] uppercase border-card-700/80 backdrop-blur-md"
+                            className={`text-[10px] uppercase backdrop-blur-md truncate ${getTicketStateBadgeClass(rt.ticket.state)}`}
                           >
                             {rt.ticket.state}
                           </Badge>
                         </td>
 
-                        <td className="px-4 py-2.5 text-xs truncate max-w-37.5">
-                          {rt.completed ? "Completed" : getNodeLabel(rt.currentNodeId)}
+                        <td className="px-2 py-2 text-xs truncate">
+                          {rt.completed
+                            ? "Completed"
+                            : getNodeLabel(rt.currentNodeId)}
                         </td>
 
-                        <td className="px-4 py-2.5 text-xs">
-                          {rt.ticket.assignedAgent ? "Assigned" : "-"}
+                        <td className="px-2 py-2 text-xs truncate">
+                          {rt.ticket.assignedAgent ? `${rt.ticket.assignedAgent}` : "-"}
                         </td>
 
-                        <td className="px-4 py-2.5 text-xs uppercase font-mono">
+                        <td className="px-2 py-2 text-xs uppercase font-mono truncate">
                           {rt.ticket.queue ?? "-"}
                         </td>
                       </tr>
@@ -91,11 +105,11 @@ export function TicketMonitor() {
                   )}
                 </tbody>
               </table>
+              </div>
             </ScrollArea>
           </AccordionContent>
         </AccordionItem>
-
-      </div>
+      </Card>
     </Accordion>
   );
 }
