@@ -86,6 +86,8 @@ class ActorNodeHandler implements NodeHandler {
   execute(node: WorkflowNode, _edges: WorkflowEdge[], ticket: Ticket): HandlerResult {
     const config = node.data.config as Extract<NodeConfig, { nodeType: 'actor' }>;
     const agentLevel = config.agentLevel;
+    const isQueueLevel =
+      agentLevel === "l1" || agentLevel === "l2" || agentLevel === "l3";
 
     if (!agentLevel) {
       return {
@@ -93,11 +95,21 @@ class ActorNodeHandler implements NodeHandler {
       };
     }
 
+    if (!isQueueLevel) {
+      return {
+        ticketUpdates: {
+          assignedGroup: agentLevel.toUpperCase(),
+          updatedAt: Date.now(),
+        },
+        events: [buildEvent('workflow.step', ticket.id, node)],
+      };
+    }
+
     if (!ticket.assignedAgent) {
       return {
-        enqueueTo: agentLevel as "l1" | "l2" | "l3",
+        enqueueTo: agentLevel,
         ticketUpdates: {
-          queue: agentLevel as "l1" | "l2" | "l3",
+          queue: agentLevel,
         },
         events: [
           buildEvent("ticket.queued", ticket.id, node, { queue: agentLevel }),
@@ -173,11 +185,16 @@ class AutomationNodeHandler implements NodeHandler {
         };
       }
       case 'escalation':
+        {
+        const currentLevel = ticket.queue ?? ticket.assignedGroup?.toLowerCase();
+        const targetQueue: "l2" | "l3" =
+          currentLevel === "l2" ? "l3" : "l2";
         return {
           releaseAgent: true,
-          enqueueTo: 'l2',
-          events: [buildEvent('ticket.escalated', ticket.id, node)],
+          enqueueTo: targetQueue,
+          events: [buildEvent('ticket.escalated', ticket.id, node, { queue: targetQueue })],
         };
+      }
       case 'auto-assign': {
         const assignedQueue = (config.assignTo ?? 'l1').toLowerCase() as "l1" | "l2" | "l3";
         const assignedGroup = assignedQueue.toUpperCase();

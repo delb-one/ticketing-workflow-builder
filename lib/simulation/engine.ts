@@ -253,7 +253,19 @@ export class SimulationEngine {
     }
 
     if (result.enqueueTo) {
-      this.queues[result.enqueueTo].push(ticketId);
+      const queue = this.queues[result.enqueueTo];
+      if (!queue) {
+        this.emit({
+          type: "workflow.error",
+          ticketId,
+          timestamp: Date.now(),
+          nodeId: currentNode.id,
+          nodeLabel: currentNode.data.label,
+          payload: { reason: `Invalid queue target: ${result.enqueueTo}` },
+        });
+        return;
+      }
+      queue.push(ticketId);
       runtime.ticket.queue = result.enqueueTo;
       runtime.paused = true;
       runtime.pausedAt = null;
