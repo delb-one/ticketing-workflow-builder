@@ -40,18 +40,30 @@ const edgeTypes = {
   label: LabelEdge,
 };
 
-const DraggablePanel = ({ children }: { children: React.ReactNode }) => {
-  const nodeRef = React.useRef(null);
+
+
+type Props = {
+  children: React.ReactNode;
+  initial?: { x: number; y: number };
+};
+
+const DraggablePanel = ({ children, initial }: Props) => {
+  const nodeRef = React.useRef<HTMLDivElement>(null);
+
   return (
     <Draggable
       nodeRef={nodeRef}
       handle=".panel-drag-handle"
-      bounds=".react-flow"
+      defaultPosition={initial}
     >
-      <div ref={nodeRef}>{children}</div>
+      <div ref={nodeRef} className="absolute pointer-events-auto z-50 w-fit h-fit">
+        {children}
+      </div>
     </Draggable>
   );
 };
+
+
 
 interface WorkflowCanvasProps {
   onNodeSelect?: (node: CustomNode | null) => void;
@@ -80,9 +92,7 @@ const isNodeType = (value: unknown): value is NodeType =>
     "event",
   ].includes(value);
 
-export default function WorkflowCanvas({
-  onNodeSelect,
-}: WorkflowCanvasProps) {
+export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const {
     nodes,
     edges,
@@ -133,7 +143,6 @@ export default function WorkflowCanvas({
           strokeWidth: 1,
         },
         animated: true,
-
       };
       addStoreEdge(edge);
     },
@@ -154,9 +163,9 @@ export default function WorkflowCanvas({
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-            ...currentEdge,
-            label: trimmedLabel || undefined,
-          }
+              ...currentEdge,
+              label: trimmedLabel || undefined,
+            }
           : currentEdge,
       );
 
@@ -266,6 +275,10 @@ export default function WorkflowCanvas({
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
         colorMode={theme === "dark" ? "dark" : "light"}
+        panOnDrag={[1]}
+        zoomOnScroll={true}
+        zoomOnPinch={true}
+        panOnScroll={false}
       >
         <Background variant={BackgroundVariant.Dots} />
         <Controls />
@@ -278,51 +291,25 @@ export default function WorkflowCanvas({
           maskColor="rgba(0, 0, 0, 0.1)"
         />
 
-        <>
-          <Panel
-            position="top-left"
-            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
-          >
-            <div className="pointer-events-auto">
-              <DraggablePanel>
-                <QueuePanel />
-              </DraggablePanel>
-            </div>
-          </Panel>
+       <div className="absolute inset-0 pointer-events-none z-10">
+  
+  <DraggablePanel initial={{ x: 16, y: 16 }}>
+    <QueuePanel />
+  </DraggablePanel>
 
-          <Panel
-            position="top-left"
-            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
-          >
-            <div className="pointer-events-auto ml-[350px]">
-              <DraggablePanel>
-                <SimulationToolbar />
-              </DraggablePanel>
-            </div>
-          </Panel>
+  <DraggablePanel initial={{ x: 350, y: 16 }}>
+    <SimulationToolbar />
+  </DraggablePanel>
 
-          <Panel
-            position="top-left"
-            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
-          >
-            <div className="pointer-events-auto ml-[800px]  ">
-              <DraggablePanel>
-                <AgentPanel />
-              </DraggablePanel>
-            </div>
-          </Panel>
+  <DraggablePanel initial={{ x: 800, y: 16 }}>
+    <AgentPanel />
+  </DraggablePanel>
 
-          <Panel
-            position="top-left"
-            className="inset-0 pointer-events-none p-4 flex items-start justify-start"
-          >
-            <div className="pointer-events-auto mt-[500px] ml-[150px]">
-              <DraggablePanel>
-                <TicketMonitor />
-              </DraggablePanel>
-            </div>
-          </Panel>
-        </>
+  <DraggablePanel initial={{ x: 150, y: 500 }}>
+    <TicketMonitor />
+  </DraggablePanel>
+
+</div>
       </ReactFlow>
     </div>
   );
