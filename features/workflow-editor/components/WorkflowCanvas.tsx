@@ -51,6 +51,7 @@ const DraggablePanel = ({ children, initial }: Props) => {
       nodeRef={nodeRef}
       handle=".panel-drag-handle"
       defaultPosition={initial}
+      bounds=".react-flow"
     >
       <div
         ref={nodeRef}
