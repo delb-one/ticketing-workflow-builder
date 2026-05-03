@@ -92,7 +92,7 @@ const createDefaultNodeConfig = (
       return { nodeType: "actor", agentLevel };
     }
     case "status":
-      return { nodeType: "status", statusValue: "in_progress" };
+      return { nodeType: "status", statusValue: "assigned" };
     case "event":
       return { nodeType: "event", eventTrigger: "manual" };
     case "start":
@@ -246,7 +246,9 @@ export default function SimulationToolbar() {
     const runtimes = Object.values(engineState.runtimes);
     const allCompleted =
       runtimes.length > 0 && runtimes.every((runtime) => runtime.completed);
-    const anyPaused = runtimes.some((runtime) => runtime.paused);
+    const anyPaused = runtimes.some(
+      (runtime) => runtime.paused && runtime.pendingDecisionOutcomes.length > 0,
+    );
 
     if (allCompleted || anyPaused || isPaused) {
       return;

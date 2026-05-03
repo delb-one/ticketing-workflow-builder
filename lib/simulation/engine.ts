@@ -255,8 +255,8 @@ export class SimulationEngine {
     if (result.enqueueTo) {
       this.queues[result.enqueueTo].push(ticketId);
       runtime.ticket.queue = result.enqueueTo;
-      runtime.paused = true; // Pause until an agent picks it up
-      runtime.pausedAt = new Date().toISOString();
+      runtime.paused = true;
+      runtime.pausedAt = null;
       this.emit({ type: "ticket.queued", ticketId, timestamp: Date.now(), payload: { queue: result.enqueueTo } });
       return;
     }
