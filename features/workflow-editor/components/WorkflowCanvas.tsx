@@ -14,8 +14,6 @@ import {
   NodeTypes,
   BackgroundVariant,
   useReactFlow,
-  Panel,
-  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
@@ -274,10 +272,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
         colorMode={theme === "dark" ? "dark" : "light"}
-        panOnDrag={[1]}
-        zoomOnScroll={true}
-        zoomOnPinch={true}
-        panOnScroll={false}
       >
         <Background variant={BackgroundVariant.Dots} />
         <Controls />
