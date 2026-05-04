@@ -399,59 +399,74 @@ export default function SimulationToolbar() {
                   </TooltipProvider>
                 </div>
 
-                {/* CONTROLLI */}
-                <div className="flex justify-center items-center gap-2">
-                  {!isSimulating ? (
+                {/* CONTROLS */}
+                <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
+                  {/* STATUS */}
+                  <div className="absolute left-3 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        !isSimulating
+                          ? "bg-gray-400"
+                          : isPaused
+                            ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                            : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"
+                      }`}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {/* PLAY / PAUSE */}
                     <Button
-                      onClick={startSimulationFlow}
-                      disabled={nodes.length === 0}
+                      onClick={() => {
+                        if (!isSimulating) return startSimulationFlow();
+                        setIsPaused(!isPaused);
+                      }}
+                      disabled={!isSimulating && nodes.length === 0}
                       size="icon"
-                      className="bg-emerald-600 hover:bg-emerald-700 h-8 w-8"
-                      title="Start Simulation"
+                      className={`h-8 w-8 transition ${
+                        !isSimulating
+                          ? "bg-emerald-600 hover:bg-emerald-700"
+                          : isPaused
+                            ? "bg-emerald-600 hover:bg-emerald-700"
+                            : "bg-amber-500 hover:bg-amber-600"
+                      }`}
+                      title={
+                        !isSimulating ? "Start" : isPaused ? "Resume" : "Pause"
+                      }
                     >
-                      <CirclePlay className="h-4 w-4" />
+                      {!isSimulating || isPaused ? (
+                        <CirclePlay className="h-4 w-4" />
+                      ) : (
+                        <CirclePause className="h-4 w-4" />
+                      )}
                     </Button>
-                  ) : (
-                    <>
-                      <Button
-                        onClick={() => setIsPaused(!isPaused)}
-                        size="icon"
-                        className={`h-8 w-8 ${
-                          isPaused
-                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                            : "bg-amber-500 hover:bg-amber-600 text-white"
-                        }`}
-                        title={isPaused ? "Resume" : "Pause"}
-                      >
-                        {isPaused ? (
-                          <CirclePlay className="h-4 w-4" />
-                        ) : (
-                          <CirclePause className="h-4 w-4" />
-                        )}
-                      </Button>
 
-                      <Button
-                        onClick={() => engineRef.current?.step()}
-                        disabled={!isPaused}
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8"
-                        title="Step Forward"
-                      >
-                        <StepForward className="h-4 w-4" />
-                      </Button>
+                    {/* STEP (solo in pausa) */}
+                    <Button
+                      onClick={() => engineRef.current?.step()}
+                      disabled={!isPaused}
+                      size="icon"
+                      variant="outline"
+                      className={`h-8 w-8 transition ${
+                        isPaused ? "opacity-100" : "opacity-40"
+                      }`}
+                      title="Step Forward"
+                    >
+                      <StepForward className="h-4 w-4" />
+                    </Button>
 
-                      <Button
-                        onClick={handleStop}
-                        size="icon"
-                        variant="destructive"
-                        className="h-8 w-8"
-                        title="Stop"
-                      >
-                        <CircleStop className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
+                    {/* STOP */}
+                    <Button
+                      onClick={handleStop}
+                      disabled={!isSimulating}
+                      size="icon"
+                      variant="destructive"
+                      className="h-8 w-8"
+                      title="Stop"
+                    >
+                      <CircleStop className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </AccordionContent>
