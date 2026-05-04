@@ -148,7 +148,7 @@ export function AgentPanel() {
                         >
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-xs font-semibold text-primary-300">
-                              {agent.level.toUpperCase()} Agent
+                              {agent.id}
                             </span>
                             <div className="flex items-center gap-2">
                               <div
@@ -165,7 +165,7 @@ export function AgentPanel() {
                             <Briefcase className="w-3 h-3" />
                             <span className="truncate">
                               {agent.currentTicketId
-                                ? agent.currentTicketId.replace("ticket-", "")
+                                ? agent.currentTicketId
                                 : "Idle"}
                             </span>
                           </div>

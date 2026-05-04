@@ -322,9 +322,7 @@ export default function SimulationToolbar() {
             >
               <div className="flex items-center gap-2">
                 <Settings className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-primary text-sm">
-                   Controls
-                </h3>
+                <h3 className="font-semibold text-primary text-sm">Controls</h3>
               </div>
             </AccordionTrigger>
             <AccordionContent className="p-2">
@@ -474,7 +472,12 @@ export default function SimulationToolbar() {
                 <Card className="max-w-sm p-6">
                   <h3 className="mb-4 text-lg font-semibold">
                     {pausedRuntime.pausedAt
-                      ? `Decision at: ${pausedRuntime.pausedAt} (${pausedRuntime.ticket.id})`
+                      ? `${[
+                          pausedRuntime.ticket.assignedAgent,
+                          pausedRuntime.pausedAt,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")} (${pausedRuntime.ticket.id})`
                       : "What is your decision?"}
                   </h3>
                   <div className="flex flex-wrap gap-3">
