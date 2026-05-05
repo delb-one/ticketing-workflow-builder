@@ -1,48 +1,30 @@
-"use client";
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { SimulationEngine } from "@/lib/simulation";
-import type {
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
   EngineRuntimeState,
-  NodeConfig,
-  NodeType,
+  SimulationEngine,
   SimulationEvent,
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
 } from "@/lib/simulation";
-import { useWorkflowStore } from "@/lib/store";
-import type { CustomNode } from "@/lib/store";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  CustomNode,
+  NodeConfig,
+  NodeType,
+  useWorkflowStore,
+} from "@/lib/store";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   CirclePause,
   CirclePlay,
   CircleStop,
   GitBranch,
+  StepBack,
   StepForward,
-  Minus,
-  Plus,
-  SlidersHorizontal,
-  Settings,
-  GripHorizontal,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-const DEFAULT_STEP_DELAY_MS = 900;
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const createDefaultNodeConfig = (
   type: NodeType,
@@ -139,8 +121,7 @@ const toWorkflowDefinition = (
     edges: workflowEdges,
   };
 };
-
-export default function SimulationToolbar() {
+export default function ControlsPanel() {
   const {
     nodes,
     edges,
@@ -306,173 +287,87 @@ export default function SimulationToolbar() {
 
   return (
     <>
-      <Accordion
-        type="single"
-        collapsible
-        className=" h-full pointer-events-auto  active:cursor-grabbing"
-      >
-        <Card className="w-50 panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
-          <AccordionItem value="controls" className=" flex flex-col h-full">
-            <div className="flex justify-center bg-secondary/50">
-              <GripHorizontal className="w-4 h-4 text-primary/70" />
-            </div>
-            <AccordionTrigger
-              value="controls"
-              className="p-4  shrink-0 hover:no-underline"
-            >
-              <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-primary text-sm">Controls</h3>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="p-2">
-              <div ref={toolbarRef} className="flex flex-col gap-4">
-                {/* TICKETS */}
-                <div className="flex flex-col gap-1">
-                  <TooltipProvider>
-                    <div className="flex items-center gap-1">
-                      {/* REMOVE */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() =>
-                              updateSimulationConfig({
-                                ticketCount: Math.max(
-                                  1,
-                                  simulationConfig.ticketCount - 1,
-                                ),
-                              })
-                            }
-                            disabled={
-                              isSimulating || simulationConfig.ticketCount <= 1
-                            }
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="left"
-                          className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border"
-                        >
-                          Remove ticket
-                        </TooltipContent>
-                      </Tooltip>
+      {/* CONTROLS */}
+      <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
+        {/* STATUS */}
+        <div className=" left-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            className={`h-2 w-2 rounded-full ${
+              !isSimulating
+                ? "bg-gray-400"
+                : isPaused
+                  ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                  : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"
+            }`}
+          />
+        </div>
 
-                      {/* COUNT */}
-                      <div className="flex-1 h-8 w-auto flex items-center justify-center bg-background/50 border rounded-md text-xs font-medium">
-                        {simulationConfig.ticketCount}
-                      </div>
+        <div className="flex items-center gap-1">
+          {/* STEP BACKWARD */}
+          <Button
+            onClick={() => engineRef.current?.stepBackward()}
+            disabled={!isPaused}
+            size="icon"
+            variant="outline"
+            className={`h-8 w-8 transition ${
+              isPaused ? "opacity-100" : "opacity-40"
+            }`}
+            title="Step Backward"
+          >
+            <StepBack className="h-4 w-4" />
+          </Button>
+          {/* PLAY / PAUSE */}
 
-                      {/* ADD */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() =>
-                              updateSimulationConfig({
-                                ticketCount: Math.min(
-                                  50,
-                                  simulationConfig.ticketCount + 1,
-                                ),
-                              })
-                            }
-                            disabled={
-                              isSimulating || simulationConfig.ticketCount >= 50
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="text-xs bg-background text-primary dark:bg-background dark:text-primary border border-border"
-                        >
-                          Add ticket
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
-                </div>
+          <Button
+            onClick={() => {
+              if (!isSimulating) return startSimulationFlow();
+              setIsPaused(!isPaused);
+            }}
+            disabled={!isSimulating && nodes.length === 0}
+            size="icon"
+            className={`h-8 w-8 transition ${
+              !isSimulating
+                ? "bg-emerald-600 hover:bg-emerald-700"
+                : isPaused
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : "bg-amber-500 hover:bg-amber-600"
+            }`}
+            title={!isSimulating ? "Start" : isPaused ? "Resume" : "Pause"}
+          >
+            {!isSimulating || isPaused ? (
+              <CirclePlay className="h-4 w-4" />
+            ) : (
+              <CirclePause className="h-4 w-4" />
+            )}
+          </Button>
 
-                {/* CONTROLS */}
-                <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
-                  {/* STATUS */}
-                  <div className="absolute left-3 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        !isSimulating
-                          ? "bg-gray-400"
-                          : isPaused
-                            ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                            : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"
-                      }`}
-                    />
-                  </div>
+          {/* STEP FORWARD */}
+          <Button
+            onClick={() => engineRef.current?.step()}
+            disabled={!isPaused}
+            size="icon"
+            variant="outline"
+            className={`h-8 w-8 transition ${
+              isPaused ? "opacity-100" : "opacity-40"
+            }`}
+            title="Step Forward"
+          >
+            <StepForward className="h-4 w-4" />
+          </Button>
 
-                  <div className="flex items-center gap-1">
-                    {/* PLAY / PAUSE */}
-                    <Button
-                      onClick={() => {
-                        if (!isSimulating) return startSimulationFlow();
-                        setIsPaused(!isPaused);
-                      }}
-                      disabled={!isSimulating && nodes.length === 0}
-                      size="icon"
-                      className={`h-8 w-8 transition ${
-                        !isSimulating
-                          ? "bg-emerald-600 hover:bg-emerald-700"
-                          : isPaused
-                            ? "bg-emerald-600 hover:bg-emerald-700"
-                            : "bg-amber-500 hover:bg-amber-600"
-                      }`}
-                      title={
-                        !isSimulating ? "Start" : isPaused ? "Resume" : "Pause"
-                      }
-                    >
-                      {!isSimulating || isPaused ? (
-                        <CirclePlay className="h-4 w-4" />
-                      ) : (
-                        <CirclePause className="h-4 w-4" />
-                      )}
-                    </Button>
-
-                    {/* STEP (solo in pausa) */}
-                    <Button
-                      onClick={() => engineRef.current?.step()}
-                      disabled={!isPaused}
-                      size="icon"
-                      variant="outline"
-                      className={`h-8 w-8 transition ${
-                        isPaused ? "opacity-100" : "opacity-40"
-                      }`}
-                      title="Step Forward"
-                    >
-                      <StepForward className="h-4 w-4" />
-                    </Button>
-
-                    {/* STOP */}
-                    <Button
-                      onClick={handleStop}
-                      disabled={!isSimulating}
-                      size="icon"
-                      variant="destructive"
-                      className="h-8 w-8"
-                      title="Stop"
-                    >
-                      <CircleStop className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Card>
-      </Accordion>
+          {/* STOP */}
+          <Button
+            onClick={handleStop}
+            disabled={!isSimulating}
+            size="icon"
+            variant="destructive"
+            className="h-8 w-8"
+            title="Stop"
+          >
+            <CircleStop className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {canvasHost &&
         createPortal(

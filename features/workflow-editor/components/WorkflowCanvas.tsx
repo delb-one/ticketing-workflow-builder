@@ -14,6 +14,7 @@ import {
   NodeTypes,
   BackgroundVariant,
   useReactFlow,
+  Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
@@ -25,10 +26,11 @@ import {
   QueuePanel,
   AgentPanel,
   TicketMonitor,
-  SimulationToolbar,
+  TicketPanel,
 } from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
+import ControlsPanel from "@/features/simulation/components/ControlsPanel";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -285,13 +287,17 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           maskColor="rgba(0, 0, 0, 0.1)"
         />
 
+        <Panel position="bottom-center">
+          <ControlsPanel />
+        </Panel>
+
         <div className="absolute inset-0 pointer-events-none z-10">
           <DraggablePanel initial={{ x: 16, y: 16 }}>
             <QueuePanel />
           </DraggablePanel>
 
           <DraggablePanel initial={{ x: 350, y: 16 }}>
-            <SimulationToolbar />
+            <TicketPanel />
           </DraggablePanel>
 
           <DraggablePanel initial={{ x: 800, y: 16 }}>

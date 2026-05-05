@@ -81,6 +81,7 @@ export class SimulationEngine {
   private eventBus: SimulationEventBus;
   private listeners: EngineStateListener[] = [];
   private eventLog: SimulationEvent[] = [];
+  private stateHistory: EngineRuntimeState[] = [];
 
   constructor(workflow: WorkflowDefinition) {
     this.workflow = {
@@ -127,10 +128,13 @@ export class SimulationEngine {
       };
     }
 
+    this.stateHistory = [];
+    this.pushHistorySnapshot();
     this.notify();
   }
 
   step(): void {
+    this.pushHistorySnapshot();
     const dequeuedThisStep = new Set<string>();
 
     // 1. Scheduler: Assign tickets from queues to available agents
@@ -173,6 +177,31 @@ export class SimulationEngine {
       this.stepRuntime(ticketId);
     }
     
+    this.notify();
+  }
+
+  stepBackward(): void {
+    const previousState = this.stateHistory.pop();
+    if (!previousState) {
+      return;
+    }
+
+    this.runtimes = {};
+    for (const [id, runtime] of Object.entries(previousState.runtimes)) {
+      this.runtimes[id] = {
+        ...runtime,
+        ticket: { ...runtime.ticket, context: { ...runtime.ticket.context } },
+        history: [...runtime.history],
+        pendingDecisionOutcomes: [...runtime.pendingDecisionOutcomes],
+      };
+    }
+
+    this.queues = {
+      l1: [...previousState.queues.l1],
+      l2: [...previousState.queues.l2],
+      l3: [...previousState.queues.l3],
+    };
+    this.agents = previousState.agents.map((agent) => ({ ...agent }));
     this.notify();
   }
 
@@ -330,6 +359,7 @@ export class SimulationEngine {
     const selectedOutcome = runtime.pendingDecisionOutcomes.find(
       (outcome) => outcome.label === outcomeLabel,
     );
+    this.pushHistorySnapshot();
 
     const nextNode =
       this.resolveNextNode(currentNode.id, outcomeLabel) ??
@@ -466,5 +496,9 @@ export class SimulationEngine {
         },
       });
     }
+  }
+
+  private pushHistorySnapshot(): void {
+    this.stateHistory.push(this.getEngineState());
   }
 }

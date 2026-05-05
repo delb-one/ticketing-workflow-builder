@@ -60,7 +60,7 @@ const getEventText = (event: SimulationEvent): string => {
   return event.type;
 };
 
-export default function SimulationPanel() {
+export  function SimulationPanel() {
   const { simulationEvents } = useWorkflowStore();
 
   return (
