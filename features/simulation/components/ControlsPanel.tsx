@@ -16,10 +16,10 @@ import {
 } from "@/lib/store";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  CirclePause,
-  CirclePlay,
-  CircleStop,
   GitBranch,
+  Pause,
+  Play,
+  Square,
   StepBack,
   StepForward,
 } from "lucide-react";
@@ -317,7 +317,7 @@ export default function ControlsPanel() {
             }`}
             title="Step Backward"
           >
-            <StepBack className="h-4 w-4" />
+            <StepBack />
           </Button>
           {/* PLAY / PAUSE */}
 
@@ -328,20 +328,17 @@ export default function ControlsPanel() {
             }}
             disabled={!isSimulating && nodes.length === 0}
             size="icon"
-            className={`h-8 w-8 transition ${
+            variant="outline"
+            className={`h-8 w-8 transition  ${
               !isSimulating
-                ? "bg-emerald-600 hover:bg-emerald-700"
+                ? "bg-emerald-600! !hover:bg-emerald-700"
                 : isPaused
-                  ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-amber-500 hover:bg-amber-600"
+                  ? "bg-emerald-600! !hover:bg-emerald-700"
+                  : "bg-amber-500! !hover:bg-amber-600"
             }`}
             title={!isSimulating ? "Start" : isPaused ? "Resume" : "Pause"}
           >
-            {!isSimulating || isPaused ? (
-              <CirclePlay className="h-4 w-4" />
-            ) : (
-              <CirclePause className="h-4 w-4" />
-            )}
+            {!isSimulating || isPaused ? <Play /> : <Pause />}
           </Button>
 
           {/* STEP FORWARD */}
@@ -358,7 +355,7 @@ export default function ControlsPanel() {
             }`}
             title="Step Forward"
           >
-            <StepForward className="h-4 w-4" />
+            <StepForward />
           </Button>
 
           {/* STOP */}
@@ -370,7 +367,7 @@ export default function ControlsPanel() {
             className="h-8 w-8"
             title="Stop"
           >
-            <CircleStop className="h-4 w-4" />
+            <Square />
           </Button>
         </div>
       </div>
