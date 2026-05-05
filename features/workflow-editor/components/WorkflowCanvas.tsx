@@ -25,7 +25,7 @@ import { useTheme } from "next-themes";
 import {
   QueuePanel,
   AgentPanel,
-  TicketMonitor,
+  TicketMonitorPanel,
   TicketPanel,
 } from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
@@ -305,7 +305,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           </DraggablePanel>
 
           <DraggablePanel initial={{ x: 150, y: 500 }}>
-            <TicketMonitor />
+            <TicketMonitorPanel />
           </DraggablePanel>
         </div>
       </ReactFlow>
