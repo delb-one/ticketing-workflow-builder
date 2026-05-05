@@ -305,8 +305,11 @@ export default function ControlsPanel() {
         <div className="flex items-center gap-1">
           {/* STEP BACKWARD */}
           <Button
-            onClick={() => engineRef.current?.stepBackward()}
-            disabled={!isPaused}
+            onClick={() => {
+              if (!isSimulating) return startSimulationFlow();
+              engineRef.current?.stepBackward();
+            }}
+            disabled={!isSimulating || !isPaused}
             size="icon"
             variant="outline"
             className={`h-8 w-8 transition ${
@@ -343,8 +346,11 @@ export default function ControlsPanel() {
 
           {/* STEP FORWARD */}
           <Button
-            onClick={() => engineRef.current?.step()}
-            disabled={!isPaused}
+            onClick={() => {
+              if (!isSimulating) return startSimulationFlow();
+              engineRef.current?.step();
+            }}
+            disabled={!isSimulating || !isPaused}
             size="icon"
             variant="outline"
             className={`h-8 w-8 transition ${
