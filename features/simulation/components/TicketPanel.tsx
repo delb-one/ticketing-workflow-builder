@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorkflowStore } from "@/lib/store";
-import { Minus, Plus, Ticket } from "lucide-react";
+import { Minus, Plus, Settings2, Tickets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -16,9 +16,15 @@ export function TicketPanel() {
     useWorkflowStore();
 
   return (
-    <CustomPanel value="controls" title="Ticket Pool" icon={Ticket}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
+    <CustomPanel value="controls" title="Ticket Pool" icon={Tickets}>
+      <div className="space-y-3 pt-1">
+        <div className="flex flex-col">
+           <div className="flex items-center gap-2 mb-3">
+            <Settings2 className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">
+              Tickets to spawn
+            </span>
+          </div>
           <TooltipProvider>
             <div className="flex items-center gap-1">
               <Tooltip>

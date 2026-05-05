@@ -14,8 +14,6 @@ interface CustomPanelProps {
   icon: LucideIcon;
   badge?: ReactNode;
   children: ReactNode;
-  className?: string;
-  contentClassName?: string;
 }
 
 export function CustomPanel({
@@ -24,8 +22,6 @@ export function CustomPanel({
   icon: Icon,
   badge,
   children,
-  className = "w-50",
-  contentClassName = "p-2",
 }: CustomPanelProps) {
   return (
     <Accordion
@@ -33,9 +29,7 @@ export function CustomPanel({
       collapsible
       className="h-full pointer-events-auto active:cursor-grabbing"
     >
-      <Card
-        className={`${className} panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden`}
-      >
+      <Card className="min-w-50 panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
         <AccordionItem value={value} className="flex flex-col h-full">
           <div className="flex justify-center bg-secondary/50">
             <GripHorizontal className="w-4 h-4 text-primary/70" />
@@ -47,9 +41,7 @@ export function CustomPanel({
               {badge}
             </div>
           </AccordionTrigger>
-          <AccordionContent className={contentClassName}>
-            {children}
-          </AccordionContent>
+          <AccordionContent className="p-2">{children}</AccordionContent>
         </AccordionItem>
       </Card>
     </Accordion>

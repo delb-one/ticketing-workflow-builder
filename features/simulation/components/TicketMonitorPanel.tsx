@@ -22,8 +22,6 @@ export function TicketMonitorPanel() {
       value="ticket-monitor"
       title="Ticket Monitor"
       icon={Activity}
-      className="w-full"
-      contentClassName="p-2 min-h-0 flex-1 overflow-hidden"
     >
       <ScrollArea className="w-full">
         <div className="max-h-80 ">
@@ -65,15 +63,21 @@ export function TicketMonitorPanel() {
                     </td>
 
                     <td className="px-2 py-2 text-xs truncate">
-                      {rt.completed ? "Completed" : getNodeLabel(rt.currentNodeId)}
+                      {rt.completed
+                        ? "Completed"
+                        : getNodeLabel(rt.currentNodeId)}
                     </td>
 
                     <td className="px-2 py-2 text-xs truncate">
-                      {rt.ticket.assignedAgent ? `${rt.ticket.assignedAgent}` : "-"}
+                      {rt.ticket.assignedAgent
+                        ? `${rt.ticket.assignedAgent}`
+                        : "-"}
                     </td>
 
                     <td className="px-2 py-2 text-xs uppercase font-mono truncate">
-                      {rt.ticket.queue != null ? `Group ${rt.ticket.queue}` : "-"}
+                      {rt.ticket.queue != null
+                        ? `${rt.ticket.queue}`
+                        : "-"}
                     </td>
                   </tr>
                 ))
