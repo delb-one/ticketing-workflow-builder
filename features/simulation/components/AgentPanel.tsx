@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
+import { Badge } from "@/components/ui/badge";
 
 const levelIcons = {
   l1: Headphones,
@@ -29,8 +30,25 @@ export function AgentPanel() {
   } = useWorkflowStore();
   const agents = engineState?.agents ?? [];
 
+  const totalAgents =
+    simulationConfig.agents.l1 +
+    simulationConfig.agents.l2 +
+    simulationConfig.agents.l3;
+
   return (
-    <CustomPanel value="agent-pool" title="Agent Pool" icon={Users}>
+    <CustomPanel
+      value="agent-pool"
+      title="Agent Pool"
+      icon={Users}
+      badge={
+        <Badge
+          variant="secondary"
+          className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full"
+        >
+          {totalAgents}
+        </Badge>
+      }
+    >
       {!isSimulating ? (
         <div className="space-y-3 pt-1">
           <div className="flex items-center gap-2 mb-3">
@@ -63,7 +81,10 @@ export function AgentPanel() {
                       updateSimulationConfig({
                         agents: {
                           ...simulationConfig.agents,
-                          [level]: Math.max(0, simulationConfig.agents[level] - 1),
+                          [level]: Math.max(
+                            0,
+                            simulationConfig.agents[level] - 1,
+                          ),
                         },
                       })
                     }
@@ -83,7 +104,10 @@ export function AgentPanel() {
                       updateSimulationConfig({
                         agents: {
                           ...simulationConfig.agents,
-                          [level]: Math.min(20, simulationConfig.agents[level] + 1),
+                          [level]: Math.min(
+                            20,
+                            simulationConfig.agents[level] + 1,
+                          ),
                         },
                       })
                     }
