@@ -69,7 +69,7 @@ export function ToolsContainerPanel({
   const activeToolSet = useMemo(() => new Set(activeToolIds), [activeToolIds]);
 
   return (
-    <div className=" border rounded-xl backdrop-blur-2xl bg-background/50 backdrop-blur-2xl">
+    <div className=" border rounded-xl backdrop-blur bg-background/50 ">
       {/* <div className="border-b rounded-tr-xl rounded-tl-xl bg-secondary/50 p-2">
         <Settings2 />
       </div> */}
