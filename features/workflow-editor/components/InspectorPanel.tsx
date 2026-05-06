@@ -18,6 +18,8 @@ import { Bell, GitBranch, UserCog } from "lucide-react";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
+import { Card } from "@/components/ui/card";
+import InspectorPanelTemplate from "./InspectorPanelTemplate";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -73,7 +75,8 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
   const config = selectedNode.data.config;
 
   return (
-    <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
+    <>
+    {/* <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
       <div className="sticky top-0 bg-card ml-4 mb-2 space-y-2">
         <h2 className="font-semibold text-foreground">Node Inspector</h2>
 
@@ -232,7 +235,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
             </PropertyCard>
           )}
 
-        {/* <Card className="p-3">
+        <Card className="p-3">
           <p className="text-xs text-muted-foreground">
             <strong>ID:</strong> {selectedNode.id}
           </p>
@@ -240,19 +243,11 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
             <strong>Position:</strong> {Math.round(selectedNode.position.x)},{" "}
             {Math.round(selectedNode.position.y)}
           </p>
-        </Card> */}
+        </Card>
       </ScrollArea>
-
-      {/* <div className="space-y-2 border-t border-border p-4">
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => deleteNode(selectedNode.id)}
-          className="w-full"
-        >
-          Delete Node
-        </Button>
-      </div> */}
-    </div>
+    </div> */}
+    <InspectorPanelTemplate />
+    
+    </>
   );
 }
