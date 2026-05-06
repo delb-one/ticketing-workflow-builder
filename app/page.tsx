@@ -2,7 +2,6 @@
 
 import { ReactFlowProvider } from "@xyflow/react";
 import { BlockLibrary, InspectorPanel, Toolbar } from "@/features/workflow-editor";
-import { SimulationPanel } from "@/features/simulation";
 import { WorkflowEditorTemplate } from "@/components/templates/WorkflowEditorTemplate";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
 import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
@@ -182,19 +181,10 @@ export default function Home() {
           <div className="flex-1 overflow-hidden">
             <InspectorPanel selectedNode={selectedNodeData} />
           </div>
-          <div className="px-2 pb-4">
-            <SimulationPanel />
-          </div>
+         
         </>
       }
-      rightSidebarCollapsedContent={
-        <>
-          <div className="flex-1" />
-          <div className="px-2 py-4 text-muted-foreground transition-colors border border-border rounded-lg bg-background">
-            <Terminal className="h-4 w-4 text-primary" />
-          </div>
-        </>
-      }
+      
     // Passing the toggle button as part of the header logic in the template
     // For now, I'll update the template to accept the toggle button separately or handle it better
     />

@@ -27,11 +27,11 @@ export function CustomPanel({
     <Accordion
       type="single"
       collapsible
-      className="h-full pointer-events-auto active:cursor-grabbing"
+      className="h-full pointer-events-auto "
     >
-      <Card className="min-w-50 panel-drag-handle p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden">
+      <Card className="min-w-50  p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden ">
         <AccordionItem value={value} className="flex flex-col h-full">
-          <div className="flex justify-center bg-secondary/50">
+          <div className="flex justify-center bg-secondary/50 panel-drag-handle hover:cursor-move ">
             <GripHorizontal className="w-4 h-4 text-primary/70" />
           </div>
           <AccordionTrigger className="p-4 shrink-0 hover:no-underline">

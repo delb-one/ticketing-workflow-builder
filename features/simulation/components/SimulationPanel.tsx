@@ -2,7 +2,6 @@
 
 import { useWorkflowStore } from "@/lib/store";
 import type { SimulationEvent } from "@/lib/simulation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
@@ -13,14 +12,9 @@ import {
   Play,
   Terminal,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
+import { CustomPanel } from "@/components/molecules/CustomPanel";
 
 const getEventIcon = (eventType: SimulationEvent["type"]) => {
   if (eventType === "workflow.started") return Play;
@@ -60,58 +54,36 @@ const getEventText = (event: SimulationEvent): string => {
   return event.type;
 };
 
-export  function SimulationPanel() {
+export function SimulationPanel() {
   const { simulationEvents } = useWorkflowStore();
 
   return (
-    <Accordion type="single" collapsible>
-      <Card className="flex flex-col overflow-hidden bg-card-900 border-card-800 text-primary p-0 gap-0">
-        <AccordionItem value="simulation-log" className="border-0">
-          <AccordionTrigger className="p-4 border-b border-card-800 shrink-0 hover:no-underline">
-            <div className="flex gap-2 items-center">
-              <Terminal className="h-4 w-4 text-primary" />
-              {/* <h3 className="font-semibold text-sm">Simulation Log</h3> */}
-            </div>
-          </AccordionTrigger>
-
-          <AccordionContent>
-            <div className="h-64">
-              <ScrollArea className="h-full p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="space-y-1.5 font-mono text-sm">
-                  <AnimatePresence>
-                    {simulationEvents.map((event, index) => {
-                      const EventIcon = getEventIcon(event.type);
-                      return (
-                        <motion.div
-                          key={`${event.timestamp}-${event.type}-${index}`}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center gap-2 text-primary"
-                        >
-                          <EventIcon className="h-4 w-4 shrink-0 text-primary" />
-                          <span>{getEventText(event)}</span>
-                        </motion.div>
-                      );
-                    })}
-
-                    {simulationEvents.length === 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 text-primary"
-                      >
-                        <Pause className="h-4 w-4" />
-                        <span>Idle</span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </ScrollArea>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Card>
-    </Accordion>
+    <CustomPanel title="Log Panel" value="log-panel" icon={Terminal}>
+      <ScrollArea className="w-full ">
+        <div className="max-h-54">
+          <div className="space-y-1.5 font-mono text-sm">
+            {simulationEvents.length === 0 ? (
+              <div className="flex items-center gap-2 text-primary">
+                <Pause className="h-4 w-4" />
+                <span>Idle</span>
+              </div>
+            ) : (
+              simulationEvents.map((event, index) => {
+                const EventIcon = getEventIcon(event.type);
+                return (
+                  <div
+                    key={`${event.timestamp}-${event.type}-${index}`}
+                    className="flex items-center gap-2 text-primary"
+                  >
+                    <EventIcon className="h-4 w-4 shrink-0 text-primary" />
+                    <span>{getEventText(event)}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </ScrollArea>
+    </CustomPanel>
   );
 }
