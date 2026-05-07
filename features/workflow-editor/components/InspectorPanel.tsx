@@ -19,7 +19,7 @@ import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { Card } from "@/components/ui/card";
-import { InspectorPanelTemplate } from "./templates/InspectorPanelTemplate";
+import { TechInspectorTemplate } from "./templates/tech-inspector/TechInspectorTemplate";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -246,7 +246,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </Card>
       </ScrollArea>
     </div> */}
-    <InspectorPanelTemplate />
+    <TechInspectorTemplate />
     
     </>
   );
