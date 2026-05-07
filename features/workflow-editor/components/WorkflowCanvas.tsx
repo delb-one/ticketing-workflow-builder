@@ -101,7 +101,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     setSelectedNode,
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
-    selectedNode,
+    selectedNodeId,
     isSimulating,
   } = useWorkflowStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -241,7 +241,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     [addNode, screenToFlowPosition],
   );
 
-  const selectedNodeData = nodes.find((node) => node.id === selectedNode);
+  const selectedNodeData = nodes.find((node) => node.id === selectedNodeId);
   const activeToolIds = useMemo(
     () =>
       Object.entries(visiblePanels)
@@ -266,7 +266,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       <ReactFlow<CustomNode, Edge>
         nodes={nodes.map((node) => ({
           ...node,
-          selected: node.id === selectedNode,
+          selected: node.id === selectedNodeId,
         }))}
         edges={edges.map((edge) => {
           const sourceNode = nodes.find((n) => n.id === edge.source);

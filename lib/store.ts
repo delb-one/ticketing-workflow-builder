@@ -45,7 +45,7 @@ export type CustomNode = Node<CustomNodeData, 'canvas'>;
 export interface WorkflowStore {
   nodes: CustomNode[];
   edges: Edge[];
-  selectedNode: string | null;
+  selectedNodeId: string | null;
   isSimulating: boolean;
   simulationStep: number;
   activeNodeId: string | null;
@@ -89,7 +89,7 @@ export interface WorkflowStore {
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   nodes: [],
   edges: [],
-  selectedNode: null,
+  selectedNodeId: null,
   isSimulating: false,
   simulationStep: 0,
   activeNodeId: null,
@@ -122,7 +122,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
     })),
 
-  setSelectedNode: (id) => set({ selectedNode: id }),
+  setSelectedNode: (id) => set({ selectedNodeId: id }),
 
   addEdge: (edge) =>
     set((state) => ({
@@ -204,7 +204,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes: [],
       edges: [],
-      selectedNode: null,
+      selectedNodeId: null,
       isSimulating: false,
       simulationStep: 0,
       activeNodeId: null,
@@ -218,7 +218,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       nodes,
       edges,
-      selectedNode: null,
+      selectedNodeId: null,
       activeNodeId: null,
       simulationRuntime: null,
       engineState: null,

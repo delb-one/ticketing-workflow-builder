@@ -31,9 +31,9 @@ const WorkflowCanvas = dynamic(() => import("@/features/workflow-editor/componen
 });
 
 export default function Home() {
-  const { nodes, edges, selectedNode, clearWorkflow, loadWorkflow } =
+  const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
     useWorkflowStore();
-  const selectedNodeData = nodes.find((n) => n.id === selectedNode);
+  const selectedNodeData = nodes.find((n) => n.id === selectedNodeId);
   const [rightCollapsed, setRightCollapsed] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
