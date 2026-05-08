@@ -31,9 +31,9 @@ export function AgentPanel() {
   const agents = engineState?.agents ?? [];
 
   const totalAgents =
-    simulationConfig.agents.l1 +
-    simulationConfig.agents.l2 +
-    simulationConfig.agents.l3;
+    simulationConfig.agentsCount.l1 +
+    simulationConfig.agentsCount.l2 +
+    simulationConfig.agentsCount.l3;
 
   return (
     <CustomPanel
@@ -79,11 +79,11 @@ export function AgentPanel() {
                     className="h-6 w-6 hover:bg-card-700/50"
                     onClick={() =>
                       updateSimulationConfig({
-                        agents: {
-                          ...simulationConfig.agents,
+                        agentsCount: {
+                          ...simulationConfig.agentsCount,
                           [level]: Math.max(
                             0,
-                            simulationConfig.agents[level] - 1,
+                            simulationConfig.agentsCount[level] - 1,
                           ),
                         },
                       })
@@ -93,7 +93,7 @@ export function AgentPanel() {
                   </Button>
 
                   <div className="h-6 min-w-6 px-1 flex items-center justify-center bg-background/30 border border-card-700/50 rounded-md text-[10px] font-medium">
-                    {simulationConfig.agents[level]}
+                    {simulationConfig.agentsCount[level]}
                   </div>
 
                   <Button
@@ -102,11 +102,11 @@ export function AgentPanel() {
                     className="h-6 w-6 hover:bg-card-700/50"
                     onClick={() =>
                       updateSimulationConfig({
-                        agents: {
-                          ...simulationConfig.agents,
+                        agentsCount: {
+                          ...simulationConfig.agentsCount,
                           [level]: Math.min(
                             20,
-                            simulationConfig.agents[level] + 1,
+                            simulationConfig.agentsCount[level] + 1,
                           ),
                         },
                       })

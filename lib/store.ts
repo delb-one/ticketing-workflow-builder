@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import type {
   NodeConfig,
   NodeType,
@@ -7,7 +7,7 @@ import type {
   EngineRuntimeState,
   Agent,
   QueueState,
-} from '@/lib/simulation/types';
+} from "@/lib/simulation/types";
 import {
   applyNodeChanges,
   applyEdgeChanges,
@@ -15,11 +15,11 @@ import {
   type Node,
   type NodeChange,
   type EdgeChange,
-} from '@xyflow/react';
+} from "@xyflow/react";
 
 export interface SimulationConfig {
   ticketCount: number;
-  agents: {
+  agentsCount: {
     l1: number;
     l2: number;
     l3: number;
@@ -27,7 +27,7 @@ export interface SimulationConfig {
   stepDelayMs: number;
 }
 
-export type { NodeType, NodeConfig } from '@/lib/simulation/types';
+export type { NodeType, NodeConfig } from "@/lib/simulation/types";
 
 export interface CustomNodeData {
   [key: string]: unknown;
@@ -40,7 +40,7 @@ export interface CustomNodeData {
   id?: string;
 }
 
-export type CustomNode = Node<CustomNodeData, 'canvas'>;
+export type CustomNode = Node<CustomNodeData, "canvas">;
 
 export interface WorkflowStore {
   nodes: CustomNode[];
@@ -100,7 +100,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   simulationEvents: [],
   simulationConfig: {
     ticketCount: 1,
-    agents: { l1: 1, l2: 1, l3: 1 },
+    agentsCount: { l1: 1, l2: 1, l3: 1 },
     stepDelayMs: 900,
   },
 
@@ -113,13 +113,17 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   updateNode: (id, data) =>
     set((state) => ({
-      nodes: state.nodes.map((node) => (node.id === id ? { ...node, ...data } : node)),
+      nodes: state.nodes.map((node) =>
+        node.id === id ? { ...node, ...data } : node,
+      ),
     })),
 
   deleteNode: (id) =>
     set((state) => ({
       nodes: state.nodes.filter((node) => node.id !== id),
-      edges: state.edges.filter((edge) => edge.source !== id && edge.target !== id),
+      edges: state.edges.filter(
+        (edge) => edge.source !== id && edge.target !== id,
+      ),
     })),
 
   setSelectedNode: (id) => set({ selectedNodeId: id }),
@@ -140,7 +144,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       isSimulating: true,
       simulationStep: 0,
-      simulationLog: ['Simulation started...'],
+      simulationLog: ["Simulation started..."],
       activeNodeId: null,
       simulationRuntime: null,
       engineState: null,
@@ -182,8 +186,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({
       engineState: state,
       // For backward compatibility with UI, we can try to find the first active runtime
-      simulationRuntime: state ? Object.values(state.runtimes)[0] ?? null : null,
-      activeNodeId: state ? Object.values(state.runtimes)[0]?.currentNodeId ?? null : null,
+      simulationRuntime: state
+        ? (Object.values(state.runtimes)[0] ?? null)
+        : null,
+      activeNodeId: state
+        ? (Object.values(state.runtimes)[0]?.currentNodeId ?? null)
+        : null,
     }),
 
   setSchedulingMode: (mode) => set({ schedulingMode: mode }),

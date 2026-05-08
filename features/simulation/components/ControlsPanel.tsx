@@ -38,11 +38,11 @@ const createDefaultNodeConfig = (
     case "automation": {
       const automationType =
         blockId === "sla-timer" ||
-          blockId === "escalation" ||
-          blockId === "auto-assign" ||
-          blockId === "notify" ||
-          blockId === "business-rules" ||
-          blockId === "reopen"
+        blockId === "escalation" ||
+        blockId === "auto-assign" ||
+        blockId === "notify" ||
+        blockId === "business-rules" ||
+        blockId === "reopen"
           ? blockId
           : "business-rules";
       return {
@@ -191,20 +191,27 @@ export default function ControlsPanel() {
 
     const initialAgents: Array<{
       id: string;
+      name?: string;
+      type: "default";
       level: "l1" | "l2" | "l3";
-      capacity: number;
       status: "available";
+      currentTicketId?: string;
+      capacity: number;
+      skills?: string[];
+      efficiency: number;
     }> = [];
 
-    const { agents } = simulationConfig;
+    const { agentsCount } = simulationConfig;
     (["l1", "l2", "l3"] as const).forEach((level) => {
-      const count = agents[level];
+      const count = agentsCount[level];
       for (let i = 0; i < count; i++) {
         initialAgents.push({
           id: `Agent-${level.toUpperCase()}-${i + 1}`,
           level,
+          type: "default",
           capacity: 1,
           status: "available",
+          efficiency: 1,
         });
       }
     });
@@ -292,12 +299,13 @@ export default function ControlsPanel() {
         {/* STATUS */}
         <div className=" left-3 flex items-center gap-2 text-xs text-muted-foreground">
           <span
-            className={`h-2 w-2 rounded-full ${!isSimulating
-              ? "bg-gray-400"
-              : isPaused
-                ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"
-              }`}
+            className={`h-2 w-2 rounded-full ${
+              !isSimulating
+                ? "bg-gray-400"
+                : isPaused
+                  ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                  : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse"
+            }`}
           />
         </div>
 
@@ -311,8 +319,9 @@ export default function ControlsPanel() {
             disabled={!isSimulating || !isPaused}
             size="icon"
             variant="outline"
-            className={`h-8 w-8 transition ${isPaused ? "opacity-100" : "opacity-40"
-              }`}
+            className={`h-8 w-8 transition ${
+              isPaused ? "opacity-100" : "opacity-40"
+            }`}
             title="Step Backward"
           >
             <StepBack />
@@ -327,12 +336,13 @@ export default function ControlsPanel() {
             disabled={!isSimulating && nodes.length === 0}
             size="icon"
             variant="outline"
-            className={`h-8 w-8 transition  ${!isSimulating
-              ? "bg-emerald-600! !hover:bg-emerald-700"
-              : isPaused
+            className={`h-8 w-8 transition  ${
+              !isSimulating
                 ? "bg-emerald-600! !hover:bg-emerald-700"
-                : "bg-amber-500! !hover:bg-amber-600"
-              }`}
+                : isPaused
+                  ? "bg-emerald-600! !hover:bg-emerald-700"
+                  : "bg-amber-500! !hover:bg-amber-600"
+            }`}
             title={!isSimulating ? "Start" : isPaused ? "Resume" : "Pause"}
           >
             {!isSimulating || isPaused ? <Play /> : <Pause />}
@@ -347,8 +357,9 @@ export default function ControlsPanel() {
             disabled={!isSimulating || !isPaused}
             size="icon"
             variant="outline"
-            className={`h-8 w-8 transition ${isPaused ? "opacity-100" : "opacity-40"
-              }`}
+            className={`h-8 w-8 transition ${
+              isPaused ? "opacity-100" : "opacity-40"
+            }`}
             title="Step Forward"
           >
             <StepForward />
@@ -382,11 +393,11 @@ export default function ControlsPanel() {
                   <h3 className="mb-4 text-lg font-semibold">
                     {pausedRuntime.pausedAt
                       ? `${[
-                        pausedRuntime.ticket.assignedAgent,
-                        pausedRuntime.pausedAt,
-                      ]
-                        .filter(Boolean)
-                        .join(" ")} (${pausedRuntime.ticket.id})`
+                          pausedRuntime.ticket.assignedAgent,
+                          pausedRuntime.pausedAt,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")} (${pausedRuntime.ticket.id})`
                       : "What is your decision?"}
                   </h3>
                   <div className="flex flex-wrap gap-3">

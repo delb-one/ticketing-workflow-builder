@@ -31,7 +31,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
     const actorLevel =
       data.config?.nodeType === "actor" ? data.config.agentLevel : undefined;
     if (actorLevel === "l1" || actorLevel === "l2" || actorLevel === "l3") {
-      return simulationConfig.agents[actorLevel];
+      return simulationConfig.agentsCount[actorLevel];
     }
     return 0;
   })();

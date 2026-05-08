@@ -20,6 +20,7 @@ export interface DecisionOutcome {
   };
 }
 
+
 export type NodeConfig =
   | {
       nodeType: "decision";
@@ -49,7 +50,13 @@ export type NodeConfig =
     }
   | {
       nodeType: "status";
-      statusValue: "open" | "assigned" | "pending" | "resolved" | "closed"| "reopened";
+      statusValue:
+        | "open"
+        | "assigned"
+        | "pending"
+        | "resolved"
+        | "closed"
+        | "reopened";
       startsSla?: boolean;
       stopsSla?: boolean;
       isFinal?: boolean;
@@ -84,7 +91,7 @@ export interface WorkflowEdge {
     field: string;
     operator: "equals" | "gt" | "lt" | "includes";
     value: string | number | boolean;
-  }
+  };
 }
 
 export interface WorkflowDefinition {
@@ -121,13 +128,7 @@ export interface SimulationContext {
 
 export interface Ticket {
   id: string;
-  state:
-    | "open"
-    | "assigned"
-    | "pending"
-    | "resolved"
-    | "closed"
-    | "reopened";
+  state: "open" | "assigned" | "pending" | "resolved" | "closed" | "reopened";
   priority: "low" | "medium" | "high" | "critical";
   impact: "low" | "medium" | "high";
   assignedAgent?: string;
@@ -159,10 +160,14 @@ export interface SimulationRuntime {
 
 export interface Agent {
   id: string;
+  name?: string;
+  type: "default" | "custom";
   level: "l1" | "l2" | "l3";
   status: "available" | "busy";
   currentTicketId?: string;
   capacity: number;
+  skills?: string[];
+  efficiency: number;
 }
 
 export interface QueueState {
