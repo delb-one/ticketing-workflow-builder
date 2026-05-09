@@ -1,17 +1,30 @@
 import {
   Activity,
+  BarChart3,
+  Bell,
+  BrainCircuit,
+  Bug,
+  Gauge,
+  GitBranch,
   ListFilter,
-  Settings2,
+  Network,
+  Radar,
+  ScanSearch,
+  ShieldAlert,
+  Sparkles,
   Terminal,
   Tickets,
   Users,
+  Workflow,
   X,
 } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +33,8 @@ export type SimulationTool = {
   name: string;
   description: string;
   icon: React.ReactNode;
+
+  status?: "coming-soon" | "experimental" | "beta";
 };
 
 interface ToolsContainerPanelProps {
@@ -35,86 +50,225 @@ export function ToolsContainerPanel({
 }: ToolsContainerPanelProps) {
   const tools: SimulationTool[] = [
     {
+      id: "getting-started-panel",
+      name: "Getting Started",
+      description: "Quick guide to start building workflows",
+      icon: <Sparkles className="w-4 h-4 text-primary" />,
+    },
+
+    {
       id: "agent-panel",
       name: "Agent Panel",
       description: "Define and manage agent groups (L1, L2, L3)",
       icon: <Users className="w-4 h-4 text-primary" />,
     },
+
     {
       id: "ticket-panel",
       name: "Ticket Panel",
       description: "Generate tickets and control incoming flow",
       icon: <Tickets className="w-4 h-4 text-primary" />,
     },
+
     {
       id: "queue-panel",
       name: "Queue Panel",
       description: "Inspect queue status and workload distribution",
       icon: <ListFilter className="w-4 h-4 text-primary" />,
     },
+
     {
       id: "activity-panel",
       name: "Activity Panel",
       description: "Track ticket activity and status changes over time",
       icon: <Activity className="w-4 h-4 text-primary" />,
     },
+
     {
       id: "log-panel",
       name: "Log Panel",
       description: "View the event log",
       icon: <Terminal className="w-4 h-4 text-primary" />,
     },
+
+    {
+      id: "metrics-panel",
+      name: "Metrics Panel",
+      description: "Monitor real-time simulation metrics",
+      icon: <BarChart3 className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "sla-panel",
+      name: "SLA Monitor",
+      description: "Track SLA compliance and violations",
+      icon: <ShieldAlert className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "performance-panel",
+      name: "Performance",
+      description: "Inspect throughput and processing performance",
+      icon: <Gauge className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "heatmap-panel",
+      name: "Heatmap",
+      description: "Visualize node congestion and activity",
+      icon: <Radar className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "validation-panel",
+      name: "Flow Validation",
+      description: "Detect invalid states and graph issues",
+      icon: <Workflow className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "ai-panel",
+      name: "AI Suggestions",
+      description: "Receive workflow optimization suggestions",
+      icon: <BrainCircuit className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    // {
+    //   id: "debug-panel",
+    //   name: "Debugger",
+    //   description: "Inspect runtime execution and events",
+    //   icon: <Bug className="w-4 h-4 text-primary" />,
+    //   status: "coming-soon",
+    // },
+
+    {
+      id: "notification-panel",
+      name: "Notifications",
+      description: "View alerts and simulation warnings",
+      icon: <Bell className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "dependency-panel",
+      name: "Dependencies",
+      description: "Inspect workflow relationships and dependencies",
+      icon: <GitBranch className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "network-panel",
+      name: "Network",
+      description: "Inspect workflow communication graph",
+      icon: <Network className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
+
+    {
+      id: "search-panel",
+      name: "Search",
+      description: "Search nodes, tickets and events",
+      icon: <ScanSearch className="w-4 h-4 text-primary" />,
+      status: "coming-soon",
+    },
   ];
 
   const activeToolSet = useMemo(() => new Set(activeToolIds), [activeToolIds]);
 
-  return (
-    <div className=" border rounded-xl backdrop-blur bg-background/50 ">
-      {/* <div className="border-b rounded-tr-xl rounded-tl-xl bg-secondary/50 p-2">
-        <Settings2 />
-      </div> */}
+  const getStatusLabel = (status?: SimulationTool["status"]) => {
+    switch (status) {
+      case "coming-soon":
+        return "Coming soon";
 
-      <div className="flex flex-row gap-2  p-2">
-        {tools.map((tool) => (
-          <Tooltip key={tool.id}>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  `p-2 rounded-md bg-transparent border-none shadow-none ${activeToolSet.has(tool.id)
-                    ? "bg-primary/15   ring-2 ring-primary/50 text-primary/300 cursor-pointer"
-                    : "hover:bg-muted/60 cursor-pointer"
-                  }`,
-                )}
-                onClick={() => onToolToggle(tool.id)}
+      // case "experimental":
+      //   return "Experimental";
+
+      // case "beta":
+      //   return "Beta";
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur ">
+        {tools.map((tool) => {
+          const statusLabel = getStatusLabel(tool.status);
+
+          return (
+            <Tooltip key={tool.id}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => onToolToggle(tool.id)}
+                  className={cn(
+                    "relative p-2 rounded-md border-none shadow-none transition-all duration-200",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                    activeToolSet.has(tool.id)
+                      ? "bg-primary/15 ring-2 ring-primary/50"
+                      : "hover:bg-muted/60",
+                    tool.status && "opacity-70",
+                    tool.status === "coming-soon" && "cursor-not-allowed",
+                  )}
+                  disabled={tool.status === "coming-soon"}
+                >
+                  {tool.icon}
+
+                  {/* {tool.status && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary " />
+                  )} */}
+                </button>
+              </TooltipTrigger>
+
+              <TooltipContent
+                side="top"
+                className="text-xs bg-background text-primary border border-border py-2 max-w-56"
               >
-                <span>{tool.icon}</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="text-xs bg-background text-primary border border-border py-2"
-            >
-              <div className="flex flex-col gap-2">
-                <span className="font-medium leading-tight">{tool.name}</span>
-                <div className="h-px w-full bg-border" />
-                <span className="text-muted-foreground text-xs leading-snug">
-                  {tool.description}
-                </span>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        ))}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium leading-tight">
+                      {tool.name}
+                    </span>
+
+                    {statusLabel && (
+                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground border rounded-md px-1.5 py-0.5">
+                        {statusLabel}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="h-px w-full bg-border" />
+
+                  <span className="text-muted-foreground text-xs leading-snug">
+                    {tool.description}
+                  </span>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+
         {/* DIVIDER */}
         <div className="w-px self-stretch bg-border" />
+
         {/* CLOSE ALL */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div
-              className="p-2 rounded-md hover:bg-muted/60 cursor-pointer  flex items-center justify-center"
+            <button
+              type="button"
               onClick={onCloseAll}
+              className="p-2 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer flex items-center justify-center"
             >
               <X className="w-4 h-4" />
-            </div>
+            </button>
           </TooltipTrigger>
 
           <TooltipContent
@@ -124,7 +278,8 @@ export function ToolsContainerPanel({
             <span>Close all panels</span>
           </TooltipContent>
         </Tooltip>
-      </div>
+      {/* <div className="flex flex-row gap-2 p-2">
+      </div> */}
     </div>
   );
 }

@@ -916,7 +916,7 @@ const buildDefaultNodeConfig = (
   }
 
   if (nodeType === 'status') {
-    return { nodeType: 'status', statusValue: 'in_progress' };
+    return { nodeType: 'status', statusValue: 'assigned' };
   }
 
   if (nodeType === 'event') {

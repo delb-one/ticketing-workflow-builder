@@ -33,6 +33,7 @@ import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
 import ControlsPanel from "@/features/simulation/components/ControlsPanel";
 import { ToolsContainerPanel } from "@/features/simulation/components/ToolsContainerPanel";
+import { GettingStartedPanel } from "@/features/simulation/components/GettingStartedPanel";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -91,6 +92,28 @@ const isNodeType = (value: unknown): value is NodeType =>
     "event",
   ].includes(value);
 
+const INITIAL_VISIBLE_PANELS: Record<string, boolean> = {
+  "getting-started-panel": true,
+
+  "agent-panel": false,
+  "ticket-panel": false,
+  "queue-panel": false,
+  "activity-panel": false,
+  "log-panel": false,
+
+  "metrics-panel": false,
+  "sla-panel": false,
+  "performance-panel": false,
+  "heatmap-panel": false,
+  "validation-panel": false,
+  "ai-panel": false,
+  // "debug-panel": false,
+  "notification-panel": false,
+  "dependency-panel": false,
+  "network-panel": false,
+  "search-panel": false,
+};
+
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const {
     nodes,
@@ -101,25 +124,21 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     setSelectedNode,
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
-    selectedNode,
+    selectedNodeId,
     isSimulating,
   } = useWorkflowStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>({
-    "queue-panel": false,
-    "ticket-panel": false,
-    "agent-panel": false,
-    "activity-panel": false,
-    "log-panel": false,
-  });
+
+  const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>(
+    INITIAL_VISIBLE_PANELS,
+  );
 
   const handleCloseAll = useCallback(() => {
     setVisiblePanels({
-      "queue-panel": false,
-      "ticket-panel": false,
-      "agent-panel": false,
-      "activity-panel": false,
-      "log-panel": false,
+      ...INITIAL_VISIBLE_PANELS,
+
+      // keep onboarding visible
+      "getting-started-panel": false,
     });
   }, []);
 
@@ -241,7 +260,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     [addNode, screenToFlowPosition],
   );
 
-  const selectedNodeData = nodes.find((node) => node.id === selectedNode);
+  const selectedNodeData = nodes.find((node) => node.id === selectedNodeId);
   const activeToolIds = useMemo(
     () =>
       Object.entries(visiblePanels)
@@ -266,7 +285,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       <ReactFlow<CustomNode, Edge>
         nodes={nodes.map((node) => ({
           ...node,
-          selected: node.id === selectedNode,
+          selected: node.id === selectedNodeId,
         }))}
         edges={edges.map((edge) => {
           const sourceNode = nodes.find((n) => n.id === edge.source);
@@ -313,74 +332,74 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           maskColor="rgba(0, 0, 0, 0.1)"
         />
 
+        <Panel position="top-center">
+          <ControlsPanel />
+        </Panel>
         <Panel position="bottom-center">
-          <div className="flex items-center gap-2 border rounded-xl bg-background/50 p-1 backdrop-blur-2xl ">
-
-
-            <ControlsPanel />
-            <ToolsContainerPanel
-              activeToolIds={activeToolIds}
-              onToolToggle={handleToolToggle}
-              onCloseAll={handleCloseAll}
-            />
-
-
-          </div>
+          <ToolsContainerPanel
+            activeToolIds={activeToolIds}
+            onToolToggle={handleToolToggle}
+            onCloseAll={handleCloseAll}
+          />
         </Panel>
 
-        <Panel position="center-right">
-        </Panel>
+        <Panel position="center-right"></Panel>
       </ReactFlow>
 
       <div className="absolute inset-0 pointer-events-none z-10">
+        {/* GETTING-STARTED PANEL */}
+        {visiblePanels["getting-started-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 200, y: 16 }}>
+              <GettingStartedPanel />
+            </DraggablePanel>
+          </div>
+        )}
+
         {/* QUEUE PANEL */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${visiblePanels["queue-panel"] ? "opacity-100" : "opacity-0"
-            }`}
-        >
-          <DraggablePanel initial={{ x: 16, y: 16 }}>
-            <QueuePanel />
-          </DraggablePanel>
-        </div>
+        {visiblePanels["queue-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 16, y: 16 }}>
+              <QueuePanel />
+            </DraggablePanel>
+          </div>
+        )}
 
         {/* TICKET PANEL */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${visiblePanels["ticket-panel"] ? "opacity-100" : "opacity-0"
-            }`}
-        >
-          <DraggablePanel initial={{ x: 350, y: 16 }}>
-            <TicketPanel />
-          </DraggablePanel>
-        </div>
+        {visiblePanels["ticket-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 350, y: 16 }}>
+              <TicketPanel />
+            </DraggablePanel>
+          </div>
+        )}
 
         {/* AGENT PANEL */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${visiblePanels["agent-panel"] ? "opacity-100" : "opacity-0"
-            }`}
-        >
-          <DraggablePanel initial={{ x: 800, y: 16 }}>
-            <AgentPanel />
-          </DraggablePanel>
-        </div>
+        {visiblePanels["agent-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 800, y: 16 }}>
+              <AgentPanel />
+            </DraggablePanel>
+          </div>
+        )}
 
         {/* ACTIVITY PANEL */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${visiblePanels["activity-panel"] ? "opacity-100" : "opacity-0"
-            }`}
-        >
-          <DraggablePanel initial={{ x: 150, y: 500 }}>
-            <TicketMonitorPanel />
-          </DraggablePanel>
-        </div>
+        {visiblePanels["activity-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 150, y: 500 }}>
+              <TicketMonitorPanel />
+            </DraggablePanel>
+          </div>
+        )}
+
         {/* LOG PANEL */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-150 ${visiblePanels["log-panel"] ? "opacity-100" : "opacity-0"
-            }`}
-        >
-          <DraggablePanel initial={{ x: 150, y: 100 }}>
-            <SimulationPanel />
-          </DraggablePanel>
-        </div>
+        {visiblePanels["log-panel"] && (
+          <div className="absolute inset-0 pointer-events-none">
+            <DraggablePanel initial={{ x: 150, y: 100 }}>
+              <SimulationPanel />
+            </DraggablePanel>
+          </div>
+        )}
       </div>
     </div>
   );

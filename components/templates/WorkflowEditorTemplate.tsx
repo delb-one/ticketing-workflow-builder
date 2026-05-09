@@ -39,7 +39,7 @@ export function WorkflowEditorTemplate({
         <aside
           className={cn(
             "flex flex-col transition-all duration-300 bg-card rounded-lg border border-border overflow-hidden",
-            rightCollapsed ? "w-12 gap-0" : "w-80 gap-4"
+            rightCollapsed ? "w-12 gap-0" : "w-80"
           )}
         >
           <div className="flex items-center justify-between border-b border-border p-1 bg-secondary/50">

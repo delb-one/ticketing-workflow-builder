@@ -14,6 +14,7 @@ interface CustomPanelProps {
   icon: LucideIcon;
   badge?: ReactNode;
   children: ReactNode;
+  defaultExpanded?: boolean;
 }
 
 export function CustomPanel({
@@ -22,12 +23,15 @@ export function CustomPanel({
   icon: Icon,
   badge,
   children,
+  defaultExpanded,
 }: CustomPanelProps) {
   return (
     <Accordion
       type="single"
       collapsible
       className="h-full pointer-events-auto "
+      defaultValue={defaultExpanded ? value : undefined}
+
     >
       <Card className="min-w-50  p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden ">
         <AccordionItem value={value} className="flex flex-col h-full">
@@ -41,7 +45,7 @@ export function CustomPanel({
               {badge}
             </div>
           </AccordionTrigger>
-          <AccordionContent className="p-2">{children}</AccordionContent>
+          <AccordionContent className="p-2" >{children}</AccordionContent>
         </AccordionItem>
       </Card>
     </Accordion>

@@ -31,7 +31,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
     const actorLevel =
       data.config?.nodeType === "actor" ? data.config.agentLevel : undefined;
     if (actorLevel === "l1" || actorLevel === "l2" || actorLevel === "l3") {
-      return simulationConfig.agents[actorLevel];
+      return simulationConfig.agentsCount[actorLevel];
     }
     return 0;
   })();
@@ -133,21 +133,27 @@ export default function CanvasNode(props: CanvasNodeProps) {
             )}
           </motion.div>
         </TooltipTrigger>
-        {isActive && (
-          <TooltipContent
-            side="top"
-            className="max-w-64 text-xs bg-background text-primary border border-border"
-          >
-            <div className="font-semibold mb-1">Tickets in this node</div>
-            <div className="space-y-1">
-              {activeTickets.map((runtime) => (
-                <div key={runtime.ticket.id} className="font-mono text-[11px]">
-                  {runtime.ticket.id} ({runtime.ticket.state})
-                </div>
-              ))}
+        {/* {isActive && (
+        )} */}
+        <TooltipContent
+          side="top"
+          className="max-w-64 text-xs bg-background text-primary border border-border"
+        >
+          <div className="font-semibold mb-1">
+            <div className="font-semibold mb-1">
+              {activeTickets.length
+                ? "Tickets in this node"
+                : "No tickets in this node"}
             </div>
-          </TooltipContent>
-        )}
+          </div>
+          <div className="space-y-1">
+            {activeTickets.map((runtime) => (
+              <div key={runtime.ticket.id} className="font-mono text-[11px]">
+                {runtime.ticket.id} ({runtime.ticket.state})
+              </div>
+            ))}
+          </div>
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
