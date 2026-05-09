@@ -67,7 +67,7 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
       config: { nodeType: "actor", agentLevel: "l2" },
     },
     {
-      blockId: "l3-specialist",
+      blockId: "l3-tech-specialist",
       label: "L3 Specialist",
       type: "actor",
       icon: Cpu,
