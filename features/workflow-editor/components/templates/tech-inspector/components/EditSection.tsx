@@ -1,5 +1,5 @@
 "use client";
-import { Agent } from "../TechInspectorTemplate";
+import { Agent } from "../TechInspector";
 
 export const SKILL_POOL = [
   "network",
@@ -89,8 +89,8 @@ export const EditSection = ({
             <div className="flex items-center gap-2">
               <div
                 className={`h-2 w-2 rounded-full ${selectedAgent.status === "busy"
-                    ? "bg-orange-500"
-                    : "bg-green-500"
+                  ? "bg-orange-500"
+                  : "bg-green-500"
                   }`}
               />
 
@@ -162,8 +162,8 @@ export const EditSection = ({
                     key={skill}
                     onClick={() => toggleSkillForSingle(skill)}
                     className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
-                        ? "bg-primary text-secondary border-primary"
-                        : "bg-muted hover:bg-muted/80 border-transparent"
+                      ? "bg-primary text-secondary border-primary"
+                      : "bg-muted hover:bg-muted/80 border-transparent"
                       }`}
                   >
                     {skill}
@@ -268,8 +268,8 @@ export const EditSection = ({
                     key={skill}
                     onClick={() => toggleSkillForBulk(skill)}
                     className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
-                        ? "bg-primary text-secondary border-primary"
-                        : "bg-muted hover:bg-muted/80 border-transparent"
+                      ? "bg-primary text-secondary border-primary"
+                      : "bg-muted hover:bg-muted/80 border-transparent"
                       }`}
                   >
                     {skill}

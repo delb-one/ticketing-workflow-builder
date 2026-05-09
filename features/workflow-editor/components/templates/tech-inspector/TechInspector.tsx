@@ -6,6 +6,7 @@ import { ActionBar } from "./components/ActionBar";
 import { AgentTabs } from "./components/AgentTabs";
 import { Footer } from "./components/Footer";
 import { EditSection, SKILL_POOL } from "./components/EditSection";
+import { CustomNode } from "@/lib/store";
 
 export type Agent = {
   id: string;
@@ -17,9 +18,14 @@ export type Agent = {
   skills: string[];
 };
 
+interface TechInspectorProps {
+  selectedNode: CustomNode;
+
+}
+
 const BULK_DEFAULT_CAPACITY = 2;
 
-export function TechInspectorTemplate() {
+export function TechInspector({ selectedNode }: TechInspectorProps) {
   const [activeTab, setActiveTab] = useState<string>("custom-agents");
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
@@ -345,7 +351,7 @@ export function TechInspectorTemplate() {
     <div className="flex h-full w-80 flex-col overflow-hidden border-l bg-card">
       <div className="flex flex-1 min-h-0 flex-col">
         {/* HEADER */}
-        <Header loadPercentage={loadPercentage} loadColor={loadColor} />
+        <Header selectedNode={selectedNode} loadPercentage={loadPercentage} loadColor={loadColor} />
 
         {/* OVERVIEW */}
         <Overview

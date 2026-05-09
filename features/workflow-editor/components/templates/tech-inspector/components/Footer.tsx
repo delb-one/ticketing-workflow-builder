@@ -1,5 +1,5 @@
 "use client";
-import { Agent } from "../TechInspectorTemplate";
+import { Agent } from "../TechInspector";
 
 interface FooterProps {
   isIdleMode: boolean;

@@ -19,7 +19,7 @@ import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { Card } from "@/components/ui/card";
-import { TechInspectorTemplate } from "./templates/tech-inspector/TechInspectorTemplate";
+import { TechInspector } from "./templates/tech-inspector/TechInspector";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -76,7 +76,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <>
-    {/* <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
+      {/* <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
       <div className="sticky top-0 bg-card ml-4 mb-2 space-y-2">
         <h2 className="font-semibold text-foreground">Node Inspector</h2>
 
@@ -246,8 +246,10 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </Card>
       </ScrollArea>
     </div> */}
-    <TechInspectorTemplate />
-    
+
+
+      <TechInspector selectedNode={selectedNode} />
+
     </>
   );
 }
