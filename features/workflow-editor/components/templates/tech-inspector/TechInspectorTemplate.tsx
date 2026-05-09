@@ -1,10 +1,9 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Edit, Plus, RotateCcw, SlidersHorizontal } from "lucide-react";
+"use client";
 import { useState } from "react";
 import { Header } from "./components/Header";
 import { Overview } from "./components/Overview";
 import { ActionBar } from "./components/ActionBar";
-import { AgentList } from "./components/AgentList";
+import { AgentTabs } from "./components/AgentTabs";
 import { Footer } from "./components/Footer";
 import { EditSection, SKILL_POOL } from "./components/EditSection";
 
@@ -21,6 +20,7 @@ export type Agent = {
 const BULK_DEFAULT_CAPACITY = 2;
 
 export function TechInspectorTemplate() {
+  const [activeTab, setActiveTab] = useState<string>("custom-agents");
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
@@ -88,10 +88,10 @@ export function TechInspectorTemplate() {
     selectedAgent === null
       ? null
       : {
-          name: singleDraft?.name ?? selectedAgent.name,
-          capacity: singleDraft?.capacity ?? selectedAgent.capacity,
-          skills: singleDraft?.skills ?? selectedAgent.skills,
-        };
+        name: singleDraft?.name ?? selectedAgent.name,
+        capacity: singleDraft?.capacity ?? selectedAgent.capacity,
+        skills: singleDraft?.skills ?? selectedAgent.skills,
+      };
 
   const isBulkMode = selectedAgents.length > 1;
 
@@ -104,7 +104,7 @@ export function TechInspectorTemplate() {
     (singleDraft.name !== selectedAgent.name ||
       singleDraft.capacity !== selectedAgent.capacity ||
       JSON.stringify(singleDraft.skills) !==
-        JSON.stringify(selectedAgent.skills));
+      JSON.stringify(selectedAgent.skills));
 
   const addDefaultAgent = () => {
     const nextId = getNextDefaultAgentId();
@@ -134,11 +134,17 @@ export function TechInspectorTemplate() {
     );
   };
 
-  const resetCustomAgents = () => {
-    setCustomAgents([]);
+  const clearSelection = () => {
     setSelectedAgents([]);
     setActiveAgentId(null);
     setSingleDraft(null);
+    setCapacityDraft(null);
+    setBulkSkillsDraft(null);
+  };
+
+  const resetCustomAgents = () => {
+    setCustomAgents([]);
+    clearSelection();
   };
 
   const totalAgents = allAgents.length;
@@ -166,49 +172,24 @@ export function TechInspectorTemplate() {
         ? "bg-orange-500"
         : "bg-red-500";
 
-  const removeSelectedAgents = () => {
-    const shouldRemove = window.confirm(
-      `Remove ${selectedAgents.length} selected agent(s)?`,
-    );
+  const removeAgents = (ids: string[]) => {
+    if (ids.length === 0) return;
+    const shouldRemove = window.confirm(`Remove ${ids.length} agent(s)?`);
     if (!shouldRemove) return;
 
-    setCustomAgents((prev) =>
-      prev.filter((agent) => !selectedAgents.includes(agent.id)),
-    );
-
-    setDefaultAgents((prev) =>
-      prev.filter((agent) => !selectedAgents.includes(agent.id)),
-    );
-
-    setSelectedAgents([]);
-    setActiveAgentId(null);
-    setSingleDraft(null);
+    setCustomAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
+    setDefaultAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
+    clearSelection();
   };
 
-  const removeSingleAgent = () => {
-    if (!selectedAgent) return;
-    const shouldRemove = window.confirm(
-      `Remove agent "${selectedAgent.name}"?`,
-    );
-    if (!shouldRemove) return;
-
-    const targetId = selectedAgent.id;
-    setCustomAgents((prev) => prev.filter((agent) => agent.id !== targetId));
-    setDefaultAgents((prev) => prev.filter((agent) => agent.id !== targetId));
-    setSelectedAgents([]);
-    setActiveAgentId(null);
-    setSingleDraft(null);
-  };
+  const removeSelectedAgents = () => removeAgents(selectedAgents);
+  const removeSingleAgent = () => selectedAgent && removeAgents([selectedAgent.id]);
 
   const getCurrentCapacity = () => {
     if (isSingleEditMode && selectedAgent) {
       return singleView?.capacity ?? selectedAgent.capacity;
     }
-
-    if (isBulkMode) {
-      return capacityDraft ?? 2; // default bulk mock
-    }
-
+    if (isBulkMode) return capacityDraft ?? BULK_DEFAULT_CAPACITY;
     return 0;
   };
 
@@ -217,181 +198,107 @@ export function TechInspectorTemplate() {
     return bulkSkillsDraft ?? [];
   };
 
-  const increaseCapacity = () => {
+  const updateCapacityDraft = (delta: number) => {
     if (isSingleEditMode && singleView) {
       setSingleDraft({
-        name: singleView.name,
-        capacity: singleView.capacity + 1,
-        skills: singleView.skills,
+        ...singleView,
+        capacity: Math.max(1, singleView.capacity + delta),
       });
       return;
     }
-
-    setCapacityDraft((prev) => {
-      const base = prev ?? getCurrentCapacity();
-      return base + 1;
-    });
+    setCapacityDraft((prev) => Math.max(1, (prev ?? getCurrentCapacity()) + delta));
   };
 
-  const decreaseCapacity = () => {
-    if (isSingleEditMode && singleView) {
-      setSingleDraft({
-        name: singleView.name,
-        capacity: Math.max(1, singleView.capacity - 1),
-        skills: singleView.skills,
-      });
-      return;
-    }
+  const increaseCapacity = () => updateCapacityDraft(1);
+  const decreaseCapacity = () => updateCapacityDraft(-1);
 
-    setCapacityDraft((prev) => {
-      const base = prev ?? getCurrentCapacity();
-      return Math.max(1, base - 1);
+  const updateAgents = (ids: string[], patch: Partial<Agent>) => {
+    if (ids.length === 0) return;
+
+    setDefaultAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
+    setCustomAgents((prevCustom) => {
+      const existingCustom = prevCustom.map((a) =>
+        ids.includes(a.id) ? { ...a, ...patch, type: "custom" as const } : a
+      );
+      const promotedDefaults = defaultAgents
+        .filter((a) => ids.includes(a.id))
+        .map((a) => ({ ...a, ...patch, type: "custom" as const }));
+
+      return [...existingCustom, ...promotedDefaults];
     });
   };
 
   const applyBulkCapacity = () => {
     if (!isBulkMode) return;
-
     const hasCapacityDraft = capacityDraft !== null;
     const hasSkillsDraft = bulkSkillsDraft !== null;
     if (!hasCapacityDraft && !hasSkillsDraft) return;
 
-    setCustomAgents((prevCustom) => {
-      const defaultToPromote = defaultAgents
-        .filter((agent) => selectedAgents.includes(agent.id))
-        .map((agent) => ({
-          ...agent,
-          type: "custom" as const,
-          capacity: hasCapacityDraft ? capacityDraft! : agent.capacity,
-          skills: hasSkillsDraft ? bulkSkillsDraft! : agent.skills,
-        }));
+    const patch: Partial<Agent> = {};
+    if (hasCapacityDraft) patch.capacity = capacityDraft!;
+    if (hasSkillsDraft) patch.skills = bulkSkillsDraft!;
 
-      const updatedCustom = prevCustom.map((agent) =>
-        selectedAgents.includes(agent.id)
-          ? {
-              ...agent,
-              capacity: hasCapacityDraft ? capacityDraft! : agent.capacity,
-              skills: hasSkillsDraft ? bulkSkillsDraft! : agent.skills,
-            }
-          : agent,
-      );
-
-      return [...updatedCustom, ...defaultToPromote];
-    });
-
-    setDefaultAgents((prevDefault) =>
-      prevDefault.filter((agent) => !selectedAgents.includes(agent.id)),
-    );
-
+    updateAgents(selectedAgents, patch);
     setCapacityDraft(null);
     setBulkSkillsDraft(null);
   };
 
-  const applyPatchToAgent = (agentId: string, patch: Partial<Agent>) => {
-    const defaultAgent = defaultAgents.find((agent) => agent.id === agentId);
-
-    if (defaultAgent) {
-      setDefaultAgents((prev) => prev.filter((agent) => agent.id !== agentId));
-      setCustomAgents((prev) => {
-        const existing = prev.find((agent) => agent.id === agentId);
-
-        if (existing) {
-          return prev.map((agent) =>
-            agent.id === agentId
-              ? { ...agent, ...patch, type: "custom" }
-              : agent,
-          );
-        }
-
-        return [...prev, { ...defaultAgent, ...patch, type: "custom" }];
-      });
-      return;
-    }
-
-    setCustomAgents((prev) =>
-      prev.map((agent) =>
-        agent.id === agentId ? { ...agent, ...patch, type: "custom" } : agent,
-      ),
-    );
-  };
-
   const handleNameChange = (name: string) => {
     if (!singleView) return;
-    setSingleDraft({
-      ...singleView,
-      name,
-    });
+    setSingleDraft({ ...singleView, name });
   };
 
-  const changeName = () => {};
 
-  const addSkillToSingle = (skill: string) => {
-    if (!singleView) return;
-    if (singleView.skills.includes(skill)) return;
-
-    setSingleDraft({
-      ...singleView,
-      skills: [...singleView.skills, skill],
-    });
-  };
-
-  const removeSkillFromSingle = (skill: string) => {
-    if (!singleView) return;
-
-    setSingleDraft({
-      ...singleView,
-      skills: singleView.skills.filter((s) => s !== skill),
-    });
-  };
-
-  const toggleSkillForSingle = (skill: string) => {
-    if (!selectedAgent) return;
-
-    if ((singleView?.skills ?? []).includes(skill)) {
-      removeSkillFromSingle(skill);
+  const toggleSkill = (skill: string) => {
+    if (isSingleEditMode && singleView) {
+      const skills = singleView.skills;
+      const nextSkills = skills.includes(skill)
+        ? skills.filter((s) => s !== skill)
+        : [...skills, skill];
+      setSingleDraft({ ...singleView, skills: nextSkills });
       return;
     }
 
-    addSkillToSingle(skill);
+    if (isBulkMode) {
+      const current = getCurrentBulkSkills();
+      const next = current.includes(skill)
+        ? current.filter((s) => s !== skill)
+        : [...current, skill];
+      setBulkSkillsDraft(next);
+    }
   };
+
+  const toggleSkillForSingle = toggleSkill;
+  const toggleSkillForBulk = toggleSkill;
 
   const isSkillActiveInBulk = (skill: string) =>
     getCurrentBulkSkills().includes(skill);
 
-  const toggleSkillForBulk = (skill: string) => {
-    if (!isBulkMode) return;
-    const current = getCurrentBulkSkills();
-    const next = current.includes(skill)
-      ? current.filter((s) => s !== skill)
-      : [...current, skill];
-    setBulkSkillsDraft(next);
-  };
-
   const applySingleChanges = () => {
     if (!selectedAgent || !singleDraft || !hasSingleDraftChanges) return;
 
-    applyPatchToAgent(selectedAgent.id, {
+    updateAgents([selectedAgent.id], {
       name: singleDraft.name.trim() || selectedAgent.name,
       capacity: singleDraft.capacity,
       skills: singleDraft.skills,
     });
-
     setSingleDraft(null);
   };
 
   const activeSelectionMode = () => {
-    setIsSelectionMode((prev) => {
-      const nextMode = !prev;
-      setSelectedAgents([]);
-      setActiveAgentId(null);
-      setSingleDraft(null);
-      setCapacityDraft(null);
-      setBulkSkillsDraft(null);
-      return nextMode;
-    });
+    setIsSelectionMode((prev) => !prev);
+    clearSelection();
   };
 
-  const stupidFunction = (agent: Agent) => {
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    clearSelection();
+  };
+
+  const handleAgentSelection = (agent: Agent) => {
+    const expectedType = activeTab === "custom-agents" ? "custom" : "default";
+    if (agent.type !== expectedType) return;
+
     if (!isSelectionMode) {
       setActiveAgentId(agent.id);
       setSelectedAgents([agent.id]);
@@ -401,38 +308,37 @@ export function TechInspectorTemplate() {
       return;
     }
 
-    setSelectedAgents((prev) => {
-      const next = prev.includes(agent.id)
-        ? prev.filter((a) => a !== agent.id)
-        : [...prev, agent.id];
+    const nextSelected = selectedAgents.includes(agent.id)
+      ? selectedAgents.filter((a) => a !== agent.id)
+      : [...selectedAgents, agent.id];
 
-      if (next.length === 1) {
-        setActiveAgentId(next[0]);
-      } else {
-        setActiveAgentId(null);
-        if (capacityDraft === null) {
-          const selected = allAgents.filter((a) => next.includes(a.id));
-          const allSameCapacity =
-            selected.length > 0 &&
-            selected.every((a) => a.capacity === selected[0].capacity);
-          setCapacityDraft(
-            allSameCapacity ? selected[0].capacity : BULK_DEFAULT_CAPACITY,
-          );
-        }
+    setSelectedAgents(nextSelected);
 
-        if (bulkSkillsDraft === null) {
-          const selected = allAgents.filter((a) => next.includes(a.id));
-          const intersection = SKILL_POOL.filter(
-            (skill) =>
-              selected.length > 0 &&
-              selected.every((a) => a.skills.includes(skill)),
-          );
-          setBulkSkillsDraft(intersection);
-        }
+    if (nextSelected.length === 1) {
+      setActiveAgentId(nextSelected[0]);
+    } else {
+      setActiveAgentId(null);
+
+      if (capacityDraft === null) {
+        const selected = allAgents.filter((a) => nextSelected.includes(a.id));
+        const allSameCapacity =
+          selected.length > 0 &&
+          selected.every((a) => a.capacity === selected[0].capacity);
+        setCapacityDraft(
+          allSameCapacity ? selected[0].capacity : BULK_DEFAULT_CAPACITY,
+        );
       }
 
-      return next;
-    });
+      if (bulkSkillsDraft === null) {
+        const selected = allAgents.filter((a) => nextSelected.includes(a.id));
+        const intersection = SKILL_POOL.filter(
+          (skill) =>
+            selected.length > 0 &&
+            selected.every((a) => a.skills.includes(skill)),
+        );
+        setBulkSkillsDraft(intersection);
+      }
+    }
   };
 
   return (
@@ -459,13 +365,15 @@ export function TechInspectorTemplate() {
         />
 
         {/* LIST */}
-        <AgentList
+        <AgentTabs
           customAgents={customAgents}
           defaultAgents={defaultAgents}
           selectedAgents={selectedAgents}
           activeAgentId={activeAgentId}
           isSelectionMode={isSelectionMode}
-          stupidFunction={stupidFunction}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          handleAgentSelection={handleAgentSelection}
         />
       </div>
 
@@ -492,7 +400,7 @@ export function TechInspectorTemplate() {
         toggleSkillForBulk={toggleSkillForBulk}
         isSingleEditMode={isSingleEditMode}
       />
-      
+
 
       {/* FOOTER STATUS */}
       <Footer

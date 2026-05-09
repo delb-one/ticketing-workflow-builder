@@ -1,3 +1,4 @@
+"use client";
 import { Agent } from "../TechInspectorTemplate";
 
 export const SKILL_POOL = [
@@ -87,11 +88,10 @@ export const EditSection = ({
 
             <div className="flex items-center gap-2">
               <div
-                className={`h-2 w-2 rounded-full ${
-                  selectedAgent.status === "busy"
+                className={`h-2 w-2 rounded-full ${selectedAgent.status === "busy"
                     ? "bg-orange-500"
                     : "bg-green-500"
-                }`}
+                  }`}
               />
 
               <span className="text-[10px] text-muted-foreground capitalize">
@@ -161,11 +161,10 @@ export const EditSection = ({
                   <button
                     key={skill}
                     onClick={() => toggleSkillForSingle(skill)}
-                    className={`text-[10px] px-2 py-1 rounded border transition-colors ${
-                      isActive
+                    className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
                         ? "bg-primary text-secondary border-primary"
                         : "bg-muted hover:bg-muted/80 border-transparent"
-                    }`}
+                      }`}
                   >
                     {skill}
                   </button>
@@ -268,11 +267,10 @@ export const EditSection = ({
                   <button
                     key={skill}
                     onClick={() => toggleSkillForBulk(skill)}
-                    className={`text-[10px] px-2 py-1 rounded border transition-colors ${
-                      isActive
+                    className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
                         ? "bg-primary text-secondary border-primary"
                         : "bg-muted hover:bg-muted/80 border-transparent"
-                    }`}
+                      }`}
                   >
                     {skill}
                   </button>

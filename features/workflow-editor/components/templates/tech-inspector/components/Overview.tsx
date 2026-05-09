@@ -1,8 +1,9 @@
+"use client";
 interface OverviewProps {
-    totalAgents: number;
-    totalCapacity: number;
-    busyAgents: number;
-    availableAgents: number;
+  totalAgents: number;
+  totalCapacity: number;
+  busyAgents: number;
+  availableAgents: number;
 }
 
 

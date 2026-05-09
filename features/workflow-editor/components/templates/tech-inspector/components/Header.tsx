@@ -1,3 +1,4 @@
+"use client";
 interface HeaderProps {
   loadPercentage: number;
   loadColor: string;

@@ -1,3 +1,4 @@
+"use client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Agent } from "../TechInspectorTemplate";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,20 +10,24 @@ interface AgentListProps {
   selectedAgents: string[];
   activeAgentId: string | null;
   isSelectionMode: boolean;
-  stupidFunction: (agent: Agent) => void;
+  activeTab: string;
+  onTabChange: (value: string) => void;
+  handleAgentSelection: (agent: Agent) => void;
 }
 
-export const AgentList = ({
+export const AgentTabs = ({
   customAgents,
   defaultAgents,
   selectedAgents,
   activeAgentId,
   isSelectionMode,
-  stupidFunction,
+  activeTab,
+  onTabChange,
+  handleAgentSelection,
 }: AgentListProps) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col p-2">
-      <Tabs defaultValue="custom-agents" className="flex flex-1 flex-col min-h-0">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="flex flex-1 flex-col min-h-0">
         <TabsList variant="line" className="shrink-0">
           <TabsTrigger value="custom-agents">
             {" "}
@@ -37,33 +42,28 @@ export const AgentList = ({
           <ScrollArea className="h-full pr-3">
             <div className="grid grid-cols-2 gap-2 mt-2">
               {customAgents.map((agent) => {
-                const isSelected = selectedAgents.includes(agent.id);
-
-                const isActive = activeAgentId === agent.id && !isSelectionMode;
-                const isSelectionActive = isSelectionMode && isSelected;
+                const isHighlighted = isSelectionMode
+                  ? selectedAgents.includes(agent.id)
+                  : activeAgentId === agent.id;
 
                 return (
                   <div
                     key={agent.id}
-                    onClick={() => stupidFunction(agent)}
-                    className={`
-                    flex items-center gap-2 p-1 rounded cursor-pointer border transition-colors
-                    ${
-                      isSelectionActive
-                        ? "bg-primary/10 border-primary/30"
-                        : isActive
-                          ? "bg-primary/10 border-primary/30"
+                    onClick={() => handleAgentSelection(agent)}
+                    className={`flex items-center gap-2 p-1 rounded cursor-pointer border transition-all ${isSelectionMode ? "border-dashed" : "border-solid"
+                      } ${isHighlighted
+                        ? "bg-primary/10 border-primary border-solid"
+                        : isSelectionMode
+                          ? "border-muted-foreground/30 hover:bg-muted"
                           : "border-transparent hover:bg-muted"
-                    }
-                  `}
+                      }`}
                   >
                     {/* STATUS */}
                     <div
-                      className={`h-2 w-2 rounded-full shrink-0 ${
-                        agent.status === "busy"
-                          ? "bg-orange-500"
-                          : "bg-green-500"
-                      }`}
+                      className={`h-2 w-2 rounded-full shrink-0 ${agent.status === "busy"
+                        ? "bg-orange-500"
+                        : "bg-green-500"
+                        }`}
                     />
 
                     {/* CONTENT */}
@@ -89,33 +89,28 @@ export const AgentList = ({
           <ScrollArea className="h-full pr-3">
             <div className="grid grid-cols-2 gap-2 mt-2">
               {defaultAgents.map((agent) => {
-                const isSelected = selectedAgents.includes(agent.id);
-
-                const isActive = activeAgentId === agent.id && !isSelectionMode;
-                const isSelectionActive = isSelectionMode && isSelected;
+                const isHighlighted = isSelectionMode
+                  ? selectedAgents.includes(agent.id)
+                  : activeAgentId === agent.id;
 
                 return (
                   <div
                     key={agent.id}
-                    onClick={() => stupidFunction(agent)}
-                    className={`
-                    flex items-center gap-2 p-1 rounded cursor-pointer border transition-colors
-                    ${
-                      isSelectionActive
-                        ? "bg-primary/10 border-primary/30"
-                        : isActive
-                          ? "bg-primary/10 border-primary/30"
+                    onClick={() => handleAgentSelection(agent)}
+                    className={`flex items-center gap-2 p-1 rounded cursor-pointer border transition-all ${isSelectionMode ? "border-dashed" : "border-solid"
+                      } ${isHighlighted
+                        ? "bg-primary/10 border-primary border-solid"
+                        : isSelectionMode
+                          ? "border-muted-foreground/30 hover:bg-muted"
                           : "border-transparent hover:bg-muted"
-                    }
-                  `}
+                      }`}
                   >
                     {/* STATUS */}
                     <div
-                      className={`h-2 w-2 rounded-full shrink-0 ${
-                        agent.status === "busy"
-                          ? "bg-orange-500"
-                          : "bg-green-500"
-                      }`}
+                      className={`h-2 w-2 rounded-full shrink-0 ${agent.status === "busy"
+                        ? "bg-orange-500"
+                        : "bg-green-500"
+                        }`}
                     />
 
                     {/* CONTENT */}

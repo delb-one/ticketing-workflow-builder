@@ -1,3 +1,4 @@
+"use client";
 import { Edit, Plus, RotateCcw, SlidersHorizontal } from "lucide-react";
 
 interface ActionBarProps {
