@@ -297,7 +297,7 @@ export default function ControlsPanel() {
       {/* CONTROLS */}
       <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
         {/* STATUS */}
-        <div className=" left-3 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="left-3 flex items-center gap-2 text-xs text-muted-foreground">
           <span
             className={`h-2 w-2 rounded-full ${
               !isSimulating
