@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useWorkflowStore } from "@/lib/store";
-import { Activity } from "lucide-react";
+import { Activity, FilterX, Undo } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { getTicketStateBadgeClass } from "@/lib/colors/color-map";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -18,56 +19,124 @@ import {
 export function TicketMonitorPanel() {
   const { engineState, nodes } = useWorkflowStore();
   const runtimes = engineState ? Object.values(engineState.runtimes) : [];
-  const [stateFilter, setStateFilter] = useState<"all" | "open" | "assigned" | "pending" | "resolved" | "closed" | "reopened">("all");
+  const [stateFilter, setStateFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [impactFilter, setImpactFilter] = useState<string>("all");
 
   const getNodeLabel = (nodeId: string | null) => {
     if (!nodeId) return "N/A";
     const node = nodes.find((n) => n.id === nodeId);
     return node ? node.data.label : nodeId;
   };
+  const priorityOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          runtimes
+            .map((rt) => rt.ticket.priority)
+            .filter((priority) => Boolean(priority)),
+        ),
+      ),
+    [runtimes],
+  );
+
+  const impactOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          runtimes
+            .map((rt) => rt.ticket.impact)
+            .filter((impact) => Boolean(impact)),
+        ),
+      ),
+    [runtimes],
+  );
+
+  const stateOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          runtimes
+            .map((rt) => rt.ticket.state)
+            .filter((state) => Boolean(state)),
+        ),
+      ),
+    [runtimes],
+  );
+
   const filteredRuntimes = useMemo(
     () =>
-      stateFilter === "all"
-        ? runtimes
-        : runtimes.filter((rt) => rt.ticket.state === stateFilter),
-    [runtimes, stateFilter],
+      runtimes.filter((rt) => {
+        const matchesState =
+          stateFilter === "all" || rt.ticket.state === stateFilter;
+        const matchesPriority =
+          priorityFilter === "all" || rt.ticket.priority === priorityFilter;
+        const matchesImpact =
+          impactFilter === "all" || rt.ticket.impact === impactFilter;
+
+        return matchesState && matchesPriority && matchesImpact;
+      }),
+    [runtimes, stateFilter, priorityFilter, impactFilter],
   );
 
   return (
-    <CustomPanel
-      value="ticket-monitor"
-      title="Ticket Monitor"
-      icon={Activity}
-    >
+    <CustomPanel value="ticket-monitor" title="Ticket Monitor" icon={Activity}>
       <div className="mb-2">
-        <Select
-          value={stateFilter}
-          onValueChange={(value) =>
-            setStateFilter(
-              value as
-                | "all"
-                | "open"
-                | "assigned"
-                | "pending"
-                | "resolved"
-                | "closed"
-                | "reopened",
-            )
-          }
-        >
-          <SelectTrigger className="h-7 w-40 text-[11px]">
-            <SelectValue placeholder="All States" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All States</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="assigned">Assigned</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
-            <SelectItem value="reopened">Reopened</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <Select value={stateFilter} onValueChange={setStateFilter} >
+              <SelectTrigger className="text-xs">
+                <SelectValue placeholder="All States" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {stateOptions.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="text-xs">
+                <SelectValue placeholder="All Priorities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                {priorityOptions.map((priority) => (
+                  <SelectItem key={priority} value={priority}>
+                    {priority}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={impactFilter} onValueChange={setImpactFilter}>
+              <SelectTrigger className="text-xs">
+                <SelectValue placeholder="All Impacts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Impacts</SelectItem>
+                {impactOptions.map((impact) => (
+                  <SelectItem key={impact} value={impact}>
+                    {impact}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              setStateFilter("all");
+              setPriorityFilter("all");
+              setImpactFilter("all");
+            }}
+          >
+            <FilterX className="h-4 w-4" />{" "}
+          </Button>
+        </div>
       </div>
       <ScrollArea className="w-full">
         <div className="max-h-80 ">
@@ -110,9 +179,15 @@ export function TicketMonitorPanel() {
                         {rt.ticket.state}
                       </Badge>
                     </td>
-                    <td className="px-2 py-2 text-xs uppercase">{rt.ticket.priority}</td>
-                    <td className="px-2 py-2 text-xs uppercase">{rt.ticket.impact}</td>
-                    <td className="px-2 py-2 text-xs truncate">{rt.ticket.category ?? "-"}</td>
+                    <td className="px-2 py-2 text-xs uppercase">
+                      {rt.ticket.priority}
+                    </td>
+                    <td className="px-2 py-2 text-xs uppercase">
+                      {rt.ticket.impact}
+                    </td>
+                    <td className="px-2 py-2 text-xs truncate">
+                      {rt.ticket.category ?? "-"}
+                    </td>
 
                     <td className="px-2 py-2 text-xs truncate">
                       {rt.completed
@@ -127,9 +202,7 @@ export function TicketMonitorPanel() {
                     </td>
 
                     <td className="px-2 py-2 text-xs uppercase font-mono truncate">
-                      {rt.ticket.queue != null
-                        ? `${rt.ticket.queue}`
-                        : "-"}
+                      {rt.ticket.queue != null ? `${rt.ticket.queue}` : "-"}
                     </td>
                   </tr>
                 ))
