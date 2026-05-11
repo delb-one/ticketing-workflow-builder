@@ -83,6 +83,9 @@ export interface WorkflowStore {
   clearSimulationEvents: () => void;
   updateSimulationConfig: (config: Partial<SimulationConfig>) => void;
   addTicketTemplate: (template: TicketTemplate) => void;
+  addAgentProfile: (agent: Agent) => void;
+  removeAgentProfiles: (ids: string[]) => void;
+  replaceAgentPool: (agents: Agent[]) => void;
   updateAgentProfile: (agentId: string, updates: Partial<Agent>) => void;
   clearWorkflow: () => void;
   loadWorkflow: (nodes: CustomNode[], edges: Edge[]) => void;
@@ -129,6 +132,34 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       simulationConfig: {
         ...state.simulationConfig,
         ticketTemplates: [...state.simulationConfig.ticketTemplates, template],
+      },
+    }));
+  },
+  addAgentProfile(agent) {
+    set((state) => ({
+      simulationConfig: {
+        ...state.simulationConfig,
+        agentPool: [...state.simulationConfig.agentPool, agent],
+      },
+    }));
+  },
+
+  removeAgentProfiles(ids) {
+    set((state) => ({
+      simulationConfig: {
+        ...state.simulationConfig,
+        agentPool: state.simulationConfig.agentPool.filter(
+          (agent) => !ids.includes(agent.id),
+        ),
+      },
+    }));
+  },
+
+  replaceAgentPool(agents) {
+    set((state) => ({
+      simulationConfig: {
+        ...state.simulationConfig,
+        agentPool: agents,
       },
     }));
   },

@@ -1,22 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "./components/Header";
 import { Overview } from "./components/Overview";
 import { ActionBar } from "./components/ActionBar";
 import { AgentTabs } from "./components/AgentTabs";
 import { Footer } from "./components/Footer";
 import { EditSection, SKILL_POOL } from "./components/EditSection";
-import { CustomNode } from "@/lib/store";
+import { CustomNode, useWorkflowStore } from "@/lib/store";
+import type { Agent as SimulationAgent } from "@/lib/simulation/types";
 
-export type Agent = {
-  id: string;
-  name: string;
-  status: "busy" | "available";
-  type: "default" | "custom";
-  efficiency: number;
-  capacity: number;
-  skills: string[];
-};
+export type Agent = SimulationAgent;
 
 interface TechInspectorProps {
   selectedNode: CustomNode;
@@ -24,8 +17,22 @@ interface TechInspectorProps {
 }
 
 const BULK_DEFAULT_CAPACITY = 2;
+type SingleDraft = {
+  name: string;
+  capacity: number;
+  efficiency: number;
+  skills: string[];
+};
 
 export function TechInspector({ selectedNode }: TechInspectorProps) {
+  const {
+    simulationConfig,
+    engineState,
+    addAgentProfile,
+    removeAgentProfiles,
+    replaceAgentPool,
+    isSimulating,
+  } = useWorkflowStore();
   const [activeTab, setActiveTab] = useState<string>("custom-agents");
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
@@ -34,50 +41,23 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [capacityDraft, setCapacityDraft] = useState<number | null>(null);
+  const [efficiencyDraft, setEfficiencyDraft] = useState<number | null>(null);
   const [bulkSkillsDraft, setBulkSkillsDraft] = useState<string[] | null>(null);
-  const [singleDraft, setSingleDraft] = useState<{
-    name: string;
-    capacity: number;
-    skills: string[];
-  } | null>(null);
+  const [singleDraft, setSingleDraft] = useState<SingleDraft | null>(null);
 
-  const [customAgents, setCustomAgents] = useState<Agent[]>([
-    {
-      id: "1",
-      name: "Mario Rossi",
-      status: "busy",
-      type: "custom",
-      efficiency: 0.8,
-      capacity: 2,
-      skills: ["network", "hardware"],
-    },
-    {
-      id: "2",
-      name: "Luigi Rossi",
-      status: "available",
-      type: "custom",
-      efficiency: 0.9,
-      capacity: 1,
-      skills: ["security"],
-    },
-  ]);
-
-  const [defaultAgents, setDefaultAgents] = useState<Agent[]>(
-    Array.from({ length: 5 }).map((_, i) => ({
-      id: `d-${i}`,
-      name: `L1-${i + 1}`,
-      status: i % 2 === 0 ? "available" : "busy",
-      type: "default",
-      efficiency: 1,
-      capacity: 1,
-      skills: [],
-    })),
-  );
-  const allAgents = [...customAgents, ...defaultAgents];
+  const liveAgents = engineState?.agents ?? [];
+  const allAgents = isSimulating
+    ? simulationConfig.agentPool.map((agent) => {
+      const live = liveAgents.find((a) => a.id === agent.id);
+      return live ? { ...agent, status: live.status, currentTicketId: live.currentTicketId } : agent;
+    })
+    : simulationConfig.agentPool;
+  const customAgents = allAgents.filter((agent) => agent.type === "custom");
+  const defaultAgents = allAgents.filter((agent) => agent.type === "default");
 
   const getNextDefaultAgentId = () => {
     const used = new Set(
-      [...customAgents, ...defaultAgents].map((agent) => agent.id),
+      allAgents.map((agent) => agent.id),
     );
 
     let index = 0;
@@ -88,15 +68,50 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     return `d-${index}`;
   };
 
+  useEffect(() => {
+    const validIds = new Set(allAgents.map((agent) => agent.id));
+    setSelectedAgents((prev) => {
+      const next = prev.filter((id) => validIds.has(id));
+      if (next.length === prev.length && next.every((id, index) => id === prev[index])) {
+        return prev;
+      }
+      return next;
+    });
+    setActiveAgentId((prev) => {
+      const next = prev && validIds.has(prev) ? prev : null;
+      return next === prev ? prev : next;
+    });
+  }, [allAgents]);
+
+  useEffect(() => {
+    if (selectedAgents.length === 0) {
+      setSingleDraft(null);
+      setCapacityDraft(null);
+      setEfficiencyDraft(null);
+      setBulkSkillsDraft(null);
+      return;
+    }
+
+    if (selectedAgents.length === 1) {
+      setCapacityDraft(null);
+      setEfficiencyDraft(null);
+      setBulkSkillsDraft(null);
+      return;
+    }
+
+    setSingleDraft(null);
+  }, [selectedAgents.length]);
+
   const selectedAgent =
     allAgents.find((agent) => agent.id === activeAgentId) ?? null;
   const singleView =
     selectedAgent === null
       ? null
       : {
-        name: singleDraft?.name ?? selectedAgent.name,
+        name: singleDraft?.name ?? selectedAgent.name ?? selectedAgent.id,
         capacity: singleDraft?.capacity ?? selectedAgent.capacity,
-        skills: singleDraft?.skills ?? selectedAgent.skills,
+        efficiency: singleDraft?.efficiency ?? selectedAgent.efficiency,
+        skills: singleDraft?.skills ?? selectedAgent.skills ?? [],
       };
 
   const isBulkMode = selectedAgents.length > 1;
@@ -107,37 +122,40 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   const hasSingleDraftChanges =
     !!selectedAgent &&
     !!singleDraft &&
-    (singleDraft.name !== selectedAgent.name ||
+    (singleDraft.name !== (selectedAgent.name ?? selectedAgent.id) ||
       singleDraft.capacity !== selectedAgent.capacity ||
+      singleDraft.efficiency !== selectedAgent.efficiency ||
       JSON.stringify(singleDraft.skills) !==
-      JSON.stringify(selectedAgent.skills));
+      JSON.stringify(selectedAgent.skills ?? []));
 
   const addDefaultAgent = () => {
+    if (isSimulating) return;
     const nextId = getNextDefaultAgentId();
-
-    setDefaultAgents((prev) => [
-      ...prev,
-      {
-        id: nextId,
-        name: `L1-${defaultAgents.length + 1}`,
-        status: "available",
-        type: "default",
-        efficiency: 1,
-        capacity: 1,
-        skills: [],
-      },
-    ]);
+    addAgentProfile({
+      id: nextId,
+      name: `L1-${defaultAgents.length + 1}`,
+      status: "available",
+      type: "default",
+      efficiency: 1,
+      capacity: 1,
+      skills: [],
+      level: "l1",
+    });
   };
 
   const normalizeAgents = () => {
-    setCustomAgents((prev) =>
-      prev.map((agent) => ({
+    if (isSimulating) return;
+    const normalized = allAgents.map((agent) =>
+      agent.type === "custom"
+        ? {
         ...agent,
         skills: ["network", "hardware"],
         efficiency: 0.8,
         capacity: 2,
-      })),
+          }
+        : agent,
     );
+    replaceAgentPool(normalized);
   };
 
   const clearSelection = () => {
@@ -145,11 +163,13 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     setActiveAgentId(null);
     setSingleDraft(null);
     setCapacityDraft(null);
+    setEfficiencyDraft(null);
     setBulkSkillsDraft(null);
   };
 
   const resetCustomAgents = () => {
-    setCustomAgents([]);
+    if (isSimulating) return;
+    removeAgentProfiles(customAgents.map((agent) => agent.id));
     clearSelection();
   };
 
@@ -179,12 +199,12 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
         : "bg-red-500";
 
   const removeAgents = (ids: string[]) => {
+    if (isSimulating) return;
     if (ids.length === 0) return;
     const shouldRemove = window.confirm(`Remove ${ids.length} agent(s)?`);
     if (!shouldRemove) return;
 
-    setCustomAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
-    setDefaultAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
+    removeAgentProfiles(ids);
     clearSelection();
   };
 
@@ -204,58 +224,78 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     return bulkSkillsDraft ?? [];
   };
 
-  const updateCapacityDraft = (delta: number) => {
+  const getCurrentEfficiency = () => {
+    if (isSingleEditMode && selectedAgent) {
+      return singleView?.efficiency ?? selectedAgent.efficiency;
+    }
+    if (isBulkMode) return efficiencyDraft ?? 1;
+    return 1;
+  };
+
+  const updateEfficiencyDraft = (value: number) => {
+    const next = Math.max(0.1, Math.min(2, Number(value.toFixed(1))));
     if (isSingleEditMode && singleView) {
       setSingleDraft({
         ...singleView,
-        capacity: Math.max(1, singleView.capacity + delta),
+        efficiency: next,
       });
       return;
     }
-    setCapacityDraft((prev) => Math.max(1, (prev ?? getCurrentCapacity()) + delta));
+    setEfficiencyDraft(next);
   };
 
-  const increaseCapacity = () => updateCapacityDraft(1);
-  const decreaseCapacity = () => updateCapacityDraft(-1);
+  const updateCapacityDraftFromSlider = (value: number) => {
+    const next = Math.max(1, Math.round(value));
+    if (isSingleEditMode && singleView) {
+      setSingleDraft({
+        ...singleView,
+        capacity: next,
+      });
+      return;
+    }
+    setCapacityDraft(next);
+  };
 
   const updateAgents = (ids: string[], patch: Partial<Agent>) => {
+    if (isSimulating) return;
     if (ids.length === 0) return;
 
-    setDefaultAgents((prev) => prev.filter((a) => !ids.includes(a.id)));
-    setCustomAgents((prevCustom) => {
-      const existingCustom = prevCustom.map((a) =>
-        ids.includes(a.id) ? { ...a, ...patch, type: "custom" as const } : a
-      );
-      const promotedDefaults = defaultAgents
-        .filter((a) => ids.includes(a.id))
-        .map((a) => ({ ...a, ...patch, type: "custom" as const }));
-
-      return [...existingCustom, ...promotedDefaults];
-    });
+    const next = allAgents.map((agent) =>
+      ids.includes(agent.id)
+        ? { ...agent, ...patch, type: "custom" as const }
+        : agent,
+    );
+    replaceAgentPool(next);
   };
 
   const applyBulkCapacity = () => {
+    if (isSimulating) return;
     if (!isBulkMode) return;
     const hasCapacityDraft = capacityDraft !== null;
+    const hasEfficiencyDraft = efficiencyDraft !== null;
     const hasSkillsDraft = bulkSkillsDraft !== null;
-    if (!hasCapacityDraft && !hasSkillsDraft) return;
+    if (!hasCapacityDraft && !hasEfficiencyDraft && !hasSkillsDraft) return;
 
     const patch: Partial<Agent> = {};
-    if (hasCapacityDraft) patch.capacity = capacityDraft!;
-    if (hasSkillsDraft) patch.skills = bulkSkillsDraft!;
+    if (hasCapacityDraft && capacityDraft !== null) patch.capacity = capacityDraft;
+    if (hasEfficiencyDraft && efficiencyDraft !== null) patch.efficiency = efficiencyDraft;
+    if (hasSkillsDraft && bulkSkillsDraft !== null) patch.skills = bulkSkillsDraft;
 
     updateAgents(selectedAgents, patch);
     setCapacityDraft(null);
+    setEfficiencyDraft(null);
     setBulkSkillsDraft(null);
   };
 
   const handleNameChange = (name: string) => {
+    if (isSimulating) return;
     if (!singleView) return;
     setSingleDraft({ ...singleView, name });
   };
 
 
   const toggleSkill = (skill: string) => {
+    if (isSimulating) return;
     if (isSingleEditMode && singleView) {
       const skills = singleView.skills;
       const nextSkills = skills.includes(skill)
@@ -281,17 +321,20 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     getCurrentBulkSkills().includes(skill);
 
   const applySingleChanges = () => {
+    if (isSimulating) return;
     if (!selectedAgent || !singleDraft || !hasSingleDraftChanges) return;
 
     updateAgents([selectedAgent.id], {
-      name: singleDraft.name.trim() || selectedAgent.name,
+      name: singleDraft.name.trim() || selectedAgent.name || selectedAgent.id,
       capacity: singleDraft.capacity,
       skills: singleDraft.skills,
+      efficiency: singleDraft.efficiency,
     });
     setSingleDraft(null);
   };
 
   const activeSelectionMode = () => {
+    if (isSimulating) return;
     setIsSelectionMode((prev) => !prev);
     clearSelection();
   };
@@ -302,6 +345,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   };
 
   const handleAgentSelection = (agent: Agent) => {
+    if (isSimulating) return;
     const expectedType = activeTab === "custom-agents" ? "custom" : "default";
     if (agent.type !== expectedType) return;
 
@@ -310,6 +354,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
       setSelectedAgents([agent.id]);
       setSingleDraft(null);
       setCapacityDraft(null);
+      setEfficiencyDraft(null);
       setBulkSkillsDraft(null);
       return;
     }
@@ -340,7 +385,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
         const intersection = SKILL_POOL.filter(
           (skill) =>
             selected.length > 0 &&
-            selected.every((a) => a.skills.includes(skill)),
+            selected.every((a) => (a.skills ?? []).includes(skill)),
         );
         setBulkSkillsDraft(intersection);
       }
@@ -368,6 +413,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
           normalizeAgents={normalizeAgents}
           resetCustomAgents={resetCustomAgents}
           activeSelectionMode={activeSelectionMode}
+          disabled={isSimulating}
         />
 
         {/* LIST */}
@@ -392,9 +438,11 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
         hasSingleDraftChanges={hasSingleDraftChanges}
         singleView={singleView}
         capacityDraft={capacityDraft}
+        efficiencyDraft={efficiencyDraft}
         bulkSkillsDraft={bulkSkillsDraft}
-        decreaseCapacity={decreaseCapacity}
-        increaseCapacity={increaseCapacity}
+        updateCapacityDraftFromSlider={updateCapacityDraftFromSlider}
+        getCurrentEfficiency={getCurrentEfficiency}
+        updateEfficiencyDraft={updateEfficiencyDraft}
         removeSingleAgent={removeSingleAgent}
         removeSelectedAgents={removeSelectedAgents}
         handleNameChange={handleNameChange}
@@ -405,6 +453,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
         isSkillActiveInBulk={isSkillActiveInBulk}
         toggleSkillForBulk={toggleSkillForBulk}
         isSingleEditMode={isSingleEditMode}
+        disabled={isSimulating}
       />
 
 

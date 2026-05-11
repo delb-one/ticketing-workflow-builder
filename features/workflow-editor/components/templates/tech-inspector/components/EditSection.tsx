@@ -1,5 +1,6 @@
 "use client";
 import { Agent } from "../TechInspector";
+import { Slider } from "@/components/ui/slider";
 
 export const SKILL_POOL = [
   "network",
@@ -14,6 +15,7 @@ export const SKILL_POOL = [
 type SingleView = {
   name: string;
   capacity: number;
+  efficiency: number;
   skills: string[]
 }
 
@@ -26,9 +28,11 @@ interface EditSectionProps {
   selectedAgent: Agent | null;
   singleView: SingleView | null;
   capacityDraft: number | null;
+  efficiencyDraft: number | null;
   bulkSkillsDraft: string[] | null;
-  decreaseCapacity: () => void;
-  increaseCapacity: () => void;
+  getCurrentEfficiency: () => number;
+  updateEfficiencyDraft: (value: number) => void;
+  updateCapacityDraftFromSlider: (value: number) => void;
   removeSingleAgent: () => void;
   removeSelectedAgents: () => void;
   handleNameChange: (name: string) => void;
@@ -38,6 +42,7 @@ interface EditSectionProps {
   toggleSkillForSingle: (skill: string) => void;
   isSkillActiveInBulk: (skill: string) => boolean;
   toggleSkillForBulk: (skill: string) => void;
+  disabled?: boolean;
 }
 
 export const EditSection = ({
@@ -48,8 +53,9 @@ export const EditSection = ({
   selectedAgent,
   hasSingleDraftChanges,
   singleView,
-  decreaseCapacity,
-  increaseCapacity,
+  updateCapacityDraftFromSlider,
+  getCurrentEfficiency,
+  updateEfficiencyDraft,
   removeSingleAgent,
   handleNameChange,
   applySingleChanges,
@@ -57,10 +63,12 @@ export const EditSection = ({
   applyBulkCapacity,
   removeSelectedAgents,
   capacityDraft,
+  efficiencyDraft,
   bulkSkillsDraft,
   toggleSkillForSingle,
   isSkillActiveInBulk,
   toggleSkillForBulk,
+  disabled = false,
 }: EditSectionProps) => {
   return (
     <div className="border-t p-3 space-y-3 bg-card">
@@ -103,50 +111,41 @@ export const EditSection = ({
                   {selectedAgent.type}
                 </p> */}
 
-          {/* EFFICIENCY */}
-          {/* <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs">Efficiency</p>
-                <span className="text-[10px] text-muted-foreground">
-                  {selectedAgent.efficiency}
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.1}
-                value={selectedAgent.efficiency}
-                className="w-full"
-              />
-            </div> */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs">Efficiency</p>
+              <span className="text-[10px] text-muted-foreground">
+                {getCurrentEfficiency().toFixed(1)}
+              </span>
+            </div>
+            <Slider
+              value={[getCurrentEfficiency()]}
+              min={0.1}
+              max={2}
+              step={0.1}
+              disabled={disabled}
+              onValueChange={(value) => updateEfficiencyDraft(value[0] ?? 1)}
+            />
+          </div>
 
           {/* CAPACITY (FIXED) */}
           <div className="space-y-2">
-            <p className="text-xs">Capacity</p>
-
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={decreaseCapacity}
-                  className="px-2 border rounded hover:bg-muted"
-                >
-                  -
-                </button>
-
-                <span className="text-xs font-medium">
-                  {getCurrentCapacity()}
-                </span>
-
-                <button
-                  onClick={increaseCapacity}
-                  className="px-2 border rounded hover:bg-muted"
-                >
-                  +
-                </button>
-              </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs">Capacity</p>
+              <span className="text-[10px] text-muted-foreground">
+                {getCurrentCapacity()}
+              </span>
             </div>
+            <Slider
+              value={[getCurrentCapacity()]}
+              min={1}
+              max={5}
+              step={1}
+              disabled={disabled}
+              onValueChange={(value) =>
+                updateCapacityDraftFromSlider(value[0] ?? 1)
+              }
+            />
           </div>
 
           {/* SKILLS */}
@@ -161,6 +160,7 @@ export const EditSection = ({
                   <button
                     key={skill}
                     onClick={() => toggleSkillForSingle(skill)}
+                    disabled={disabled}
                     className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
                       ? "bg-primary text-secondary border-primary"
                       : "bg-muted hover:bg-muted/80 border-transparent"
@@ -181,7 +181,7 @@ export const EditSection = ({
           <div className="flex items-center gap-2">
             <button
               onClick={applySingleChanges}
-              disabled={!hasSingleDraftChanges}
+              disabled={disabled || !hasSingleDraftChanges}
               className="w-full text-xs bg-primary text-secondary rounded py-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Apply Changes
@@ -189,6 +189,7 @@ export const EditSection = ({
 
             <button
               onClick={removeSingleAgent}
+              disabled={disabled}
               className="w-full text-xs border border-red-500 text-red-500 rounded py-1 hover:bg-red-500/10"
             >
               Remove Agent
@@ -209,50 +210,41 @@ export const EditSection = ({
             </span>
           </div>
 
-          {/* EFFICIENCY */}
-          {/* <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs">Efficiency</p>
-                <span className="text-[10px] text-muted-foreground">Mixed</span>
-              </div>
-
-              <input type="range" className="w-full" />
-            </div> */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs">Efficiency</p>
+              <span className="text-[10px] text-muted-foreground">
+                {getCurrentEfficiency().toFixed(1)}
+              </span>
+            </div>
+            <Slider
+              value={[getCurrentEfficiency()]}
+              min={0.1}
+              max={2}
+              step={0.1}
+              disabled={disabled}
+              onValueChange={(value) => updateEfficiencyDraft(value[0] ?? 1)}
+            />
+          </div>
 
           {/* CAPACITY (SHARED LOGIC) */}
           <div className="space-y-2">
-            <p className="text-xs">Capacity</p>
-
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={decreaseCapacity}
-                  className="px-2 border rounded hover:bg-muted"
-                >
-                  -
-                </button>
-
-                <span className="text-xs font-medium">
-                  {getCurrentCapacity()}
-                </span>
-
-                <button
-                  onClick={increaseCapacity}
-                  className="px-2 border rounded hover:bg-muted"
-                >
-                  +
-                </button>
-              </div>
-
-              {/* {capacityDraft !== null && (
-                  <button
-                    onClick={applyBulkCapacity}
-                    className="text-[10px] px-2 py-1 rounded border bg-primary text-secondary"
-                  >
-                    Apply
-                  </button>
-                )} */}
+            <div className="flex items-center justify-between">
+              <p className="text-xs">Capacity</p>
+              <span className="text-[10px] text-muted-foreground">
+                {getCurrentCapacity()}
+              </span>
             </div>
+            <Slider
+              value={[getCurrentCapacity()]}
+              min={1}
+              max={5}
+              step={1}
+              disabled={disabled}
+              onValueChange={(value) =>
+                updateCapacityDraftFromSlider(value[0] ?? 1)
+              }
+            />
           </div>
 
           {/* SKILLS */}
@@ -267,6 +259,7 @@ export const EditSection = ({
                   <button
                     key={skill}
                     onClick={() => toggleSkillForBulk(skill)}
+                    disabled={disabled}
                     className={`text-[10px] px-2 py-1 rounded border transition-colors ${isActive
                       ? "bg-primary text-secondary border-primary"
                       : "bg-muted hover:bg-muted/80 border-transparent"
@@ -281,7 +274,7 @@ export const EditSection = ({
           <div className="flex items-center gap-2">
             <button
               onClick={applyBulkCapacity}
-              disabled={capacityDraft === null && bulkSkillsDraft === null}
+              disabled={disabled || (capacityDraft === null && efficiencyDraft === null && bulkSkillsDraft === null)}
               className="w-full text-xs bg-primary text-secondary rounded py-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Apply Changes
@@ -290,6 +283,7 @@ export const EditSection = ({
             {/* REMOVE */}
             <button
               onClick={removeSelectedAgents}
+              disabled={disabled}
               className="w-full text-xs border border-red-500 text-red-500 rounded py-1 hover:bg-red-500/10"
             >
               Remove Agents

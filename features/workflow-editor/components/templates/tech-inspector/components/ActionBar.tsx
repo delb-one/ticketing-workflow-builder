@@ -7,6 +7,7 @@ interface ActionBarProps {
   normalizeAgents: () => void;
   resetCustomAgents: () => void;
   activeSelectionMode: () => void;
+  disabled?: boolean;
 }
 
 export const ActionBar = ({
@@ -15,12 +16,14 @@ export const ActionBar = ({
   normalizeAgents,
   resetCustomAgents,
   activeSelectionMode,
+  disabled = false,
 }: ActionBarProps) => {
   return (
     <div className="p-2 flex items-center justify-between ">
       <div className="flex items-center bg-primary gap-2 p-2 rounded-md border-none shadow-none ">
         <button
           onClick={addDefaultAgent}
+          disabled={disabled}
           className="font-semibold text-xs text-secondary flex items-center gap-2"
         >
           <span>Add Agent</span>
@@ -30,6 +33,7 @@ export const ActionBar = ({
       <div className="flex gap-2">
         <button
           onClick={activeSelectionMode}
+          disabled={disabled}
           className={`p-2 rounded-md transition-colors
   ${isSelectionMode ? "bg-primary text-secondary" : "hover:bg-muted/60"}
   `}
@@ -39,6 +43,7 @@ export const ActionBar = ({
 
         <button
           onClick={normalizeAgents}
+          disabled={disabled}
           className="p-2 rounded-md bg-transparent border-none shadow-none hover:bg-muted/60 cursor-pointer transition-colors"
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -46,6 +51,7 @@ export const ActionBar = ({
 
         <button
           onClick={resetCustomAgents}
+          disabled={disabled}
           className="p-2 rounded-md bg-transparent border-none shadow-none hover:bg-muted/60 cursor-pointer transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
