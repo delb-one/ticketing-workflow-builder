@@ -38,9 +38,9 @@ export function GettingStartedPanel() {
     },
 
     {
-      title: "Run Simulation",
+      title: "Setup and Run",
       description:
-        "Start the simulation and monitor workflow execution in real time.",
+        "Configure Ticket Factory and Agent Pool, then start simulation.",
       icon: <Play className="w-4 h-4 text-primary" />,
     },
   ];
@@ -112,9 +112,8 @@ export function GettingStartedPanel() {
             </div>
 
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Build, simulate and inspect enterprise ITSM workflows directly on
-              the canvas using real-time workflow execution and monitoring
-              tools.
+              Build, simulate, and inspect ITSM workflows directly on the
+              canvas with real-time execution and monitoring.
             </p>
           </div>
 
@@ -159,7 +158,48 @@ export function GettingStartedPanel() {
               ))}
             </div>
           </div>
+ {/* SIMULATION SETUP V2 */}
+          <div className="rounded-xl border bg-background/40 p-3 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-2.5">
+              <Bot className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-semibold tracking-wide">
+                Simulation Setup
+              </span>
+            </div>
 
+            <div className="flex flex-col gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                <span>
+                  Add at least one template in Ticket Factory (`id`,
+                  `priority`, `impact`, `autoSpawnCount`)
+                </span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                <span>
+                  Add at least one agent in Agent Pool (`level`, `efficiency`,
+                  `capacity`)
+                </span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                <span>
+                  Configure Actor, Decision, and Action nodes
+                </span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                <span>
+                  Start from Controls and monitor State, Priority, Impact, and
+                  Category in Ticket Monitor
+                </span>
+              </div>
+            </div>
+          </div>
           {/* SIMULATION */}
           <div className="rounded-xl border bg-background/40 p-3 backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-2.5">
@@ -196,6 +236,8 @@ export function GettingStartedPanel() {
               </div>
             </div>
           </div>
+
+         
 
           {/* NODE TYPES */}
           <div className="rounded-xl border bg-background/40 p-3 backdrop-blur-xl">
