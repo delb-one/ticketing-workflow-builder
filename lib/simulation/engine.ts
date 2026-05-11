@@ -9,6 +9,7 @@ import type {
   SimulationEvent,
   SimulationRuntime,
   Ticket,
+  TicketTemplate,
   WorkflowDefinition,
   WorkflowEdge,
   WorkflowNode,
@@ -19,18 +20,25 @@ export type EngineStateListener = (
   event?: SimulationEvent,
 ) => void;
 
-const createDefaultTicket = (index: number = 0): Ticket => {
+const createTicketFromTemplate = (
+  template: TicketTemplate,
+  index: number = 0,
+): Ticket => {
   const now = Date.now();
 
   return {
-    id: `tkt-${index}`,
+    id: `${template.id}-${index + 1}`,
     state: "open",
-    priority: "medium",
-    impact: "medium",
+    priority: template.priority,
+    impact: template.impact,
+    category: template.category,
     createdAt: now,
     updatedAt: now,
     context: {
-      variables: {},
+      variables: {
+        category: template.category,
+        priority: template.priority,
+      },
       events: [],
     },
   };
@@ -101,7 +109,7 @@ export class SimulationEngine {
     });
   }
 
-  start(ticketCount: number = 1, initialAgents: Agent[] = []): void {
+  start(ticketTemplates: TicketTemplate[] = [], initialAgents: Agent[] = []): void {
     const startNode = this.resolveStartNode();
 
     this.runtimes = {};
@@ -119,8 +127,25 @@ export class SimulationEngine {
       return;
     }
 
-    for (let i = 0; i < ticketCount; i++) {
-      const ticket = createDefaultTicket(i);
+    const expandedTemplates =
+      ticketTemplates.length > 0
+        ? ticketTemplates.flatMap((template) => {
+            const count = Math.max(1, template.autoSpawnCount ?? 1);
+            return Array.from({ length: count }, (_, index) => ({ template, index }));
+          })
+        : [
+            {
+              template: {
+                id: "default-ticket",
+                priority: "medium" as const,
+                impact: "medium" as const,
+              },
+              index: 0,
+            },
+          ];
+
+    for (const { template, index } of expandedTemplates) {
+      const ticket = createTicketFromTemplate(template, index);
 
       this.runtimes[ticket.id] = {
         ...createDefaultRuntime(ticket),
@@ -302,7 +327,7 @@ export class SimulationEngine {
       return;
     }
 
-    if (result.requiresInput) {
+    if (result.pause) {
       runtime.paused = true;
       runtime.pausedAt = currentNode.data.label;
       runtime.pendingDecisionOutcomes = result.inputOptions ?? [];

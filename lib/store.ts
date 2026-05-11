@@ -6,7 +6,7 @@ import type {
   SimulationRuntime,
   EngineRuntimeState,
   Agent,
-  QueueState,
+  TicketTemplate,
 } from "@/lib/simulation/types";
 import {
   applyNodeChanges,
@@ -18,12 +18,15 @@ import {
 } from "@xyflow/react";
 
 export interface SimulationConfig {
-  ticketCount: number;
-  agentsCount: {
-    l1: number;
-    l2: number;
-    l3: number;
-  };
+  ticketTemplates: TicketTemplate[];
+  agentPool: Agent[];
+  // ticketCount: number;
+  // agentsCount: {
+  //   l1: number;
+  //   l2: number;
+  //   l3: number;
+  // };
+
   stepDelayMs: number;
 }
 
@@ -79,7 +82,8 @@ export interface WorkflowStore {
   addSimulationEvent: (event: SimulationEvent) => void;
   clearSimulationEvents: () => void;
   updateSimulationConfig: (config: Partial<SimulationConfig>) => void;
-
+  addTicketTemplate: (template: TicketTemplate) => void;
+  updateAgentProfile: (agentId: string, updates: Partial<Agent>) => void;
   clearWorkflow: () => void;
   loadWorkflow: (nodes: CustomNode[], edges: Edge[]) => void;
   onNodesChange: (changes: NodeChange<CustomNode>[]) => void;
@@ -99,8 +103,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   schedulingMode: "fifo",
   simulationEvents: [],
   simulationConfig: {
-    ticketCount: 1,
-    agentsCount: { l1: 1, l2: 1, l3: 1 },
+    agentPool: [],
+    ticketTemplates: [],
+    // ticketCount: 1,
+    // agentsCount: { l1: 1, l2: 1, l3: 1 },
     stepDelayMs: 900,
   },
 
@@ -117,6 +123,26 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         node.id === id ? { ...node, ...data } : node,
       ),
     })),
+
+  addTicketTemplate(template) {
+    set((state) => ({
+      simulationConfig: {
+        ...state.simulationConfig,
+        ticketTemplates: [...state.simulationConfig.ticketTemplates, template],
+      },
+    }));
+  },
+
+  updateAgentProfile(agentId, updates) {
+    set((state) => ({
+      simulationConfig: {
+        ...state.simulationConfig,
+        agentPool: state.simulationConfig.agentPool.map((agent) =>
+          agent.id === agentId ? { ...agent, ...updates } : agent,
+        ),
+      },
+    }));
+  },
 
   deleteNode: (id) =>
     set((state) => ({

@@ -132,6 +132,7 @@ export interface Ticket {
   priority: "low" | "medium" | "high" | "critical";
   impact: "low" | "medium" | "high";
   assignedAgent?: string;
+  category?: string;
   assignedGroup?: string;
   createdAt: number;
   updatedAt: number;
@@ -140,6 +141,15 @@ export interface Ticket {
   queue?: "l1" | "l2" | "l3";
   history?: string[];
 }
+
+export interface TicketTemplate {
+    id: string;
+    priority: "low" | "medium" | "high" | "critical";
+    impact: "low" | "medium" | "high";
+    category?: string;
+    description?: string;
+    autoSpawnCount?: number; // For batch generation
+  }
 
 export interface HistoryEntry {
   nodeId: string;
@@ -161,8 +171,8 @@ export interface SimulationRuntime {
 export interface Agent {
   id: string;
   name?: string;
-  type: "default" | "custom";
   level: "l1" | "l2" | "l3";
+  type: "default" | "custom";
   status: "available" | "busy";
   currentTicketId?: string;
   capacity: number;

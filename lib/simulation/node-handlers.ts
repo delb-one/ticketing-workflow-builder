@@ -12,7 +12,7 @@ import type {
 export interface HandlerResult {
   ticketUpdates?: Partial<Ticket>;
   events?: SimulationEvent[];
-  requiresInput?: boolean;
+  pause?: boolean;
   inputOptions?: DecisionOutcome[];
   logMessage?: string;
   releaseAgent?: boolean;
@@ -236,7 +236,7 @@ class DecisionNodeHandler implements NodeHandler {
       : getDefaultDecisionOutcomes(node, edges);
 
     return {
-      requiresInput: true,
+      pause: true,
       inputOptions: outcomes,
       events: [buildEvent('decision.required', ticket.id, node, { outcomes: outcomes.map((outcome) => outcome.label) })],
     };

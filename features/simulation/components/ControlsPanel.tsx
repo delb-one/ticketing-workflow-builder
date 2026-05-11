@@ -133,7 +133,6 @@ export default function ControlsPanel() {
     addSimulationEvent,
     engineState,
     simulationConfig,
-    updateSimulationConfig,
   } = useWorkflowStore();
 
   const [showDecisionDialog, setShowDecisionDialog] = useState(false);
@@ -189,35 +188,8 @@ export default function ControlsPanel() {
       },
     );
 
-    const initialAgents: Array<{
-      id: string;
-      name?: string;
-      type: "default";
-      level: "l1" | "l2" | "l3";
-      status: "available";
-      currentTicketId?: string;
-      capacity: number;
-      skills?: string[];
-      efficiency: number;
-    }> = [];
-
-    const { agentsCount } = simulationConfig;
-    (["l1", "l2", "l3"] as const).forEach((level) => {
-      const count = agentsCount[level];
-      for (let i = 0; i < count; i++) {
-        initialAgents.push({
-          id: `Agent-${level.toUpperCase()}-${i + 1}`,
-          level,
-          type: "default",
-          capacity: 1,
-          status: "available",
-          efficiency: 1,
-        });
-      }
-    });
-
     startSimulation();
-    engine.start(simulationConfig.ticketCount, initialAgents);
+    engine.start(simulationConfig.ticketTemplates, simulationConfig.agentPool);
   };
 
   const handleStop = () => {
@@ -291,11 +263,29 @@ export default function ControlsPanel() {
     () => pausedRuntime?.pendingDecisionOutcomes ?? [],
     [pausedRuntime],
   );
+  const totalSpawnedTickets = useMemo(
+    () =>
+      simulationConfig.ticketTemplates.reduce(
+        (sum, template) => sum + Math.max(1, template.autoSpawnCount ?? 1),
+        0,
+      ),
+    [simulationConfig.ticketTemplates],
+  );
+  const preflightError = useMemo(() => {
+    if (simulationConfig.ticketTemplates.length === 0) {
+      return "Add at least one ticket template before starting.";
+    }
+    if (simulationConfig.agentPool.length === 0) {
+      return "Add at least one agent before starting.";
+    }
+    return null;
+  }, [simulationConfig.ticketTemplates.length, simulationConfig.agentPool.length]);
 
   return (
     <>
       {/* CONTROLS */}
-      <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
+      <div className="flex flex-col gap-2 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur">
+        <div className="flex justify-center items-center gap-3">
         {/* STATUS */}
         <div className="left-3 flex items-center gap-2 text-xs text-muted-foreground">
           <span
@@ -330,10 +320,13 @@ export default function ControlsPanel() {
 
           <Button
             onClick={() => {
-              if (!isSimulating) return startSimulationFlow();
+              if (!isSimulating) {
+                if (preflightError) return;
+                return startSimulationFlow();
+              }
               setIsPaused(!isPaused);
             }}
-            disabled={!isSimulating && nodes.length === 0}
+            disabled={!isSimulating && (nodes.length === 0 || Boolean(preflightError))}
             size="icon"
             variant="outline"
             className={`h-8 w-8 transition  ${
@@ -377,6 +370,16 @@ export default function ControlsPanel() {
             <Square />
           </Button>
         </div>
+        </div>
+        {/* <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <span>Templates: {simulationConfig.ticketTemplates.length}</span>
+          <span>Spawned Tickets: {totalSpawnedTickets}</span>
+          <span>Agents: {simulationConfig.agentPool.length}</span>
+          <span>Step Delay: {simulationConfig.stepDelayMs}ms</span>
+        </div>
+        {!isSimulating && preflightError && (
+          <div className="text-[11px] text-amber-400">{preflightError}</div>
+        )} */}
       </div>
 
       {canvasHost &&
