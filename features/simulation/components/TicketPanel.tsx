@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useWorkflowStore } from "@/lib/store";
-import { Settings2, Tickets } from "lucide-react";
+import { Settings2, Tickets, X } from "lucide-react";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -201,8 +201,8 @@ export function TicketPanel() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="font-semibold truncate">{template.id}</div>
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size="icon"
+                    variant="ghost"
                     className="h-6 px-2 text-[11px]"
                     disabled={isSimulating}
                     onClick={() =>
@@ -213,7 +213,7 @@ export function TicketPanel() {
                       })
                     }
                   >
-                    Remove
+                    <X className=" h-2 w-2" />
                   </Button>
                 </div>
                 <div className="mt-1 text-[11px] text-muted-foreground">

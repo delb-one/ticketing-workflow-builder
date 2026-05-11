@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useWorkflowStore } from "@/lib/store";
-import { Users, Briefcase, Settings2 } from "lucide-react";
+import { Users, Briefcase, Settings2, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +26,12 @@ type AgentFormState = {
 };
 
 export function AgentPanel() {
-  const { engineState, isSimulating, simulationConfig, updateSimulationConfig } =
-    useWorkflowStore();
+  const {
+    engineState,
+    isSimulating,
+    simulationConfig,
+    updateSimulationConfig,
+  } = useWorkflowStore();
   const agents = engineState?.agents ?? [];
   const totalAgents = simulationConfig.agentPool.length;
   const [form, setForm] = useState<AgentFormState>({
@@ -53,7 +57,10 @@ export function AgentPanel() {
       title="Agent Pool"
       icon={Users}
       badge={
-        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full">
+        <Badge
+          variant="secondary"
+          className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full"
+        >
           {totalAgents}
         </Badge>
       }
@@ -73,14 +80,18 @@ export function AgentPanel() {
               placeholder="Agent ID"
               value={form.id}
               disabled={isSimulating}
-              onChange={(e) => setForm((prev) => ({ ...prev, id: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, id: e.target.value }))
+              }
             />
             <input
               className="h-8 rounded-md border bg-background/60 px-2 text-xs"
               placeholder="Name (optional)"
               value={form.name}
               disabled={isSimulating}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, name: e.target.value }))
+              }
             />
             <Select
               value={form.level}
@@ -90,7 +101,6 @@ export function AgentPanel() {
                   level: value as "l1" | "l2" | "l3",
                 }))
               }
-            
               disabled={isSimulating}
             >
               <SelectTrigger className="h-8 text-xs">
@@ -166,7 +176,10 @@ export function AgentPanel() {
               step={1}
               disabled={isSimulating}
               onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, capacity: Math.max(1, Math.round(value[0] ?? 1)) }))
+                setForm((prev) => ({
+                  ...prev,
+                  capacity: Math.max(1, Math.round(value[0] ?? 1)),
+                }))
               }
             />
           </div>
@@ -176,16 +189,22 @@ export function AgentPanel() {
             placeholder="Skills (comma separated)"
             value={form.skills}
             disabled={isSimulating}
-            onChange={(e) => setForm((prev) => ({ ...prev, skills: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, skills: e.target.value }))
+            }
           />
 
           {hasDuplicateId && (
-            <div className="text-[11px] text-red-400">Agent ID must be unique.</div>
+            <div className="text-[11px] text-red-400">
+              Agent ID must be unique.
+            </div>
           )}
 
           <div className="space-y-2">
             {simulationConfig.agentPool.length === 0 ? (
-              <div className="text-xs text-muted-foreground">No agents configured</div>
+              <div className="text-xs text-muted-foreground">
+                No agents configured
+              </div>
             ) : (
               simulationConfig.agentPool.map((agent) => (
                 <div
@@ -193,11 +212,13 @@ export function AgentPanel() {
                   className="rounded-md border bg-background/40 p-2 text-xs"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-semibold truncate">{agent.name ?? agent.id}</div>
+                    <div className="font-semibold truncate">
+                      {agent.name ?? agent.id}
+                    </div>
                     <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 px-2 text-[11px]"
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 px-2 text-[11px] "
                       disabled={isSimulating}
                       onClick={() =>
                         updateSimulationConfig({
@@ -207,11 +228,12 @@ export function AgentPanel() {
                         })
                       }
                     >
-                      Remove
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground uppercase">
-                    {agent.level} | eff {agent.efficiency} | cap {agent.capacity}
+                    {agent.level} | eff {agent.efficiency} | cap{" "}
+                    {agent.capacity}
                   </div>
                 </div>
               ))
@@ -222,17 +244,28 @@ export function AgentPanel() {
         <ScrollArea className="w-full pr-2">
           <div className="max-h-80 space-y-2">
             {agents.length === 0 ? (
-              <div className="text-xs text-primary-500 text-center py-4">No agents active</div>
+              <div className="text-xs text-primary-500 text-center py-4">
+                No agents active
+              </div>
             ) : (
               agents.map((agent) => (
-                <div key={agent.id} className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md">
+                <div
+                  key={agent.id}
+                  className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md"
+                >
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-primary-300">{agent.name ?? agent.id}</span>
-                    <div className={`w-2 h-2 rounded-full ${agent.status === "available" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)] animate-pulse"}`} />
+                    <span className="text-xs font-semibold text-primary-300">
+                      {agent.name ?? agent.id}
+                    </span>
+                    <div
+                      className={`w-2 h-2 rounded-full ${agent.status === "available" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)] animate-pulse"}`}
+                    />
                   </div>
                   <div className="flex items-center gap-2 text-xs text-primary-400">
                     <Briefcase className="w-3 h-3" />
-                    <span className="truncate">{agent.currentTicketId ? agent.currentTicketId : "Idle"}</span>
+                    <span className="truncate">
+                      {agent.currentTicketId ? agent.currentTicketId : "Idle"}
+                    </span>
                   </div>
                 </div>
               ))
