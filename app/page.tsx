@@ -8,15 +8,7 @@ import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Download,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Terminal,
-  Trash2,
-  Upload,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Download, Trash2, Upload } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +26,7 @@ export default function Home() {
   const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
     useWorkflowStore();
   const selectedNodeData = nodes.find((n) => n.id === selectedNodeId);
-  const [rightCollapsed, setRightCollapsed] = useState(true);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);

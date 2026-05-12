@@ -393,7 +393,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   };
 
   return (
-    <div className="flex h-full w-80 flex-col overflow-hidden border-l bg-card">
+    <div className="flex h-full w-80 flex-col overflow-hidden bg-transparent">
       <div className="flex flex-1 min-h-0 flex-col">
         {/* HEADER */}
         <Header selectedNode={selectedNode} loadPercentage={loadPercentage} loadColor={loadColor} />

@@ -44,7 +44,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   if (!selectedNode) {
     return (
-      <div className="flex h-full w-80 flex-col overflow-y-auto p-4">
+      <div className="flex h-full w-80 flex-col overflow-y-auto p-4 bg-transparent">
         <div className="py-12 text-center">
           <p className="text-muted-foreground">Select a node to inspect</p>
         </div>
@@ -77,8 +77,8 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
   return (
     <>
       {!blockId?.includes("tech") && (
-        <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-          <div className="sticky top-0 bg-card p-3 space-y-2 ">
+        <div className="flex h-full w-80 flex-col overflow-y-auto bg-transparent">
+          <div className="sticky top-0 p-3 space-y-2">
             <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
 
             <div className="flex items-center gap-2 text-xs">

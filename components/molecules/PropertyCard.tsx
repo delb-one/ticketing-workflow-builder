@@ -8,7 +8,7 @@ interface PropertyCardProps {
 
 export function PropertyCard({ label, children }: PropertyCardProps) {
   return (
-    <Card className="p-4 mb-2">
+    <Card className="p-4 mb-2 bg-card/50 border-border/50">
       <label className="block text-sm font-semibold text-foreground">
         {label}
       </label>

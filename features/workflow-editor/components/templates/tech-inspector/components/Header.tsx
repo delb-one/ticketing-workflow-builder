@@ -26,8 +26,8 @@ export const Header = ({ loadPercentage, loadColor, selectedNode }: HeaderProps)
 
   return (
     <div className="p-3 space-y-2">
-      <div className="sticky top-0 bg-card mb-2 space-y-2">
-        {/* DEBUG HEADER */}
+      <div className="sticky top-0  pb-2 mb-2 space-y-2">
+
         <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
 
         <div className="flex items-center gap-2 text-xs">

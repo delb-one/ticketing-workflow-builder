@@ -71,7 +71,7 @@ export const EditSection = ({
   disabled = false,
 }: EditSectionProps) => {
   return (
-    <div className="border-t p-3 space-y-3 bg-card">
+    <div className="border-t border-border/40 p-3 space-y-3 bg-transparent">
       {/* IDLE MODE */}
       {isIdleMode && (
         <div className="flex items-center justify-center py-8">
