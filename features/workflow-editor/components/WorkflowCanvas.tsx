@@ -32,6 +32,7 @@ import ControlsPanel from "@/features/simulation/components/ControlsPanel";
 import { ToolsContainerPanel } from "@/features/simulation/components/ToolsContainerPanel";
 import { GettingStartedPanel } from "@/features/simulation/components/GettingStartedPanel";
 import { CustomEdge } from "./CustomEdge";
+import { FlowBackground } from "./FlowBackground";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -129,6 +130,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>(
     INITIAL_VISIBLE_PANELS,
   );
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   const handleCloseAll = useCallback(() => {
     setVisiblePanels({
@@ -277,6 +279,14 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       onDrop={onDrop}
     >
       <ReactFlow<CustomNode, Edge>
+          onPaneMouseMove={(event) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+
+    setMouse({
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    });
+  }}
         nodes={nodes.map((node) => ({
           ...node,
           selected: node.id === selectedNodeId,
@@ -310,7 +320,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         fitView
         colorMode={theme === "dark" ? "dark" : "light"}
       >
-        <Background variant={BackgroundVariant.Dots} />
+        {/* <Background variant={BackgroundVariant.Dots} /> */}
+        <FlowBackground mouse={mouse}  />
         {/* <Controls /> */}
         <MiniMap
           nodeColor={(node) =>

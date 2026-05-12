@@ -28,7 +28,7 @@ export function WorkflowEditorTemplate({
 }: WorkflowEditorTemplateProps) {
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex flex-1 overflow-hidden gap-4 p-4">
+      <div className="flex flex-1 overflow-hidden gap-4">
         {/* Canvas — occupa tutto lo spazio flex */}
         <main className="relative flex-1 flex flex-col rounded-lg shadow-sm border border-border overflow-hidden">
           {canvas}
