@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 
 interface PropertyCardProps {
   label: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function PropertyCard({ label, children }: PropertyCardProps) {

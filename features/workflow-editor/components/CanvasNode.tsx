@@ -1,6 +1,6 @@
 "use client";
 
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { motion } from "framer-motion";
 import { getNodeIcon } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
@@ -17,8 +17,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export default function CanvasNode(props: CanvasNodeProps) {
+  const { updateNodeData } = useReactFlow();
   const { setSelectedNode, engineState, simulationConfig } = useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
   const activeTickets = engineState
@@ -31,7 +34,9 @@ export default function CanvasNode(props: CanvasNodeProps) {
     const actorLevel =
       data.config?.nodeType === "actor" ? data.config.agentLevel : undefined;
     if (actorLevel === "l1" || actorLevel === "l2" || actorLevel === "l3") {
-      return simulationConfig.agentPool.filter((agent) => agent.level === actorLevel).length;
+      return simulationConfig.agentPool.filter(
+        (agent) => agent.level === actorLevel,
+      ).length;
     }
     return 0;
   })();
@@ -72,9 +77,25 @@ export default function CanvasNode(props: CanvasNodeProps) {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-foreground">
-                    {data.label}
-                  </div>
+                  <Input
+                    onChange={(evt) =>
+                      updateNodeData(id, { label: evt.target.value })
+                    }
+                    value={data.label}
+                    style={
+                      {
+                        "--input-color": getCssVarColor(theme.color),
+                      } as React.CSSProperties
+                    }
+                    className={`
+      border-border
+      hover:border-(--input-color)
+      focus-visible:border-(--input-color)
+      focus-visible:ring-(--input-color)
+      active:border-(--input-color)
+    `}
+                  />
+
                   <div
                     className={`mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] `}
                     style={{ color: getCssVarColor(theme.softText) }}

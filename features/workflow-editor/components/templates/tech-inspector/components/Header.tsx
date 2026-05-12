@@ -28,7 +28,7 @@ export const Header = ({ loadPercentage, loadColor, selectedNode }: HeaderProps)
     <div className="p-3 space-y-2">
       <div className="sticky top-0 bg-card mb-2 space-y-2">
         {/* DEBUG HEADER */}
-        <h2 className="font-semibold text-foreground">Node Inspector</h2>
+        <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
 
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground">Type:</span>
@@ -46,13 +46,14 @@ export const Header = ({ loadPercentage, loadColor, selectedNode }: HeaderProps)
           </Badge>
         </div>
       </div>
-      <PropertyCard label="Label">
+      {/* <PropertyCard label="Label">
+      <span>{selectedNode.data.label}</span>
         <Input
           value={selectedNode.data.label}
           onChange={(event) => handleLabelChange(event.target.value)}
           className="text-sm"
         />
-      </PropertyCard>
+      </PropertyCard> */}
 
       {/* LABEL */}
       <div className="text-xs text-muted-foreground">Node load</div>

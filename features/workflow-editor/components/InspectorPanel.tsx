@@ -78,8 +78,8 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
     <>
       {!blockId?.includes("tech") && (
         <div className="flex h-full w-80 flex-col overflow-y-auto bg-card">
-          <div className="sticky top-0 bg-card ml-4 mt-2 space-y-2">
-            <h2 className="font-semibold text-foreground">Node Inspector</h2>
+          <div className="sticky top-0 bg-card p-3 space-y-2 ">
+            <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
 
             <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground">Type:</span>
@@ -99,19 +99,19 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
           </div>
 
           <ScrollArea className="flex-1 space-y-6 overflow-y-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <PropertyCard label="Label">
+            {/* <PropertyCard label="Label">
               <Input
                 value={selectedNode.data.label}
                 onChange={(event) => handleLabelChange(event.target.value)}
                 className="text-sm"
               />
-            </PropertyCard>
+            </PropertyCard> */}
 
-            <PropertyCard label="Description">
+            {/* <PropertyCard label="Description">
               <p className="text-sm text-muted-foreground">
                 {selectedNode.data.description ?? "No description available"}
               </p>
-            </PropertyCard>
+            </PropertyCard> */}
 
             {selectedNode.data.type === "decision" && (
               <PropertyCard label="Decision Type">
