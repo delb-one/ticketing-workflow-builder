@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InspectorPanel from "./InspectorPanel";
+import { CustomEdge } from "./CustomEdge";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -49,6 +50,7 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes = {
   label: LabelEdge,
+  glow: CustomEdge,
 };
 
 type Props = {
@@ -187,11 +189,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
         source: connection.source || "",
         target: connection.target || "",
-        style: {
-          stroke: color,
-          strokeWidth: 1,
-        },
-        animated: true,
+
+        type: "glow",
       };
       addStoreEdge(edge);
     },
@@ -303,21 +302,16 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         }))}
         edges={edges.map((edge) => {
           const sourceNode = nodes.find((n) => n.id === edge.source);
-          const color = sourceNode
-            ? getNodeTypeColorVar(sourceNode.data.type)
-            : "var(--primary)";
-
           const isSelected = edge.selected;
-
           return {
             ...edge,
-            type: "label",
-            animated: edge.animated ?? true,
-            style: {
-              ...edge.style,
-              stroke: isSelected ? "var(--primary)" : color,
-              strokeWidth: isSelected ? 3 : 1,
+            type: edge.type ?? "glow",
+            data: {
+              color: sourceNode
+                ? getNodeTypeColorVar(sourceNode.data.type)
+                : "var(--primary)",
             },
+            selected: isSelected,
           };
         })}
         onNodesChange={onNodesChange}
