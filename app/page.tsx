@@ -26,7 +26,7 @@ export default function Home() {
   const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
     useWorkflowStore();
   const selectedNodeData = nodes.find((n) => n.id === selectedNodeId);
-  const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -173,10 +173,10 @@ export default function Home() {
           <div className="flex-1 overflow-hidden">
             <InspectorPanel selectedNode={selectedNodeData} />
           </div>
-         
+
         </>
       }
-      
+
     // Passing the toggle button as part of the header logic in the template
     // For now, I'll update the template to accept the toggle button separately or handle it better
     />
