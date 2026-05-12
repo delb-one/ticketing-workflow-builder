@@ -1,9 +1,6 @@
 import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
-import { url } from "inspector";
-import { hover } from "framer-motion";
-import { useState } from "react";
 
 const PARTICLE_COUNT = 6;
 const ANIMATE_DURATION = 6;
@@ -28,8 +25,6 @@ export function CustomEdge({
     targetPosition,
   });
 
-  const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
-
   const color = (data?.color as string) ?? "var(--primary)";
   const gradientId = `edge-gradient-${id}`;
   return (
@@ -51,12 +46,13 @@ export function CustomEdge({
       <BaseEdge
         id={id}
         path={edgePath}
-        className={cn("edge", selected && "edge--active")}
+        className={cn("edge")}
         style={{
           stroke: color,
+          strokeWidth: selected ? 2.5 : 1,
           filter: selected
-            ? `drop-shadow(0 0 8px ${color}) drop-shadow(0 0 14px ${color})`
-            : `drop-shadow(0 0 4px ${color})`,
+            ? `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 20px ${color}) drop-shadow(0 0 32px ${color})`
+            : `drop-shadow(0 0 2px ${color})`,
         }}
       />
 
@@ -64,14 +60,14 @@ export function CustomEdge({
       {Array.from({ length: PARTICLE_COUNT }).map((_, i) => (
         <ellipse
           key={`${id}-particle-${i}`}
-          rx="5"
-          ry="1.8"
+          rx={selected ? "6.4" : "4.6"}
+          ry={selected ? "2.4" : "1.6"}
           fill={`url(#${gradientId})`}
-          opacity="0.85"
+          opacity={selected ? 1 : 0.7}
         >
           <animateMotion
             path={edgePath}
-            dur={`${ANIMATE_DURATION}s`}
+            dur={selected ? `${ANIMATE_DURATION * 0.3}` : `${ANIMATE_DURATION}`}
             repeatCount="indefinite"
             begin={`${-i * (ANIMATE_DURATION / PARTICLE_COUNT)}s`}
             rotate="auto"

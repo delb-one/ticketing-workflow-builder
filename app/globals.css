@@ -141,7 +141,3 @@
   transition: stroke 0.25s ease !important;
 }
 
-.edge--active {
-  stroke: var(--primary) !important;
-  stroke-width: 1px !important;
-}

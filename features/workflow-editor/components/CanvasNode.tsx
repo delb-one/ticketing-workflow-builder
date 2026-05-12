@@ -63,10 +63,21 @@ export default function CanvasNode(props: CanvasNodeProps) {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={() => setSelectedNode(id)}
-            className={`group relative min-w-55 cursor-pointer rounded-xl  p-px shadow-lg transition-all ${selected ? "ring-1 ring-primary ring-offset-2" : ""} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+            className={`group relative min-w-55 cursor-pointer rounded-xl p-0 shadow-lg transition-all  ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+            style={
+              selected
+                ? {
+                    boxShadow: `0 0 10px ${getCssVarColor(theme.color)}, 0 0 18px ${getCssVarColor(theme.color)}`,
+                  }
+                : isActive
+                  ? {
+                      boxShadow: `0 0 6px ${getCssVarColor(theme.color)}, 0 0 12px ${getCssVarColor(theme.color)}`,
+                    }
+                : undefined
+            }
           >
             <div
-              className={`relative rounded-[11px] border border-border/70  bg-card px-3 py-3 backdrop-blur-sm `}
+              className={`relative rounded-[11px] border bg-card px-3 py-3 backdrop-blur-sm `}
               style={{
                 borderColor: getCssVarColor(theme.color),
                 backgroundImage: getNodeTypeBackgroundGradient(data.type),
