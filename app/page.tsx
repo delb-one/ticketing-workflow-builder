@@ -26,6 +26,7 @@ export default function Home() {
   const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
     useWorkflowStore();
   const selectedNodeData = nodes.find((n) => n.id === selectedNodeId);
+  const [leftCollapsed, setLeftCollapsed] = useState(true);
   const [rightCollapsed, setRightCollapsed] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -103,7 +104,9 @@ export default function Home() {
           <WorkflowCanvas />
         </ReactFlowProvider>
       }
+      leftCollapsed={leftCollapsed}
       rightCollapsed={rightCollapsed}
+      onToggleLeftSidebar={() => setLeftCollapsed((p) => !p)}
       onToggleRightSidebar={() => setRightCollapsed((p) => !p)}
       rightSidebarHeaderActions={
         <>
@@ -176,9 +179,6 @@ export default function Home() {
 
         </>
       }
-
-    // Passing the toggle button as part of the header logic in the template
-    // For now, I'll update the template to accept the toggle button separately or handle it better
     />
   );
 }

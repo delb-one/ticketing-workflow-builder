@@ -192,9 +192,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-              ...currentEdge,
-              label: trimmedLabel || undefined,
-            }
+            ...currentEdge,
+            label: trimmedLabel || undefined,
+          }
           : currentEdge,
       );
 
@@ -311,7 +311,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         colorMode={theme === "dark" ? "dark" : "light"}
       >
         <Background variant={BackgroundVariant.Dots} />
-        <Controls />
+        {/* <Controls /> */}
         <MiniMap
           nodeColor={(node) =>
             isNodeType(node.data?.type)

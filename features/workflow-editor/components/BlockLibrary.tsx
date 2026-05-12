@@ -37,9 +37,9 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
   };
 
   return (
-    <div className="w-20 h-full rounded-lg shadow-sm border flex flex-col">
-      <div className="flex h-full flex-col rounded-2xl bg-card">
-        <ScrollArea className="flex-1 p-2 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="w-20 h-full flex flex-col ">
+      <div className="flex h-full flex-col bg-transparent ">
+        <ScrollArea className="flex-1 p-2 overflow-y-auto ">
           <TooltipProvider delayDuration={200}>
             <div className="space-y-1">
               {Object.values(BLOCKS)
