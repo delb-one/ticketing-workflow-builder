@@ -1,4 +1,9 @@
-import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  getBezierPath,
+  type EdgeProps,
+} from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,8 +20,9 @@ export function CustomEdge({
   targetPosition,
   selected,
   data,
+  label,
 }: EdgeProps) {
-  const [edgePath] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -76,6 +82,36 @@ export function CustomEdge({
           />
         </ellipse>
       ))}
+
+      {label && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              pointerEvents: "all",
+            }}
+            className="nodrag nopan"
+          >
+            <div
+              className={cn(
+                "group flex items-center gap-1.5 rounded-full border bg-card/90 px-2.5 py-1 text-[10px] font-bold tracking-tight text-foreground shadow-[0_2px_10px_-3px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all hover:scale-105 hover:shadow-md",
+                selected ? "border-primary ring-1 ring-primary/20" : "border-border/50",
+              )}
+              style={{
+                borderLeftColor: selected ? undefined : color,
+                borderLeftWidth: selected ? undefined : "3px",
+              }}
+            >
+              <div
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-sm opacity-90">{label}</span>
+            </div>
+          </div>
+        </EdgeLabelRenderer>
+      )}
     </>
   );
 }

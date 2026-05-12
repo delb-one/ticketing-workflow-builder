@@ -7,8 +7,6 @@ import {
   Controls,
   Background,
   Connection,
-  EdgeChange,
-  NodeChange,
   ConnectionMode,
   MiniMap,
   NodeTypes,
@@ -20,7 +18,6 @@ import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
-import LabelEdge from "./LabelEdge";
 import { useTheme } from "next-themes";
 import {
   QueuePanel,
@@ -34,14 +31,6 @@ import Draggable from "react-draggable";
 import ControlsPanel from "@/features/simulation/components/ControlsPanel";
 import { ToolsContainerPanel } from "@/features/simulation/components/ToolsContainerPanel";
 import { GettingStartedPanel } from "@/features/simulation/components/GettingStartedPanel";
-import {
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import InspectorPanel from "./InspectorPanel";
 import { CustomEdge } from "./CustomEdge";
 
 const nodeTypes: NodeTypes = {
@@ -49,7 +38,6 @@ const nodeTypes: NodeTypes = {
 };
 
 const edgeTypes = {
-  label: LabelEdge,
   glow: CustomEdge,
 };
 
@@ -135,11 +123,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     addEdge: addStoreEdge,
     setEdges: setStoreEdges,
     selectedNodeId,
-    isSimulating,
   } = useWorkflowStore();
-  const { theme, setTheme, resolvedTheme } = useTheme();
-
-  const [showInspectorPanel, setShowInspectorPanel] = useState(false);
+  const { theme } = useTheme();
 
   const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>(
     INITIAL_VISIBLE_PANELS,
@@ -155,10 +140,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   }, []);
 
   const { screenToFlowPosition } = useReactFlow();
-
-  const handleOpenInspecor = useCallback(() => {
-    setShowInspectorPanel(!showInspectorPanel);
-  }, [showInspectorPanel]);
 
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
@@ -339,16 +320,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           }
           maskColor="rgba(0, 0, 0, 0.1)"
         />
-        {/* <Panel position="top-right">
-          <Button variant="ghost" size="icon" onClick={handleOpenInspecor}>
-            {showInspectorPanel ? (
-              <PanelRightClose className="h-4 w-4" />
-            ) : (
-              <PanelRightOpen className="h-4 w-4" />
-            )}
-          </Button>
-        </Panel> */}
-
         <Panel position="top-center">
           <ControlsPanel />
         </Panel>
@@ -364,14 +335,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       </ReactFlow>
 
       <div className="absolute inset-0 pointer-events-none z-10">
-        {/* <div className="absolute inset-0 pointer-events-none">
-          <DraggablePanel initial={{ x: 1200, y: 16 }}>
-            {showInspectorPanel && (
-              <InspectorPanel selectedNode={selectedNodeData} />
-            )}
-          </DraggablePanel>
-        </div> */}
-
         {/* GETTING-STARTED PANEL */}
         {visiblePanels["getting-started-panel"] && (
           <div className="absolute inset-0 pointer-events-none ">
