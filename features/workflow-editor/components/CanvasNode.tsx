@@ -19,11 +19,16 @@ import {
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 export default function CanvasNode(props: CanvasNodeProps) {
-  const { updateNodeData } = useReactFlow();
-  const { setSelectedNode, engineState, simulationConfig } = useWorkflowStore();
+  const { updateNodeData, deleteElements } = useReactFlow();
+  const { setSelectedNode, engineState, simulationConfig, isSimulating } =
+    useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
+
+  const deleteNode = () => deleteElements({ nodes: [{ id }] });
+
   const activeTickets = engineState
     ? Object.values(engineState.runtimes).filter(
         (r) => r.currentNodeId === id && !r.completed,
@@ -67,41 +72,45 @@ export default function CanvasNode(props: CanvasNodeProps) {
                 backgroundImage: getNodeTypeBackgroundGradient(data.type),
               }}
             >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br  text-primary`}
-                  style={{
-                    backgroundImage: getNodeTypeIconGradient(data.type),
+              <div>
+                <X
+                  className="absolute right-2 top-2 h-4 w-4 rounded-sm p-0.5 cursor-pointer opacity-0 transition-all hover:bg-muted group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNode();
                   }}
-                >
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <Input
-                    onChange={(evt) =>
-                      updateNodeData(id, { label: evt.target.value })
-                    }
-                    value={data.label}
-                    style={
-                      {
-                        "--input-color": getCssVarColor(theme.color),
-                      } as React.CSSProperties
-                    }
-                    className={`
-      border-border
-      hover:border-(--input-color)
-      focus-visible:border-(--input-color)
-      focus-visible:ring-(--input-color)
-      active:border-(--input-color)
-    `}
-                  />
-
+                />
+                <div className="flex items-center gap-2">
                   <div
-                    className={`mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] `}
-                    style={{ color: getCssVarColor(theme.softText) }}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br text-primary"
+                    style={{
+                      backgroundImage: getNodeTypeIconGradient(data.type),
+                    }}
                   >
-                    {subtitle}
+                    <Icon className="h-4 w-4" />
                   </div>
+
+                  <div className="min-w-0 flex-1">
+                    <Input
+                      onChange={(evt) =>
+                        updateNodeData(id, { label: evt.target.value })
+                      }
+                      value={data.label}
+                      style={
+                        {
+                          "--input-color": getCssVarColor(theme.color),
+                        } as React.CSSProperties
+                      }
+                      className={` w-[90%] border-border hover:border-(--input-color) focus-visible:border-(--input-color) focus-visible:ring-(--input-color) active:border-(--input-color)`}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="mt-0.5 pl-10 text-[10px] font-medium uppercase tracking-[0.14em]"
+                  style={{ color: getCssVarColor(theme.softText) }}
+                >
+                  {subtitle}
                 </div>
               </div>
               {isActive && (
@@ -154,27 +163,27 @@ export default function CanvasNode(props: CanvasNodeProps) {
             )}
           </motion.div>
         </TooltipTrigger>
-        {/* {isActive && (
-        )} */}
-        <TooltipContent
-          side="top"
-          className="max-w-64 text-xs bg-background text-primary border border-border"
-        >
-          <div className="font-semibold mb-1">
+        {isSimulating && (
+          <TooltipContent
+            side="top"
+            className="max-w-64 text-xs bg-background text-primary border border-border"
+          >
             <div className="font-semibold mb-1">
-              {activeTickets.length
-                ? "Tickets in this node"
-                : "No tickets in this node"}
-            </div>
-          </div>
-          <div className="space-y-1">
-            {activeTickets.map((runtime) => (
-              <div key={runtime.ticket.id} className="font-mono text-[11px]">
-                {runtime.ticket.id} ({runtime.ticket.state})
+              <div className="font-semibold mb-1">
+                {activeTickets.length
+                  ? "Tickets in this node"
+                  : "No tickets in this node"}
               </div>
-            ))}
-          </div>
-        </TooltipContent>
+            </div>
+            <div className="space-y-1">
+              {activeTickets.map((runtime) => (
+                <div key={runtime.ticket.id} className="font-mono text-[11px]">
+                  {runtime.ticket.id} ({runtime.ticket.state})
+                </div>
+              ))}
+            </div>
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   );
