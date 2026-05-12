@@ -141,3 +141,6 @@
   transition: stroke 0.25s ease !important;
 }
 
+.react-flow__attribution {
+  display: none !important;
+}

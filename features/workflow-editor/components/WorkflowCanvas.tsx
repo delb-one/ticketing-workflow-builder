@@ -194,9 +194,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-            ...currentEdge,
-            label: trimmedLabel || undefined,
-          }
+              ...currentEdge,
+              label: trimmedLabel || undefined,
+            }
           : currentEdge,
       );
 
@@ -279,14 +279,14 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       onDrop={onDrop}
     >
       <ReactFlow<CustomNode, Edge>
-          onPaneMouseMove={(event) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
+        onPaneMouseMove={(event) => {
+          const bounds = event.currentTarget.getBoundingClientRect();
 
-    setMouse({
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    });
-  }}
+          setMouse({
+            x: event.clientX - bounds.left,
+            y: event.clientY - bounds.top,
+          });
+        }}
         nodes={nodes.map((node) => ({
           ...node,
           selected: node.id === selectedNodeId,
@@ -318,19 +318,19 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         connectionMode={ConnectionMode.Strict}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
-        colorMode={theme === "dark" ? "dark" : "light"}
+        colorMode='dark'
       >
         {/* <Background variant={BackgroundVariant.Dots} /> */}
-        <FlowBackground mouse={mouse}  />
+        <FlowBackground mouse={mouse} />
         {/* <Controls /> */}
-        <MiniMap
+        {/* <MiniMap
           nodeColor={(node) =>
             isNodeType(node.data?.type)
               ? getNodeTypeColorVar(node.data.type)
               : getNodeTypeColorVar("start")
           }
           maskColor="rgba(0, 0, 0, 0.1)"
-        />
+        /> */}
         <Panel position="top-center">
           <ControlsPanel />
         </Panel>

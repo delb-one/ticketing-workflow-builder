@@ -168,7 +168,7 @@ export default function Home() {
               </Tooltip>
             </div>
           </TooltipProvider>
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
         </>
       }
       rightSidebar={
