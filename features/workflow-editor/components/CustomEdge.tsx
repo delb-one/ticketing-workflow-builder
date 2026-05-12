@@ -63,7 +63,11 @@ export function CustomEdge({
       />
 
       {/* PARTICLES (flow) */}
-      {Array.from({ length: PARTICLE_COUNT }).map((_, i) => (
+      {Array.from(
+        selected
+          ? { length: PARTICLE_COUNT * 1.5 }
+          : { length: PARTICLE_COUNT },
+      ).map((_, i) => (
         <ellipse
           key={`${id}-particle-${i}`}
           rx={selected ? "6.4" : "4.6"}
@@ -96,7 +100,9 @@ export function CustomEdge({
             <div
               className={cn(
                 "group flex items-center gap-1.5 rounded-full border bg-card/90 px-2.5 py-1 text-[10px] font-bold tracking-tight text-foreground shadow-[0_2px_10px_-3px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all hover:scale-105 hover:shadow-md",
-                selected ? "border-primary ring-1 ring-primary/20" : "border-border/50",
+                selected
+                  ? "border-primary ring-1 ring-primary/20"
+                  : "border-border/50",
               )}
               style={{
                 borderLeftColor: selected ? undefined : color,
