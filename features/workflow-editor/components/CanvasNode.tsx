@@ -144,22 +144,39 @@ export default function CanvasNode(props: CanvasNodeProps) {
                   </div>
                 )}
             </div>
-            {}
+
             {data.type !== "start" && (
               <Handle
                 type="target"
                 position={Position.Top}
-                // className={`-top-1! h-2! w-2!   `}
-                // style={{ backgroundColor: getCssVarColor(theme.handle) }}
+                className="
+      h-2.5! w-2.5!
+      rounded-full!
+      border!
+      bg-background!
+    "
+                style={{
+                  borderColor: getCssVarColor(theme.handle),
+                }}
               />
             )}
+
             {data.type !== "end" && (
-              <Handle
-                type="source"
-                position={Position.Bottom}
-                // className={`-bottom-1! h-2! w-2!`}
-                // style={{ backgroundColor: getCssVarColor(theme.handle) }}
-              />
+             <Handle
+  type="source"
+  position={Position.Bottom}
+  className="
+    h-3! w-3!
+    rounded-[2px]!
+  "
+  style={{
+    "--handle-color": getCssVarColor(theme.handle),
+    backgroundColor: "var(--handle-color)",
+    boxShadow: `0 0 0 1px var(--handle-color)`,
+
+    transform: "translate(-50%, 40%) rotate(45deg)",
+  } as React.CSSProperties}
+/>
             )}
           </motion.div>
         </TooltipTrigger>
