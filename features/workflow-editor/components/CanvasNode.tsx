@@ -137,8 +137,19 @@ export default function CanvasNode(props: CanvasNodeProps) {
                 data.config.agentLevel !== "client" &&
                 data.config.agentLevel !== "supervisor" && (
                   <div
-                    className="absolute -left-2 top-2 flex h-6 min-w-6 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-xs font-bold text-primary shadow-md ring-2 ring-background"
-                    style={{ backgroundColor: getCssVarColor(theme.color) }}
+                    className="absolute -left-2 top-2 flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-full px-1.5 text-xs font-bold text-primary shadow-md"
+                    style={
+                      {
+                        "--handle-color": getCssVarColor(theme.color),
+
+                        backgroundColor: "var(--handle-color)",
+
+                        boxShadow: `
+        0 0 0 1px var(--background),
+        0 0 0 2px var(--handle-color)
+      `,
+                      } as React.CSSProperties
+                    }
                   >
                     {configuredAgentCount}
                   </div>
@@ -157,26 +168,29 @@ export default function CanvasNode(props: CanvasNodeProps) {
     "
                 style={{
                   borderColor: getCssVarColor(theme.handle),
+                  transform: "translate(-50%, -35%) ",
                 }}
               />
             )}
 
             {data.type !== "end" && (
-             <Handle
-  type="source"
-  position={Position.Bottom}
-  className="
+              <Handle
+                type="source"
+                position={Position.Bottom}
+                className="
     h-3! w-3!
     rounded-[2px]!
   "
-  style={{
-    "--handle-color": getCssVarColor(theme.handle),
-    backgroundColor: "var(--handle-color)",
-    boxShadow: `0 0 0 1px var(--handle-color)`,
+                style={
+                  {
+                    "--handle-color": getCssVarColor(theme.handle),
+                    backgroundColor: "var(--handle-color)",
+                    boxShadow: `0 0 0 1px var(--handle-color)`,
 
-    transform: "translate(-50%, 40%) rotate(45deg)",
-  } as React.CSSProperties}
-/>
+                    transform: "translate(-50%, 40%) rotate(45deg)",
+                  } as React.CSSProperties
+                }
+              />
             )}
           </motion.div>
         </TooltipTrigger>
