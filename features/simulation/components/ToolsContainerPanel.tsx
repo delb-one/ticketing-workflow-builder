@@ -200,84 +200,92 @@ export function ToolsContainerPanel({
 
   return (
     <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur ">
-        {tools.map((tool) => {
-          const statusLabel = getStatusLabel(tool.status);
+      {tools.map((tool) => {
+        const statusLabel = getStatusLabel(tool.status);
 
-          return (
-            <Tooltip key={tool.id}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => onToolToggle(tool.id)}
-                  className={cn(
-                    "relative p-2 rounded-md border-none shadow-none transition-all duration-200",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                    activeToolSet.has(tool.id)
-                      ? "bg-primary/15 ring-2 ring-primary/50"
-                      : "hover:bg-muted/60",
-                    tool.status && "opacity-70",
-                    tool.status === "coming-soon" && "cursor-not-allowed",
-                  )}
-                  disabled={tool.status === "coming-soon"}
-                >
-                  {tool.icon}
+        return (
+          <Tooltip key={tool.id}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => onToolToggle(tool.id)}
+                className={cn(
+                  "relative p-2 rounded-md border-none shadow-none transition-all duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
 
-                  {/* {tool.status && (
+                  activeToolSet.has(tool.id)
+                    ? [
+                        "bg-linear-to-br from-primary to-primary/70",
+                        "text-primary-foreground",
+                        "[&_svg]:text-primary-foreground",
+                        "[&_svg]:stroke-current",
+
+                        "border border-primary/20",
+                        "shadow-[0_0_20px_hsl(var(--primary)/0.25)]",
+                        "hover:brightness-110",
+                      ]
+                    : "hover:bg-muted/60",
+
+                  tool.status && "opacity-70",
+                  tool.status === "coming-soon" && "cursor-not-allowed",
+                )}
+                disabled={tool.status === "coming-soon"}
+              >
+                {tool.icon}
+              </button>
+            </TooltipTrigger>
+
+            {/* {tool.status && (
                     <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary " />
                   )} */}
-                </button>
-              </TooltipTrigger>
-
-              <TooltipContent
-                side="top"
-                className="text-xs bg-background text-primary border border-border py-2 max-w-56"
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-medium leading-tight">
-                      {tool.name}
-                    </span>
-
-                    {statusLabel && (
-                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground border rounded-md px-1.5 py-0.5">
-                        {statusLabel}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="h-px w-full bg-border" />
-
-                  <span className="text-muted-foreground text-xs leading-snug">
-                    {tool.description}
-                  </span>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-
-        {/* DIVIDER */}
-        <div className="w-px self-stretch bg-border" />
-
-        {/* CLOSE ALL */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={onCloseAll}
-              className="p-2 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer flex items-center justify-center"
+            <TooltipContent
+              side="top"
+              className="text-xs bg-background text-primary border border-border py-2 max-w-56"
             >
-              <X className="w-4 h-4" />
-            </button>
-          </TooltipTrigger>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="font-medium leading-tight">{tool.name}</span>
 
-          <TooltipContent
-            side="top"
-            className="text-xs bg-background text-primary border border-border py-2"
+                  {statusLabel && (
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground border rounded-md px-1.5 py-0.5">
+                      {statusLabel}
+                    </span>
+                  )}
+                </div>
+
+                <div className="h-px w-full bg-border" />
+
+                <span className="text-muted-foreground text-xs leading-snug">
+                  {tool.description}
+                </span>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        );
+      })}
+
+      {/* DIVIDER */}
+      <div className="w-px self-stretch bg-border" />
+
+      {/* CLOSE ALL */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={onCloseAll}
+            className="p-2 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer flex items-center justify-center"
           >
-            <span>Close all panels</span>
-          </TooltipContent>
-        </Tooltip>
+            <X className="w-4 h-4" />
+          </button>
+        </TooltipTrigger>
+
+        <TooltipContent
+          side="top"
+          className="text-xs bg-background text-primary border border-border py-2"
+        >
+          <span>Close all panels</span>
+        </TooltipContent>
+      </Tooltip>
       {/* <div className="flex flex-row gap-2 p-2">
       </div> */}
     </div>

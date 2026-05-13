@@ -33,6 +33,14 @@ import { ToolsContainerPanel } from "@/features/simulation/components/ToolsConta
 import { GettingStartedPanel } from "@/features/simulation/components/GettingStartedPanel";
 import { CustomEdge } from "./CustomEdge";
 import { FlowBackground } from "./FlowBackground";
+import { Button } from "@/components/ui/button";
+import { Map } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -131,7 +139,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     INITIAL_VISIBLE_PANELS,
   );
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [showMinimap, setShowMinimap] = useState<boolean>(false);
 
+  const handleShowMinimap = () => {
+    setShowMinimap(!showMinimap);
+  };
   const handleCloseAll = useCallback(() => {
     setVisiblePanels({
       ...INITIAL_VISIBLE_PANELS,
@@ -318,19 +330,55 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         connectionMode={ConnectionMode.Strict}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
-        colorMode='dark'
+        colorMode="dark"
       >
-        {/* <Background variant={BackgroundVariant.Dots} /> */}
         <FlowBackground mouse={mouse} />
         {/* <Controls /> */}
-        {/* <MiniMap
-          nodeColor={(node) =>
-            isNodeType(node.data?.type)
-              ? getNodeTypeColorVar(node.data.type)
-              : getNodeTypeColorVar("start")
-          }
-          maskColor="rgba(0, 0, 0, 0.1)"
-        /> */}
+        <Panel position="bottom-right">
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleShowMinimap}
+                className="bg-background/50 border backdrop-blur"
+              >
+                <Map className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+
+            <TooltipContent
+              side="left"
+              className="text-xs bg-background text-primary border border-border"
+            >
+              {showMinimap ? "Hide Minimap" : "Show Minimap"}
+            </TooltipContent>
+          </Tooltip>
+        </Panel>
+
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-12 right-8 z-50 transition-all duration-300 ease-out",
+            showMinimap
+              ? "translate-y-0 opacity-100 scale-100"
+              : "translate-y-6 opacity-0 scale-95",
+          )}
+        >
+          <div
+            className={cn(
+              "pointer-events-auto rounded-xl border border-border bg-background/70 backdrop-blur-xl",
+            )}
+          >
+            <MiniMap
+              nodeColor={(node) =>
+                isNodeType(node.data?.type)
+                  ? getNodeTypeColorVar(node.data.type)
+                  : getNodeTypeColorVar("start")
+              }
+              maskColor="rgba(0,0,0,0.1)"
+            />
+          </div>
+        </div>
         <Panel position="top-center">
           <ControlsPanel />
         </Panel>
