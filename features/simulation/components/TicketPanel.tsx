@@ -62,7 +62,7 @@ export function TicketPanel() {
   return (
     <CustomPanel
       value="controls"
-      title="Ticket Factory"
+      title="Ticket Pool"
       icon={Tickets}
       badge={
         <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full">

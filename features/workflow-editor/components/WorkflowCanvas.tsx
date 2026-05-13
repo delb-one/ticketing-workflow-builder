@@ -358,7 +358,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         colorMode="dark"
       >
         <FlowBackground mouse={mouse} />
-        {/* <Controls /> */}
+
+        {/* Minimap */}
+
         <Panel position="bottom-right">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -400,13 +402,19 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
                   ? getNodeTypeColorVar(node.data.type)
                   : getNodeTypeColorVar("start")
               }
-              maskColor="rgba(0,0,0,0.1)"
+              maskColor="rgb(60, 60, 60,0.1)"
+              offsetScale={0}
+              pannable
+              zoomable
             />
           </div>
         </div>
         <Panel position="top-center">
           <ControlsPanel />
         </Panel>
+
+        {/* <Controls /> */}
+
         <Panel position="bottom-center">
           <ToolsContainerPanel
             activeToolIds={activeToolIds}
@@ -417,6 +425,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
         <Panel position="center-right"></Panel>
       </ReactFlow>
+
+      {/*Panels */}
 
       <div className="absolute inset-0 pointer-events-none z-10">
         {PANELS.map((panel, i) => (
