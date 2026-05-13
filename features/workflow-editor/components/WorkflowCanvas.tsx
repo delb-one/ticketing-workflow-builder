@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ReactFlow,
   Edge,
@@ -121,6 +128,23 @@ const INITIAL_VISIBLE_PANELS: Record<string, boolean> = {
   "network-panel": false,
   "search-panel": false,
 };
+
+const PANELS = [
+  { id: "queue-panel", component: QueuePanel, initial: { x: 30, y: 20 } },
+  {
+    id: "getting-started-panel",
+    component: GettingStartedPanel,
+    initial: { x: 330, y: 20 },
+  },
+  { id: "ticket-panel", component: TicketPanel, initial: { x: 630, y: 20 } },
+  { id: "agent-panel", component: AgentPanel, initial: { x: 30, y: 320 } },
+  {
+    id: "activity-panel",
+    component: TicketMonitorPanel,
+    initial: { x: 330, y: 320 },
+  },
+  { id: "log-panel", component: SimulationPanel, initial: { x: 630, y: 320 } },
+];
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const {
@@ -395,65 +419,17 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       </ReactFlow>
 
       <div className="absolute inset-0 pointer-events-none z-10">
-        {/* GETTING-STARTED PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["getting-started-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 200, y: 16 }}>
-            <GettingStartedPanel />
-          </DraggablePanel>
-        </AnimatedPanel>
-
-        {/* QUEUE PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["queue-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 16, y: 16 }}>
-            <QueuePanel />
-          </DraggablePanel>
-        </AnimatedPanel>
-
-        {/* TICKET PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["ticket-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 350, y: 16 }}>
-            <TicketPanel />
-          </DraggablePanel>
-        </AnimatedPanel>
-
-        {/* AGENT PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["agent-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 800, y: 16 }}>
-            <AgentPanel />
-          </DraggablePanel>
-        </AnimatedPanel>
-
-        {/* ACTIVITY PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["activity-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 150, y: 500 }}>
-            <TicketMonitorPanel />
-          </DraggablePanel>
-        </AnimatedPanel>
-
-        {/* LOG PANEL */}
-        <AnimatedPanel
-          visible={visiblePanels["log-panel"]}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <DraggablePanel initial={{ x: 150, y: 100 }}>
-            <SimulationPanel />
-          </DraggablePanel>
-        </AnimatedPanel>
+        {PANELS.map((panel, i) => (
+          <AnimatedPanel
+            key={panel.id}
+            visible={visiblePanels[panel.id]}
+            className="absolute inset-0 pointer-events-none"
+          >
+            <DraggablePanel initial={panel.initial}>
+              <panel.component />
+            </DraggablePanel>
+          </AnimatedPanel>
+        ))}
       </div>
     </div>
   );
