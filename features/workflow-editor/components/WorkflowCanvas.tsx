@@ -41,6 +41,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { AnimatedPanel } from "./AnimatedPanel";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -336,7 +337,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         {/* <Controls /> */}
         <Panel position="bottom-right">
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
@@ -360,8 +361,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           className={cn(
             "pointer-events-none absolute bottom-12 right-8 z-50 transition-all duration-300 ease-out",
             showMinimap
-              ? "translate-y-0 opacity-100 scale-100"
-              : "translate-y-6 opacity-0 scale-95",
+              ? "translate-y-0 opacity-100 scale-100 visible"
+              : "translate-y-6 opacity-0 scale-95 invisible",
           )}
         >
           <div
@@ -395,58 +396,64 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
       <div className="absolute inset-0 pointer-events-none z-10">
         {/* GETTING-STARTED PANEL */}
-        {visiblePanels["getting-started-panel"] && (
-          <div className="absolute inset-0 pointer-events-none ">
-            <DraggablePanel initial={{ x: 200, y: 16 }}>
-              <GettingStartedPanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["getting-started-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 200, y: 16 }}>
+            <GettingStartedPanel />
+          </DraggablePanel>
+        </AnimatedPanel>
 
         {/* QUEUE PANEL */}
-        {visiblePanels["queue-panel"] && (
-          <div className="absolute inset-0 pointer-events-none">
-            <DraggablePanel initial={{ x: 16, y: 16 }}>
-              <QueuePanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["queue-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 16, y: 16 }}>
+            <QueuePanel />
+          </DraggablePanel>
+        </AnimatedPanel>
 
         {/* TICKET PANEL */}
-        {visiblePanels["ticket-panel"] && (
-          <div className="absolute inset-0 pointer-events-none">
-            <DraggablePanel initial={{ x: 350, y: 16 }}>
-              <TicketPanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["ticket-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 350, y: 16 }}>
+            <TicketPanel />
+          </DraggablePanel>
+        </AnimatedPanel>
 
         {/* AGENT PANEL */}
-        {visiblePanels["agent-panel"] && (
-          <div className="absolute inset-0 pointer-events-none">
-            <DraggablePanel initial={{ x: 800, y: 16 }}>
-              <AgentPanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["agent-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 800, y: 16 }}>
+            <AgentPanel />
+          </DraggablePanel>
+        </AnimatedPanel>
 
         {/* ACTIVITY PANEL */}
-        {visiblePanels["activity-panel"] && (
-          <div className="absolute inset-0 pointer-events-none">
-            <DraggablePanel initial={{ x: 150, y: 500 }}>
-              <TicketMonitorPanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["activity-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 150, y: 500 }}>
+            <TicketMonitorPanel />
+          </DraggablePanel>
+        </AnimatedPanel>
 
         {/* LOG PANEL */}
-        {visiblePanels["log-panel"] && (
-          <div className="absolute inset-0 pointer-events-none">
-            <DraggablePanel initial={{ x: 150, y: 100 }}>
-              <SimulationPanel />
-            </DraggablePanel>
-          </div>
-        )}
+        <AnimatedPanel
+          visible={visiblePanels["log-panel"]}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <DraggablePanel initial={{ x: 150, y: 100 }}>
+            <SimulationPanel />
+          </DraggablePanel>
+        </AnimatedPanel>
       </div>
     </div>
   );
