@@ -1,14 +1,21 @@
 "use client";
 
 import { ReactFlowProvider } from "@xyflow/react";
-import { BlockLibrary, InspectorPanel, Toolbar } from "@/features/workflow-editor";
+import {
+  BlockLibrary,
+  InspectorPanel,
+  Toolbar,
+} from "@/features/workflow-editor";
 import { WorkflowEditorTemplate } from "@/components/templates/WorkflowEditorTemplate";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
-import { WORKFLOW_TEMPLATES } from "@/lib/templates/workflow-templates";
+import {
+  WORKFLOW_TEMPLATES,
+  WorkflowTemplate,
+} from "@/lib/templates/workflow-templates";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Download, Loader2, Trash2, Upload } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,10 +24,20 @@ import {
 } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/molecules/theme-toggle";
 import { Edge } from "@xyflow/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const WorkflowCanvas = dynamic(() => import("@/features/workflow-editor/components/WorkflowCanvas"), {
-  ssr: false,
-});
+const WorkflowCanvas = dynamic(
+  () => import("@/features/workflow-editor/components/WorkflowCanvas"),
+  {
+    ssr: false,
+  },
+);
 
 export default function Home() {
   const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
@@ -31,6 +48,7 @@ export default function Home() {
   const [isExporting, setIsExporting] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState<boolean>(false);
 
   const handleExportWorkflow = async () => {
     setIsExporting(true);
@@ -88,17 +106,32 @@ export default function Home() {
     }
   };
 
-  const loadTemplate = (templateId: string) => {
-    const template = WORKFLOW_TEMPLATES.find((item) => item.id === templateId);
+  const loadTemplate = async (templateId: string) => {
+    const template = WORKFLOW_TEMPLATES.find(
+      (item: WorkflowTemplate) => item.id === templateId,
+    );
+
     if (!template) return;
 
+    setIsLoadingTemplate(true);
+
+    try {
+      clearWorkflow();
+      await new Promise((r) => setTimeout(r, 1000));
+      loadWorkflow(template.nodes, template.edges);
+    } finally {
+      setIsLoadingTemplate(false);
+    }
+  };
+
+  const handleClearWorkflow = () => {
     clearWorkflow();
-    loadWorkflow(template.nodes, template.edges);
+    setSelectedTemplateId("");
   };
 
   return (
     <WorkflowEditorTemplate
-      leftSidebar={<BlockLibrary onBlockDrag={() => { }} />}
+      leftSidebar={<BlockLibrary onBlockDrag={() => {}} />}
       canvas={
         <ReactFlowProvider>
           <WorkflowCanvas />
@@ -119,6 +152,38 @@ export default function Home() {
           />
           <TooltipProvider>
             <div className="flex gap-1 shrink-0">
+              <Select
+                value={selectedTemplateId}
+                onValueChange={(id) => {
+                  setSelectedTemplateId(id);
+                  loadTemplate(id);
+                }}
+                disabled={isLoadingTemplate}
+              >
+                <SelectTrigger
+                  className="h-9 w-40 text-sm overflow-hidden"
+                  title="Select and load a workflow template"
+                >
+                  <div className="flex w-full items-center gap-2 overflow-hidden">
+                    <SelectValue
+                      placeholder="Select Template"
+                      className="truncate"
+                    />
+
+                    {isLoadingTemplate ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    ) : null}
+                  </div>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {WORKFLOW_TEMPLATES.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -156,7 +221,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => clearWorkflow()}
+                    onClick={handleClearWorkflow}
                     disabled={nodes.length === 0}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -176,7 +241,6 @@ export default function Home() {
           <div className="flex-1 overflow-hidden">
             <InspectorPanel selectedNode={selectedNodeData} />
           </div>
-
         </>
       }
     />
