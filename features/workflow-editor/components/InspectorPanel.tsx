@@ -19,7 +19,7 @@ import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { Card } from "@/components/ui/card";
-import { TechInspector } from "./templates/tech-inspector/TechInspector";
+import { TechInspector } from "./tech-inspector/TechInspector";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
