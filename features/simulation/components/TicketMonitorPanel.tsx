@@ -52,17 +52,7 @@ export function TicketMonitorPanel() {
     [runtimes],
   );
 
-  const stateOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          runtimes
-            .map((rt) => rt.ticket.state)
-            .filter((state) => Boolean(state)),
-        ),
-      ),
-    [runtimes],
-  );
+  const stateOptions = ["open", "assigned", "resolved", "closed", "reopened"];
 
   const filteredRuntimes = useMemo(
     () =>
@@ -92,7 +82,7 @@ export function TicketMonitorPanel() {
                 <SelectItem value="all">All States</SelectItem>
                 {stateOptions.map((state) => (
                   <SelectItem key={state} value={state}>
-                    {state}
+                    <span className="capitalize">{state}</span>
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getTicketStateColor } from "@/lib/colors/color-map";
 
 export function MetricsPanel() {
   const metrics = useMetrics();
@@ -134,7 +135,7 @@ export function MetricsPanel() {
           {/* Throughput Chart */}
           <div className="space-y-2">
             <div className="text-xs font-semibold text-primary-300 uppercase">
-              Throughput
+              Ticket Status Volume
             </div>
             <div className="h-40 w-full rounded-lg bg-card-800/60 border border-card-700/60 p-2 text-xs">
               {metrics.throughput.length > 0 ? (
@@ -173,8 +174,8 @@ export function MetricsPanel() {
                     />
                     <Line
                       type="monotone"
-                      dataKey="created"
-                      stroke="#3b82f6"
+                      dataKey="open"
+                      stroke={getTicketStateColor("open")}
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
@@ -182,7 +183,7 @@ export function MetricsPanel() {
                     <Line
                       type="monotone"
                       dataKey="closed"
-                      stroke="#ef4444"
+                      stroke={getTicketStateColor("closed")}
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
@@ -190,7 +191,7 @@ export function MetricsPanel() {
                     <Line
                       type="monotone"
                       dataKey="assigned"
-                      stroke="#3b82f6"
+                      stroke={getTicketStateColor("assigned")}
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
@@ -198,7 +199,7 @@ export function MetricsPanel() {
                     <Line
                       type="monotone"
                       dataKey="reopened"
-                      stroke="#f59e0b"
+                      stroke={getTicketStateColor("reopened")}
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
@@ -206,7 +207,7 @@ export function MetricsPanel() {
                     <Line
                       type="monotone"
                       dataKey="resolved"
-                      stroke="#10b981"
+                      stroke={getTicketStateColor("resolved")}
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
