@@ -96,7 +96,6 @@ export function ToolsContainerPanel({
       name: "Metrics Panel",
       description: "Monitor real-time simulation metrics",
       icon: <BarChart3 className="w-4 h-4 text-primary" />,
-      status: "coming-soon",
     },
 
     {

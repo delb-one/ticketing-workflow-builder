@@ -32,6 +32,7 @@ import {
   TicketMonitorPanel,
   TicketPanel,
   SimulationPanel,
+  MetricsPanel,
 } from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
@@ -144,6 +145,7 @@ const PANELS = [
     initial: { x: 330, y: 320 },
   },
   { id: "log-panel", component: SimulationPanel, initial: { x: 630, y: 320 } },
+  { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
 ];
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
