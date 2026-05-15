@@ -40,7 +40,6 @@ export function SLAPanel() {
   const liveTickets = allSLATickets.map((ticket) => {
     if (ticket.completed) return ticket;
 
-    console.log(ticket.slaDeadline);
     
 
     const elapsedTime = now - ticket.slaStartTime;

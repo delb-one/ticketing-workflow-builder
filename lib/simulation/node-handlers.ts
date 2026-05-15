@@ -9,6 +9,13 @@ import type {
   WorkflowNode,
 } from './types';
 
+const DEFAULT_PRIORITY_MULTIPLIERS: Record<Ticket["priority"], number> = {
+  critical: 0.5,
+  high: 0.75,
+  medium: 1,
+  low: 1.5,
+};
+
 export interface HandlerResult {
   ticketUpdates?: Partial<Ticket>;
   events?: SimulationEvent[];
@@ -186,7 +193,11 @@ class AutomationNodeHandler implements NodeHandler {
       case 'sla-timer': {
         const now = Date.now();
         const baseDurationMs = Math.max(1, config.duration ?? 60) * 60 * 1000;
-        const multiplier = config.priorityMultipliers?.[ticket.priority] ?? 1;
+        const multipliers = {
+          ...DEFAULT_PRIORITY_MULTIPLIERS,
+          ...(config.priorityMultipliers ?? {}),
+        };
+        const multiplier = multipliers[ticket.priority] ?? 1;
         const durationMs = baseDurationMs * multiplier;
         return {
           ticketUpdates: {

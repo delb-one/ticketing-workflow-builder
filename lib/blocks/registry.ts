@@ -159,6 +159,12 @@ export const BLOCKS: Record<string, BlockDefinition[]> = {
         nodeType: "automation",
         automationType: "sla-timer",
         duration: 60,
+        priorityMultipliers: {
+          critical: 0.5,
+          high: 0.75,
+          medium: 1,
+          low: 1.5,
+        },
       },
     },
     {
