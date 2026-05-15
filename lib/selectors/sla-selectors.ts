@@ -33,7 +33,7 @@ export const selectSLATicketStates = memoize(
 
     const now = Date.now();
     const config = state.simulationConfig.slaConfig;
-    const warningThreshold = config?.warningThreshold ?? 0.75;
+    const globalWarningThreshold = config?.warningThreshold ?? 0.75;
 
     return Object.values(state.engineState.runtimes)
       .filter((rt) => rt.ticket.sla)
@@ -46,6 +46,7 @@ export const selectSLATicketStates = memoize(
         const elapsedTime = referenceTime - sla.startTime;
         const remainingTime = Math.max(0, sla.deadline - referenceTime);
         const totalDuration = sla.deadline - sla.startTime;
+        const warningThreshold = sla.warningThreshold ?? globalWarningThreshold;
 
         let status: "ok" | "warning" | "breached" = "ok";
 
@@ -148,10 +149,10 @@ export const selectSLATrend = memoize(
 
     const buckets: SLATrendData[] = [];
     const bucketInterval = 5000; // 5 seconds
-    const warningThreshold = state.simulationConfig.slaConfig?.warningThreshold ?? 0.75;
+    const globalWarningThreshold = state.simulationConfig.slaConfig?.warningThreshold ?? 0.75;
 
     // We need to replay SLA states
-    const activeSLAs: Record<string, { startTime: number, deadline: number, completed: boolean, completedAt?: number, breached: boolean }> = {};
+    const activeSLAs: Record<string, { startTime: number, deadline: number, warningThreshold: number, completed: boolean, completedAt?: number, breached: boolean }> = {};
     let eventIdx = 0;
 
     for (let t = startTime; t <= lastEventTime + bucketInterval; t += bucketInterval) {
@@ -166,6 +167,7 @@ export const selectSLATrend = memoize(
             activeSLAs[e.ticketId] = {
               startTime: runtime.ticket.sla.startTime,
               deadline: runtime.ticket.sla.deadline,
+              warningThreshold: runtime.ticket.sla.warningThreshold ?? globalWarningThreshold,
               completed: false,
               breached: false
             };
@@ -194,7 +196,7 @@ export const selectSLATrend = memoize(
 
         if (sla.breached || referenceTime > sla.deadline) {
           breachedCount++;
-        } else if (!sla.completed && elapsedTime >= totalDuration * warningThreshold) {
+        } else if (!sla.completed && elapsedTime >= totalDuration * sla.warningThreshold) {
           warningCount++;
         } else {
           okCount++;

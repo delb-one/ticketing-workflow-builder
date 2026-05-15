@@ -113,6 +113,7 @@ export interface WorkflowDefinition {
 export interface SlaState {
   startTime: number;
   deadline: number;
+  warningThreshold?: number;
   breached: boolean;
   paused?: boolean;
   pausedAt?: number;

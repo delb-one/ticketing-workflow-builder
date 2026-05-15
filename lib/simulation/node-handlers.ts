@@ -199,11 +199,13 @@ class AutomationNodeHandler implements NodeHandler {
         };
         const multiplier = multipliers[ticket.priority] ?? 1;
         const durationMs = baseDurationMs * multiplier;
+        const warningThreshold = config.warningThreshold ?? 0.75;
         return {
           ticketUpdates: {
             sla: {
               startTime: now,
               deadline: now + durationMs,
+              warningThreshold,
               breached: false,
               completed: false,
             },
