@@ -18,6 +18,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Users,
+  BarChart3,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getTicketStateColor } from "@/lib/colors/color-map";
@@ -29,7 +30,7 @@ export function MetricsPanel() {
     <CustomPanel
       value="metrics-panel"
       title="Metrics & Health"
-      icon={Activity}
+      icon={BarChart3}
       badge={
         <Badge
           variant="secondary"

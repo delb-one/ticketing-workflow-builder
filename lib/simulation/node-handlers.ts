@@ -69,11 +69,16 @@ class StartNodeHandler implements NodeHandler {
 
 class EndNodeHandler implements NodeHandler {
   execute(node: WorkflowNode, _edges: WorkflowEdge[], ticket: Ticket): HandlerResult {
+    const now = Date.now();
+    const ticketUpdates: Partial<Ticket> = {
+      state: 'closed',
+      updatedAt: now,
+    };
+    if (ticket.sla && !ticket.sla.completed) {
+      ticketUpdates.sla = { ...ticket.sla, completed: true, completedAt: now };
+    }
     return {
-      ticketUpdates: {
-        state: 'closed',
-        updatedAt: Date.now(),
-      },
+      ticketUpdates,
       events: [
         buildEvent('ticket.closed', ticket.id, node),
         buildEvent('workflow.completed', ticket.id, node),
@@ -135,11 +140,16 @@ class ActorNodeHandler implements NodeHandler {
 class ActionNodeHandler implements NodeHandler {
   execute(node: WorkflowNode, _edges: WorkflowEdge[], ticket: Ticket): HandlerResult {
     const config = node.data.config as Extract<NodeConfig, { nodeType: 'action' }>;
+    const now = Date.now();
 
     if (config.ticketAction === 'resolve') {
+      const ticketUpdates: Partial<Ticket> = { state: 'resolved', updatedAt: now };
+      if (ticket.sla && !ticket.sla.completed) {
+        ticketUpdates.sla = { ...ticket.sla, completed: true, completedAt: now };
+      }
       return {
         releaseAgent: true,
-        ticketUpdates: { state: 'resolved', updatedAt: Date.now() },
+        ticketUpdates,
         events: [
           buildEvent('ticket.resolved', ticket.id, node),
           buildEvent('ticket.updated', ticket.id, node, { state: 'resolved' }),
@@ -148,9 +158,13 @@ class ActionNodeHandler implements NodeHandler {
     }
 
     if (config.ticketAction === 'close') {
+      const ticketUpdates: Partial<Ticket> = { state: 'closed', updatedAt: now };
+      if (ticket.sla && !ticket.sla.completed) {
+        ticketUpdates.sla = { ...ticket.sla, completed: true, completedAt: now };
+      }
       return {
         releaseAgent: true,
-        ticketUpdates: { state: 'closed', updatedAt: Date.now() },
+        ticketUpdates,
         events: [
           buildEvent('ticket.closed', ticket.id, node),
           buildEvent('ticket.updated', ticket.id, node, { state: 'closed' }),
@@ -171,13 +185,16 @@ class AutomationNodeHandler implements NodeHandler {
     switch (config.automationType) {
       case 'sla-timer': {
         const now = Date.now();
-        const durationMs = Math.max(1, config.duration ?? 60) * 60 * 1000;
+        const baseDurationMs = Math.max(1, config.duration ?? 60) * 60 * 1000;
+        const multiplier = config.priorityMultipliers?.[ticket.priority] ?? 1;
+        const durationMs = baseDurationMs * multiplier;
         return {
           ticketUpdates: {
             sla: {
               startTime: now,
               deadline: now + durationMs,
               breached: false,
+              completed: false,
             },
             updatedAt: now,
           },
@@ -254,16 +271,22 @@ class StatusNodeHandler implements NodeHandler {
     const events: SimulationEvent[] = [buildEvent('ticket.updated', ticket.id, node, { state: config.statusValue })];
 
     if (config.startsSla) {
+      const durationMs = Math.max(1, config.slaDuration ?? 60) * 60 * 1000;
       updates.sla = {
         startTime: now,
-        deadline: now + 60 * 60 * 1000,
+        deadline: now + durationMs,
         breached: false,
+        completed: false,
       };
       events.push(buildEvent('sla.started', ticket.id, node));
     }
 
-    if (config.stopsSla && ticket.sla) {
-      updates.sla = undefined;
+    if ((config.stopsSla || config.statusValue === 'resolved' || config.statusValue === 'closed') && ticket.sla && !ticket.sla.completed) {
+      updates.sla = {
+        ...ticket.sla,
+        completed: true,
+        completedAt: now,
+      };
     }
 
     return {

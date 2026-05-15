@@ -103,7 +103,7 @@ export function ToolsContainerPanel({
       name: "SLA Monitor",
       description: "Track SLA compliance and violations",
       icon: <ShieldAlert className="w-4 h-4 text-primary" />,
-      status: "coming-soon",
+
     },
 
     {
@@ -214,15 +214,15 @@ export function ToolsContainerPanel({
 
                   activeToolSet.has(tool.id)
                     ? [
-                        "bg-linear-to-br from-primary to-primary/70",
-                        "text-primary-foreground",
-                        "[&_svg]:text-primary-foreground",
-                        "[&_svg]:stroke-current",
+                      "bg-linear-to-br from-primary to-primary/70",
+                      "text-primary-foreground",
+                      "[&_svg]:text-primary-foreground",
+                      "[&_svg]:stroke-current",
 
-                        "border border-primary/20",
-                        "shadow-[0_0_20px_hsl(var(--primary)/0.25)]",
-                        "hover:brightness-110",
-                      ]
+                      "border border-primary/20",
+                      "shadow-[0_0_20px_hsl(var(--primary)/0.25)]",
+                      "hover:brightness-110",
+                    ]
                     : "hover:bg-muted/60",
 
                   tool.status && "opacity-70",

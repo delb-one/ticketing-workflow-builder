@@ -33,6 +33,7 @@ import {
   TicketPanel,
   SimulationPanel,
   MetricsPanel,
+  SLAPanel,
 } from "@/features/simulation";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
@@ -146,6 +147,7 @@ const PANELS = [
   },
   { id: "log-panel", component: SimulationPanel, initial: { x: 630, y: 320 } },
   { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
+  { id: "sla-panel", component: SLAPanel, initial: { x: 930, y: 320 } },
 ];
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
@@ -233,9 +235,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-              ...currentEdge,
-              label: trimmedLabel || undefined,
-            }
+            ...currentEdge,
+            label: trimmedLabel || undefined,
+          }
           : currentEdge,
       );
 
@@ -425,7 +427,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           />
         </Panel>
 
-        <Panel position="center-right"></Panel>
+
       </ReactFlow>
 
       {/*Panels */}

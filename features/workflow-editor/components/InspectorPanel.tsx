@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { Card } from "@/components/ui/card";
 import { TechInspector } from "./tech-inspector/TechInspector";
+import { SLAInspector } from "./sla-inspector/SLAInspector";
 
 interface InspectorPanelProps {
   selectedNode: CustomNode | undefined;
@@ -76,7 +77,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   return (
     <>
-      {!blockId?.includes("tech") && (
+      {!blockId?.includes("tech") && !blockId?.includes("sla") && (
         <div className="flex h-full w-80 flex-col overflow-y-auto bg-transparent">
           <div className="sticky top-0 p-3 space-y-2">
             <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
@@ -146,28 +147,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
               </PropertyCard>
             )}
 
-            {selectedNode.data.type === "automation" &&
-              blockId?.includes("sla") && (
-                <PropertyCard label="SLA Duration (minutes)">
-                  <Input
-                    type="number"
-                    value={
-                      config?.nodeType === "automation"
-                        ? (config.duration ?? 60)
-                        : 60
-                    }
-                    onChange={(event) =>
-                      handleConfigChange({
-                        nodeType: "automation",
-                        automationType: "sla-timer",
-                        duration: parseInt(event.target.value, 10),
-                      })
-                    }
-                    min="1"
-                    className="text-sm"
-                  />
-                </PropertyCard>
-              )}
+
 
             {selectedNode.data.type === "automation" &&
               blockId?.includes("assign") && (
@@ -251,9 +231,12 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
         </div>
       )}
 
-      {/* Use the TechInspector */}
       {blockId?.includes("tech") && (
         <TechInspector selectedNode={selectedNode} />
+      )}
+      
+      {blockId?.includes("sla") && (
+        <SLAInspector selectedNode={selectedNode} />
       )}
     </>
   );

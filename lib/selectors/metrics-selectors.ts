@@ -1,7 +1,7 @@
 import type { WorkflowStore } from "@/lib/store";
 
 // Simple memoization helper for selectors
-const memoize = <T extends (state: WorkflowStore) => any>(
+export const memoize = <T extends (state: WorkflowStore) => any>(
   fn: T,
   getDeps: (state: WorkflowStore) => any[],
 ) => {

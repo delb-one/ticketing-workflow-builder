@@ -7,6 +7,7 @@ import type {
   EngineRuntimeState,
   Agent,
   TicketTemplate,
+  SLAConfig,
 } from "@/lib/simulation/types";
 import {
   applyNodeChanges,
@@ -28,6 +29,7 @@ export interface SimulationConfig {
   // };
 
   stepDelayMs: number;
+  slaConfig: SLAConfig;
 }
 
 export type { NodeType, NodeConfig } from "@/lib/simulation/types";
@@ -111,6 +113,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     // ticketCount: 1,
     // agentsCount: { l1: 1, l2: 1, l3: 1 },
     stepDelayMs: 900,
+    slaConfig: {
+      defaultMaxResolutionTime: 60,
+      warningThreshold: 0.75,
+      priorityMultiplier: {
+        critical: 0.5,
+        high: 0.75,
+        medium: 1,
+        low: 1.5,
+      },
+    },
   },
 
   addNode: (node) =>

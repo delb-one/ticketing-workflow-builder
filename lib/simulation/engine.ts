@@ -161,6 +161,18 @@ export class SimulationEngine {
   step(): void {
     this.pushHistorySnapshot();
     const dequeuedThisStep = new Set<string>();
+    const now = Date.now();
+
+    // 0. SLA Breach Monitor
+    for (const [ticketId, runtime] of Object.entries(this.runtimes)) {
+      const sla = runtime.ticket.sla;
+      if (!runtime.completed && sla && !sla.completed && !sla.breached) {
+        if (now > sla.deadline) {
+          sla.breached = true;
+          this.emit({ type: "sla.breached", ticketId, timestamp: now });
+        }
+      }
+    }
 
     // 1. Scheduler: Assign tickets from queues to available agents
     for (const agent of this.agents) {

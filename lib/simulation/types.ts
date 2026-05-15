@@ -37,6 +37,8 @@ export type NodeConfig =
         | "business-rules"
         | "reopen";
       duration?: number;
+      warningThreshold?: number;
+      priorityMultipliers?: Record<string, number>;
       assignTo?: "l1" | "l2" | "l3";
       channel?: string;
     }
@@ -59,6 +61,7 @@ export type NodeConfig =
         | "reopened";
       startsSla?: boolean;
       stopsSla?: boolean;
+      slaDuration?: number; // duration in minutes
       isFinal?: boolean;
     }
   | {
@@ -113,6 +116,14 @@ export interface SlaState {
   breached: boolean;
   paused?: boolean;
   pausedAt?: number;
+  completed?: boolean;
+  completedAt?: number;
+}
+
+export interface SLAConfig {
+  defaultMaxResolutionTime: number; // minutes
+  warningThreshold: number; // percentage (e.g. 0.75 for 75%)
+  priorityMultiplier: Record<string, number>; // e.g. { critical: 0.5, high: 0.8, medium: 1, low: 1.5 }
 }
 
 export interface SimulationContext {
