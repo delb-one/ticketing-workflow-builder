@@ -51,7 +51,7 @@ const TICKET_STATE_BADGE_CLASS_MAP: Record<Ticket["state"], string> = {
   reopened: "bg-rose-500/15 text-rose-300 border-rose-500/40",
 };
 
-const TICKET_STATE_COLOR_MAP: Record<Ticket["state"], string> = {
+export const TICKET_STATE_COLOR_MAP: Record<Ticket["state"], string> = {
   open: "#7dd3fc", // sky-300
   assigned: "#a5b4fc", // indigo-300
   pending: "#fcd34d", // amber-300

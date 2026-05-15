@@ -21,7 +21,11 @@ import {
   BarChart3,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getTicketStateColor } from "@/lib/colors/color-map";
+import {
+  getTicketStateColor,
+  TICKET_STATE_COLOR_MAP,
+} from "@/lib/colors/color-map";
+import { Ticket } from "@/lib/simulation/types";
 
 export function MetricsPanel() {
   const metrics = useMetrics();
@@ -41,13 +45,10 @@ export function MetricsPanel() {
       }
     >
       <div className="space-y-4 pt-1">
-
         {/* TOP SECTION */}
         <div className="grid grid-cols-3 gap-4">
-
           {/* KPI Overview */}
           <div className="col-span-2 grid grid-cols-2 gap-2">
-
             <div className="flex flex-col p-3 rounded-lg bg-card-800/60 border border-card-700/60 backdrop-blur-md">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <Activity className="w-3.5 h-3.5" />
@@ -88,20 +89,19 @@ export function MetricsPanel() {
                 <span>SLA Breaches</span>
               </div>
               <div
-                className={`text-xl font-bold ${metrics.slaBreachesCount > 0
-                  ? "text-red-400"
-                  : "text-emerald-400"
-                  }`}
+                className={`text-xl font-bold ${
+                  metrics.slaBreachesCount > 0
+                    ? "text-red-400"
+                    : "text-emerald-400"
+                }`}
               >
                 {metrics.slaBreachesCount}
               </div>
             </div>
-
           </div>
 
-          {/* RIGHT SIDE STACK (IMPORTANT CHANGE ONLY LAYOUT) */}
-          <div className="flex flex-col gap-4">
-
+          {/* RIGHT SIDE STACK */}
+          <div className="flex flex-col gap-4 justify-around">
             {/* Workflow Health */}
             <div className="space-y-2">
               <div className="text-xs font-semibold text-primary-300 uppercase">
@@ -110,12 +110,13 @@ export function MetricsPanel() {
 
               <div className="h-3 w-full bg-card-800/60 rounded-full overflow-hidden border border-card-700/60">
                 <div
-                  className={`h-full ${metrics.workflowHealth > 80
-                    ? "bg-emerald-500"
-                    : metrics.workflowHealth > 50
-                      ? "bg-amber-500"
-                      : "bg-red-500"
-                    } transition-all duration-500`}
+                  className={`h-full ${
+                    metrics.workflowHealth > 80
+                      ? "bg-emerald-500"
+                      : metrics.workflowHealth > 50
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  } transition-all duration-500`}
                   style={{ width: `${metrics.workflowHealth}%` }}
                 />
               </div>
@@ -137,8 +138,9 @@ export function MetricsPanel() {
                       {q.name}
                     </span>
                     <span
-                      className={`text-lg font-bold ${q.size > 5 ? "text-amber-500" : "text-primary-300"
-                        }`}
+                      className={`text-lg font-bold ${
+                        q.size > 5 ? "text-amber-500" : "text-primary-300"
+                      }`}
                     >
                       {q.size}
                     </span>
@@ -146,16 +148,16 @@ export function MetricsPanel() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* CHART SECTION (ONLY CHANGE: MORE VISUAL IMPORTANCE) */}
+        {/* CHART SECTION  */}
         <div className="space-y-2">
-
           <div className="text-xs font-semibold text-primary-300 uppercase">
             Ticket Status Volume
           </div>
+
+          
 
           <div className="h-80 w-full rounded-lg bg-card-800/60 border border-card-700/60 p-3">
             {metrics.throughput.length > 0 ? (
@@ -247,11 +249,22 @@ export function MetricsPanel() {
               </div>
             )}
           </div>
+          
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+            {(Object.keys(TICKET_STATE_COLOR_MAP) as Ticket["state"][]).map(
+              (state) => (
+                <div key={state} className="flex items-center gap-1.5">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: getTicketStateColor(state) }}
+                  />
+                  <span className="capitalize">{state}</span>
+                </div>
+              ),
+            )}
+          </div>
         </div>
-
       </div>
-      {/* <ScrollArea className="w-full pr-2">
-      </ScrollArea> */}
     </CustomPanel>
   );
 }
