@@ -34,6 +34,7 @@ export function AgentPanel() {
       value="agent-pool"
       title="Agent Pool"
       icon={Users}
+      defaultExpanded
       badge={
         <Badge
           variant="secondary"

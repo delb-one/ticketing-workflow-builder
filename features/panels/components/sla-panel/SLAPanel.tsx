@@ -85,7 +85,7 @@ export function SLAPanel() {
   };
 
   return (
-    <CustomPanel value="sla-panel" title="SLA Monitor" icon={ShieldAlert}>
+    <CustomPanel value="sla-panel" title="SLA Monitor" icon={ShieldAlert} defaultExpanded>
       <div className="flex h-full flex-col gap-4 p-4 min-w-85">
         <div className="grid grid-cols-3 gap-2 shrink-0">
           <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3 text-card-foreground shadow-sm">

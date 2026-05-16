@@ -10,7 +10,7 @@ export function LogPanel() {
     useLog();
 
   return (
-    <CustomPanel title="Log Panel" value="log-panel" icon={Terminal}>
+    <CustomPanel title="Log Panel" value="log-panel" icon={Terminal} defaultExpanded>
       <ScrollArea className="w-full">
         <div className="space-y-1.5 font-mono text-sm p-2 max-h-56">
           {simulationEvents.length === 0 ? (

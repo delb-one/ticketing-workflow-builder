@@ -33,6 +33,7 @@ export function MetricsPanel() {
       value="metrics-panel"
       title="Metrics & Health"
       icon={BarChart3}
+      defaultExpanded
       badge={
         <Badge
           variant="secondary"

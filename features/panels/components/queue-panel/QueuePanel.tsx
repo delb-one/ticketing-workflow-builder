@@ -14,6 +14,7 @@ export function QueuePanel() {
       value="queues"
       title="Queues"
       icon={ListFilter}
+      defaultExpanded
       badge={
         <Badge
           variant="secondary"

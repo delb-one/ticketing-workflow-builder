@@ -32,6 +32,7 @@ export function TicketPanel() {
       value="controls"
       title="Ticket Pool"
       icon={Tickets}
+      defaultExpanded
       badge={
         <Badge
           variant="secondary"
