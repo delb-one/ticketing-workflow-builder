@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useWorkflowStore } from "@/lib/store";
-import { Users, Briefcase, Settings2, X } from "lucide-react";
+import { Briefcase, Settings2, Users, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
@@ -15,33 +13,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AgentFormState } from "./types";
+import { useAgent } from "@/features/panels/hooks/useAgent";
 
 export function AgentPanel() {
   const {
-    engineState,
     isSimulating,
-    simulationConfig,
-    updateSimulationConfig,
-  } = useWorkflowStore();
-  const agents = engineState?.agents ?? [];
-  const totalAgents = simulationConfig.agentPool.length;
-  const [form, setForm] = useState<AgentFormState>({
-    id: "",
-    name: "",
-    level: "l1",
-    efficiency: 1,
-    capacity: 1,
-    skills: "",
-  });
-  const hasDuplicateId = useMemo(
-    () =>
-      simulationConfig.agentPool.some(
-        (a) => a.id.trim().toLowerCase() === form.id.trim().toLowerCase(),
-      ),
-    [simulationConfig.agentPool, form.id],
-  );
-  const canAdd = form.id.trim().length > 0 && !hasDuplicateId && !isSimulating;
+    agents,
+    agentPool,
+    totalAgents,
+    form,
+    setForm,
+    hasDuplicateId,
+    canAdd,
+    addAgent,
+    removeAgent,
+  } = useAgent();
 
   return (
     <CustomPanel
@@ -104,39 +90,7 @@ export function AgentPanel() {
                 <SelectItem value="l3">Level: L3</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              size="sm"
-              disabled={!canAdd}
-              onClick={() => {
-                const skills = form.skills
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean);
-                updateSimulationConfig({
-                  agentPool: [
-                    ...simulationConfig.agentPool,
-                    {
-                      id: form.id.trim(),
-                      name: form.name.trim() || undefined,
-                      level: form.level,
-                      efficiency: form.efficiency,
-                      capacity: form.capacity,
-                      skills: skills.length > 0 ? skills : undefined,
-                      status: "available",
-                      type: "custom",
-                    },
-                  ],
-                });
-                setForm({
-                  id: "",
-                  name: "",
-                  level: "l1",
-                  efficiency: 1,
-                  capacity: 1,
-                  skills: "",
-                });
-              }}
-            >
+            <Button size="sm" disabled={!canAdd} onClick={addAgent}>
               Add Agent
             </Button>
           </div>
@@ -187,45 +141,32 @@ export function AgentPanel() {
           />
 
           {hasDuplicateId && (
-            <div className="text-[11px] text-red-400">
-              Agent ID must be unique.
-            </div>
+            <div className="text-[11px] text-red-400">Agent ID must be unique.</div>
           )}
 
           <div className="space-y-2">
-            {simulationConfig.agentPool.length === 0 ? (
-              <div className="text-xs text-muted-foreground">
-                No agents configured
-              </div>
+            {agentPool.length === 0 ? (
+              <div className="text-xs text-muted-foreground">No agents configured</div>
             ) : (
-              simulationConfig.agentPool.map((agent) => (
+              agentPool.map((agent) => (
                 <div
                   key={agent.id}
                   className="rounded-md border bg-background/40 p-2 text-xs"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-semibold truncate">
-                      {agent.name ?? agent.id}
-                    </div>
+                    <div className="font-semibold truncate">{agent.name ?? agent.id}</div>
                     <Button
                       size="icon"
                       variant="ghost"
                       className="h-6 px-2 text-[11px] "
                       disabled={isSimulating}
-                      onClick={() =>
-                        updateSimulationConfig({
-                          agentPool: simulationConfig.agentPool.filter(
-                            (a) => a.id !== agent.id,
-                          ),
-                        })
-                      }
+                      onClick={() => removeAgent(agent.id)}
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground uppercase">
-                    {agent.level} | eff {agent.efficiency} | cap{" "}
-                    {agent.capacity}
+                    {agent.level} | eff {agent.efficiency} | cap {agent.capacity}
                   </div>
                 </div>
               ))
@@ -236,9 +177,7 @@ export function AgentPanel() {
         <ScrollArea className="w-full pr-2">
           <div className="max-h-80 space-y-2">
             {agents.length === 0 ? (
-              <div className="text-xs text-primary-500 text-center py-4">
-                No agents active
-              </div>
+              <div className="text-xs text-primary-500 text-center py-4">No agents active</div>
             ) : (
               agents.map((agent) => (
                 <div

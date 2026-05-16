@@ -31,7 +31,7 @@ import {
   AgentPanel,
   TicketMonitorPanel,
   TicketPanel,
-  SimulationPanel,
+  LogPanel,
   MetricsPanel,
   SLAPanel,
 } from "@/features/panels";
@@ -145,7 +145,7 @@ const PANELS = [
     component: TicketMonitorPanel,
     initial: { x: 330, y: 320 },
   },
-  { id: "log-panel", component: SimulationPanel, initial: { x: 630, y: 320 } },
+  { id: "log-panel", component: LogPanel, initial: { x: 630, y: 320 } },
   { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
   { id: "sla-panel", component: SLAPanel, initial: { x: 930, y: 320 } },
 ];

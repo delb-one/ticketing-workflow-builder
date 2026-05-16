@@ -1,7 +1,6 @@
 "use client";
 
 import { CustomPanel } from "@/components/molecules/CustomPanel";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LineChart,
   Line,
@@ -13,7 +12,6 @@ import {
 } from "recharts";
 import {
   Activity,
-  Clock,
   CheckCircle,
   AlertTriangle,
   Users,
@@ -26,7 +24,6 @@ import {
 } from "@/lib/colors/color-map";
 import { Ticket } from "@/lib/simulation/types";
 import { useMetrics } from "../../hooks/useMetrics";
-import { WorkflowStore } from "@/lib/store";
 
 export function MetricsPanel() {
   const metrics = useMetrics();

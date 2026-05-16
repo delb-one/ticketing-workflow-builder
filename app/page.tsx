@@ -4,14 +4,13 @@ import { ReactFlowProvider } from "@xyflow/react";
 import {
   BlockLibrary,
   InspectorPanel,
-  Toolbar,
 } from "@/features/workflow-editor";
 import { WorkflowEditorTemplate } from "@/components/templates/WorkflowEditorTemplate";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
 import {
   WORKFLOW_TEMPLATES,
   WorkflowTemplate,
-} from "@/lib/templates/workflow-templates";
+} from "@/lib/flow-template/workflow-templates";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";

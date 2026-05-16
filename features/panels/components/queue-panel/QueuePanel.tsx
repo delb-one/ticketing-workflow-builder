@@ -1,16 +1,13 @@
 "use client";
 
-import { useWorkflowStore } from "@/lib/store";
 import { ListFilter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
+import { useQueue } from "@/features/panels/hooks/useQueue";
 
 export function QueuePanel() {
-  const { engineState } = useWorkflowStore();
-  const queues = engineState?.queues ?? { l1: [], l2: [], l3: [] };
-
-  const totalWaiting = queues.l1.length + queues.l2.length + queues.l3.length;
+  const { queues, totalWaiting, levels } = useQueue();
 
   return (
     <CustomPanel
@@ -27,7 +24,7 @@ export function QueuePanel() {
       }
     >
       <div className="flex-1 grid grid-cols-3 gap-2 overflow-hidden">
-        {(["l1", "l2", "l3"] as const).map((level) => (
+        {levels.map((level) => (
           <div
             key={level}
             className="flex flex-col bg-card/60 rounded-lg border border-card-700/60 p-2 overflow-hidden backdrop-blur-md"

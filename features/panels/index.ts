@@ -1,4 +1,4 @@
-export { SimulationPanel } from "./components/simulation-panel/SimulationPanel";
+export { LogPanel } from "./components/log-panel/LogPanel";
 export { AgentPanel } from "./components/agent-panel/AgentPanel";
 export { QueuePanel } from "./components/queue-panel/QueuePanel";
 export { TicketMonitorPanel } from "./components/ticket-monitor-panel/TicketMonitorPanel";

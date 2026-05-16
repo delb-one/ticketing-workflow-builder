@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useWorkflowStore } from "@/lib/store";
 import { Settings2, Tickets, X } from "lucide-react";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
@@ -14,46 +12,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TicketFormState } from "./types";
+import { useTicket } from "@/features/panels/hooks/useTicket";
 
 export function TicketPanel() {
   const {
     isSimulating,
-    simulationConfig,
-    addTicketTemplate,
-    updateSimulationConfig,
-  } = useWorkflowStore();
-  const [form, setForm] = useState<TicketFormState>({
-    id: "",
-    priority: "medium",
-    impact: "medium",
-    category: "",
-    description: "",
-    autoSpawnCount: 1,
-  });
-
-  const totalTickets = simulationConfig.ticketTemplates.reduce(
-    (sum, template) => sum + Math.max(1, template.autoSpawnCount ?? 1),
-    0,
-  );
-  const hasDuplicateId = useMemo(
-    () =>
-      simulationConfig.ticketTemplates.some(
-        (t) => t.id.trim().toLowerCase() === form.id.trim().toLowerCase(),
-      ),
-    [simulationConfig.ticketTemplates, form.id],
-  );
-  const canAdd = form.id.trim().length > 0 && !hasDuplicateId && !isSimulating;
-
-  const resetForm = () =>
-    setForm({
-      id: "",
-      priority: "medium",
-      impact: "medium",
-      category: "",
-      description: "",
-      autoSpawnCount: 1,
-    });
+    ticketTemplates,
+    totalTickets,
+    form,
+    setForm,
+    hasDuplicateId,
+    canAdd,
+    addTemplate,
+    removeTemplate,
+  } = useTicket();
 
   return (
     <CustomPanel
@@ -135,21 +107,7 @@ export function TicketPanel() {
               <SelectItem value="high">Impact: High</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            size="sm"
-            disabled={!canAdd}
-            onClick={() => {
-              addTicketTemplate({
-                id: form.id.trim(),
-                priority: form.priority,
-                impact: form.impact,
-                category: form.category.trim() || undefined,
-                description: form.description.trim() || undefined,
-                autoSpawnCount: form.autoSpawnCount,
-              });
-              resetForm();
-            }}
-          >
+          <Button size="sm" disabled={!canAdd} onClick={addTemplate}>
             Add Template
           </Button>
         </div>
@@ -184,21 +142,17 @@ export function TicketPanel() {
         />
 
         {hasDuplicateId && (
-          <div className="text-[11px] text-red-400">
-            Template ID must be unique.
-          </div>
+          <div className="text-[11px] text-red-400">Template ID must be unique.</div>
         )}
 
         <div className="pt-1 space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">
-            Launch List
-          </div>
-          {simulationConfig.ticketTemplates.length === 0 ? (
+          <div className="text-xs font-medium text-muted-foreground">Launch List</div>
+          {ticketTemplates.length === 0 ? (
             <div className="text-xs text-muted-foreground">
               No templates configured. Add at least one template to start.
             </div>
           ) : (
-            simulationConfig.ticketTemplates.map((template) => (
+            ticketTemplates.map((template) => (
               <div
                 key={template.id}
                 className="rounded-md border bg-background/40 p-2 text-xs"
@@ -210,21 +164,13 @@ export function TicketPanel() {
                     variant="ghost"
                     className="h-6 px-2 text-[11px]"
                     disabled={isSimulating}
-                    onClick={() =>
-                      updateSimulationConfig({
-                        ticketTemplates:
-                          simulationConfig.ticketTemplates.filter(
-                            (t) => t.id !== template.id,
-                          ),
-                      })
-                    }
+                    onClick={() => removeTemplate(template.id)}
                   >
                     <X className=" h-2 w-2" />
                   </Button>
                 </div>
                 <div className="mt-1 text-[11px] text-muted-foreground">
-                  {template.priority.toUpperCase()} |{" "}
-                  {template.impact.toUpperCase()} |{" "}
+                  {template.priority.toUpperCase()} | {template.impact.toUpperCase()} |{" "}
                   {template.category ?? "uncategorized"} | x
                   {Math.max(1, template.autoSpawnCount ?? 1)}
                 </div>
