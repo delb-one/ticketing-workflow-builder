@@ -33,10 +33,17 @@ export function ToolsContainerPanel({
     }
   };
 
+  const badgeCounts = {
+    agents: totalAgents,
+    tickets: totalTickets,
+    queue: totalWaiting,
+  } as const;
+
   return (
     <div className="flex justify-center items-center gap-3 px-3 py-2 rounded-xl bg-background/50 border backdrop-blur ">
       {tools.map((tool) => {
         const statusLabel = getStatusLabel(tool.status);
+        const badgeCount = tool.badgeKey ? badgeCounts[tool.badgeKey] : null;
 
         return (
           <Tooltip key={tool.id}>
@@ -67,19 +74,9 @@ export function ToolsContainerPanel({
               >
                 <tool.icon className="w-4 h-4 text-primary" />
 
-                {tool.id === "agent-panel" && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
-                    {totalAgents}
-                  </span>
-                )}
-                {tool.id === "ticket-panel" && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
-                    {totalTickets}
-                  </span>
-                )}
-                {tool.id === "queue-panel" && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
-                    {totalWaiting}
+                {badgeCount !== null && badgeCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full border  bg-amber-200 text-black text-[10px] font-semibold flex items-center justify-center  z-10">
+                    {badgeCount}
                   </span>
                 )}
               </button>

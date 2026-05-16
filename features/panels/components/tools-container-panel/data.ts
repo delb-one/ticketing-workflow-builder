@@ -31,6 +31,7 @@ export const tools: SimulationTool[] = [
     name: "Agent Panel",
     description: "Define and manage agent groups (L1, L2, L3)",
     icon: Users,
+    badgeKey: "agents",
   },
 
   {
@@ -38,6 +39,7 @@ export const tools: SimulationTool[] = [
     name: "Ticket Panel",
     description: "Generate tickets and control incoming flow",
     icon: Tickets,
+    badgeKey: "tickets",
   },
 
   {
@@ -45,6 +47,7 @@ export const tools: SimulationTool[] = [
     name: "Queue Panel",
     description: "Inspect queue status and workload distribution",
     icon: ListFilter,
+    badgeKey: "queue",
   },
 
   {
