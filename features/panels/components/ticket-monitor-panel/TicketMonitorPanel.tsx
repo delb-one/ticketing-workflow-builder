@@ -28,7 +28,7 @@ export function TicketMonitorPanel() {
   } = useTicketMonitor();
 
   return (
-    <CustomPanel value="ticket-monitor" title="Ticket Monitor" icon={Activity}>
+    <CustomPanel value="ticket-monitor" title="Ticket Monitor" icon={Activity} defaultExpanded>
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
