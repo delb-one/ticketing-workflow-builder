@@ -7,7 +7,6 @@ import {
   selectImpactOptions,
   selectPriorityOptions,
   selectTicketMonitorNodes,
-  selectTicketMonitorRuntimes,
   TICKET_STATE_OPTIONS,
   type TicketMonitorFilters,
 } from "@/features/panels/logic/ticket-monitor-selectors";
@@ -19,11 +18,15 @@ const INITIAL_FILTERS: TicketMonitorFilters = {
 };
 
 export function useTicketMonitor() {
-  const { runtimes, nodes } = useWorkflowStore(
+  const { runtimeMap, nodes } = useWorkflowStore(
     useShallow((state) => ({
-      runtimes: selectTicketMonitorRuntimes(state),
+      runtimeMap: state.engineState?.runtimes ?? null,
       nodes: selectTicketMonitorNodes(state),
     })),
+  );
+  const runtimes = useMemo(
+    () => (runtimeMap ? Object.values(runtimeMap) : []),
+    [runtimeMap],
   );
 
   const [filters, setFilters] = useState<TicketMonitorFilters>(INITIAL_FILTERS);

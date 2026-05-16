@@ -10,6 +10,9 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { SimulationTool, ToolsContainerPanelProps } from "./types";
 import { tools } from "./data";
+import { useAgent } from "../../hooks/useAgent";
+import { useTicket } from "../../hooks/useTicket";
+import { useQueue } from "../../hooks/useQueue";
 
 export function ToolsContainerPanel({
   activeToolIds,
@@ -17,6 +20,9 @@ export function ToolsContainerPanel({
   onCloseAll,
 }: ToolsContainerPanelProps) {
   const activeToolSet = useMemo(() => new Set(activeToolIds), [activeToolIds]);
+  const { totalAgents } = useAgent();
+  const { totalTickets } = useTicket();
+  const { totalWaiting } = useQueue();
 
   const getStatusLabel = (status?: SimulationTool["status"]) => {
     switch (status) {
@@ -48,7 +54,6 @@ export function ToolsContainerPanel({
                         "text-primary-foreground",
                         "[&_svg]:text-primary-foreground",
                         "[&_svg]:stroke-current",
-
                         "border border-primary/20",
                         "shadow-[0_0_20px_hsl(var(--primary)/0.25)]",
                         "hover:brightness-110",
@@ -61,12 +66,24 @@ export function ToolsContainerPanel({
                 disabled={tool.status === "coming-soon"}
               >
                 <tool.icon className="w-4 h-4 text-primary" />
+
+                {tool.id === "agent-panel" && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
+                    {totalAgents}
+                  </span>
+                )}
+                {tool.id === "ticket-panel" && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
+                    {totalTickets}
+                  </span>
+                )}
+                {tool.id === "queue-panel" && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 border rounded-full bg-amber-200 text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
+                    {totalWaiting}
+                  </span>
+                )}
               </button>
             </TooltipTrigger>
-
-            {/* {tool.status && (
-                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary " />
-                  )} */}
             <TooltipContent
               side="top"
               className="text-xs bg-background text-primary border border-border py-2 max-w-56"
@@ -102,7 +119,7 @@ export function ToolsContainerPanel({
           <button
             type="button"
             onClick={onCloseAll}
-            className="p-2 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer flex items-center justify-center"
+            className="p-2 rounded-md transition-colors cursor-pointer flex items-center justify-center"
           >
             <X className="w-4 h-4" />
           </button>
