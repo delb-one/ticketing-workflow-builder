@@ -89,7 +89,7 @@ export function WorkflowEditorTemplate({
                 </TooltipTrigger>
                 <TooltipContent
                   side="right"
-                  className="text-xs flex  gap-2 bg-background text-primary border border-border"
+                  className="text-xs flex  gap-2 bg-background text-primary border border-border items-center"
                 >
                   {leftCollapsed ? "Show Library" : "Hide Library"}
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
@@ -136,7 +136,7 @@ export function WorkflowEditorTemplate({
                 </TooltipTrigger>
                 <TooltipContent
                   side="left"
-                  className="text-xs flex  gap-2 bg-background text-primary border border-border"
+                  className="text-xs flex  gap-2 bg-background text-primary border border-border items-center"
                 >
                   {rightCollapsed ? "Show Inspector" : "Hide Inspector"}
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
