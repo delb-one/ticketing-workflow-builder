@@ -43,7 +43,7 @@ import { GettingStartedPanel } from "@/features/panels/components/getting-starte
 import { CustomEdge } from "./CustomEdge";
 import { FlowBackground } from "./FlowBackground";
 import { Button } from "@/components/ui/button";
-import { Map } from "lucide-react";
+import { Map as MapIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { AnimatedPanel } from "../../panels/components/animated-panel/AnimatedPanel";
+import { tools } from "@/features/panels/components/tools-container-panel/data";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -149,6 +150,7 @@ const PANELS = [
   { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
   { id: "sla-panel", component: SLAPanel, initial: { x: 930, y: 320 } },
 ];
+const CLOSE_PANELS_TOOL_ID = "close-panels";
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const {
@@ -235,9 +237,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-            ...currentEdge,
-            label: trimmedLabel || undefined,
-          }
+              ...currentEdge,
+              label: trimmedLabel || undefined,
+            }
           : currentEdge,
       );
 
@@ -301,13 +303,54 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const activeToolIds = useMemo(
     () =>
       Object.entries(visiblePanels)
-        .filter(([, isVisible]) => isVisible)
+        .filter(
+          ([panelId, isVisible]) =>
+            isVisible && panelId !== CLOSE_PANELS_TOOL_ID,
+        )
         .map(([panelId]) => panelId),
     [visiblePanels],
   );
   const handleToolToggle = useCallback((toolId: string) => {
+    if (toolId === CLOSE_PANELS_TOOL_ID) {
+      handleCloseAll();
+      return;
+    }
     setVisiblePanels((prev) => ({ ...prev, [toolId]: !prev[toolId] }));
+  }, [handleCloseAll]);
+
+  const shortcutsByKey = useMemo(() => {
+    const entries = tools
+      .filter((tool) => Boolean(tool.shortcut) && tool.status !== "coming-soon")
+      .map((tool) => [tool.shortcut!.toLowerCase(), tool.id] as const);
+
+    return new Map(entries);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.ctrlKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const panelId = shortcutsByKey.get(event.key.toLowerCase());
+      if (!panelId) return;
+
+      event.preventDefault();
+      handleToolToggle(panelId);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleToolToggle, shortcutsByKey]);
 
   useEffect(() => {
     onNodeSelect?.(selectedNodeData ?? null);
@@ -374,7 +417,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
                 onClick={handleShowMinimap}
                 className="bg-background/50 border backdrop-blur"
               >
-                <Map className="w-4 h-4" />
+                <MapIcon className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
 
@@ -426,8 +469,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             onCloseAll={handleCloseAll}
           />
         </Panel>
-
-
       </ReactFlow>
 
       {/*Panels */}

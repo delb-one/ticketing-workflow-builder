@@ -12,7 +12,7 @@ import {
   WorkflowTemplate,
 } from "@/lib/flow-template/workflow-templates";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, Trash2, Upload } from "lucide-react";
 import {
@@ -127,6 +127,36 @@ export default function Home() {
     clearWorkflow();
     setSelectedTemplateId("");
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.ctrlKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setLeftCollapsed((prev) => !prev);
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setRightCollapsed((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <WorkflowEditorTemplate

@@ -14,7 +14,8 @@ import {
   GitBranch,
   ScanSearch,
   Activity,
-  Network
+  Network,
+  X,
 } from "lucide-react";
 import { SimulationTool } from "./types";
 
@@ -24,6 +25,7 @@ export const tools: SimulationTool[] = [
     name: "Getting Started",
     description: "Quick guide to start building workflows",
     icon: Sparkles,
+    shortcut: "G",
   },
 
   {
@@ -32,6 +34,8 @@ export const tools: SimulationTool[] = [
     description: "Define and manage agent groups (L1, L2, L3)",
     icon: Users,
     badgeKey: "agents",
+    category: "core",
+    shortcut: "A",
   },
 
   {
@@ -40,6 +44,8 @@ export const tools: SimulationTool[] = [
     description: "Generate tickets and control incoming flow",
     icon: Tickets,
     badgeKey: "tickets",
+    category: "core",
+    shortcut: "K",
   },
 
   {
@@ -48,6 +54,8 @@ export const tools: SimulationTool[] = [
     description: "Inspect queue status and workload distribution",
     icon: ListFilter,
     badgeKey: "queue",
+    category: "monitoring",
+    shortcut: "Q",
   },
 
   {
@@ -55,6 +63,8 @@ export const tools: SimulationTool[] = [
     name: "Activity Panel",
     description: "Track ticket activity and status changes over time",
     icon: Activity,
+    category: "monitoring",
+    shortcut: "Y",
   },
 
   {
@@ -62,6 +72,8 @@ export const tools: SimulationTool[] = [
     name: "Log Panel",
     description: "View the event log",
     icon: Terminal,
+    category: "monitoring",
+    shortcut: "L",
   },
 
   {
@@ -69,6 +81,8 @@ export const tools: SimulationTool[] = [
     name: "Metrics Panel",
     description: "Monitor real-time simulation metrics",
     icon: BarChart3,
+    category: "monitoring",
+    shortcut: "M",
   },
 
   {
@@ -76,6 +90,8 @@ export const tools: SimulationTool[] = [
     name: "SLA Monitor",
     description: "Track SLA compliance and violations",
     icon: ShieldAlert,
+    category: "monitoring",
+    shortcut: "S",
   },
 
   {
@@ -139,5 +155,12 @@ export const tools: SimulationTool[] = [
     description: "Search nodes, tickets and events",
     icon: ScanSearch,
     status: "coming-soon",
+  },
+
+  {
+    id: "close-panels",
+    name: "Close Panels",
+    icon: X,
+    shortcut: "X",
   },
 ];

@@ -14,7 +14,7 @@ export type ToolBadgeKey =
 export type SimulationTool = {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   icon: LucideIcon;
 
   category?: "core" | "monitoring" | "advanced";

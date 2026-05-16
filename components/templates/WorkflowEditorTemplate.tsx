@@ -2,7 +2,12 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 import { Button } from "../ui/button";
 
 interface WorkflowEditorTemplateProps {
@@ -38,7 +43,9 @@ export function WorkflowEditorTemplate({
             className={cn(
               "absolute top-2 left-2 bottom-2 z-20 flex flex-col items-stretch",
               "transition-transform duration-300 ease-in-out",
-              leftCollapsed ? "-translate-x-[calc(100%+1rem)]" : "translate-x-0"
+              leftCollapsed
+                ? "-translate-x-[calc(100%+1rem)]"
+                : "translate-x-0",
             )}
           >
             {/* ── Pannello Library — glass identico a CustomPanel ── */}
@@ -47,7 +54,7 @@ export function WorkflowEditorTemplate({
                 "w-20 h-full flex flex-col",
                 "bg-card/70 backdrop-blur-md",
                 "border border-border rounded-2xl",
-                "shadow-[8px_0_32px_rgba(0,0,0,0.1)]"
+                "shadow-[8px_0_32px_rgba(0,0,0,0.1)]",
               )}
             >
               {/* Contenuto scrollabile */}
@@ -70,33 +77,37 @@ export function WorkflowEditorTemplate({
                       "bg-card/70 backdrop-blur-md",
                       "border border-l-0 border-border",
                       "hover:bg-card/90 transition-colors duration-200",
-                      "flex items-center justify-center shadow-sm"
+                      "flex items-center justify-center shadow-sm",
                     )}
                   >
-                    {leftCollapsed
-                      ? <PanelRightOpen className="h-4 w-4 text-muted-foreground rotate-180" />
-                      : <PanelRightClose className="h-4 w-4 text-muted-foreground rotate-180" />
-                    }
+                    {leftCollapsed ? (
+                      <PanelRightOpen className="h-4 w-4 text-muted-foreground rotate-180" />
+                    ) : (
+                      <PanelRightClose className="h-4 w-4 text-muted-foreground rotate-180" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
                   side="right"
-                  className="text-xs bg-background text-primary border border-border"
+                  className="text-xs flex  gap-2 bg-background text-primary border border-border"
                 >
                   {leftCollapsed ? "Show Library" : "Hide Library"}
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
+                    CTRL +<span className="text-xs">→</span>
+                  </span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-
-
 
           {/* ── Overlay sidebar DESTRA interna al canvas ── */}
           <div
             className={cn(
               "absolute top-2 right-2 bottom-2 z-20 flex flex-col items-stretch",
               "transition-transform duration-300 ease-in-out",
-              rightCollapsed ? "translate-x-[calc(100%+1rem)]" : "translate-x-0"
+              rightCollapsed
+                ? "translate-x-[calc(100%+1rem)]"
+                : "translate-x-0",
             )}
           >
             {/* Tab pulsante toggle — ancorata al bordo sinistro del pannello */}
@@ -113,20 +124,24 @@ export function WorkflowEditorTemplate({
                       "bg-card/70 backdrop-blur-md",
                       "border border-r-0 border-border",
                       "hover:bg-card/90 transition-colors duration-200",
-                      "flex items-center justify-center shadow-sm"
+                      "flex items-center justify-center shadow-sm",
                     )}
                   >
-                    {rightCollapsed
-                      ? <PanelRightOpen className="h-4 w-4 text-muted-foreground" />
-                      : <PanelRightClose className="h-4 w-4 text-muted-foreground" />
-                    }
+                    {rightCollapsed ? (
+                      <PanelRightOpen className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <PanelRightClose className="h-4 w-4 text-muted-foreground" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
                   side="left"
-                  className="text-xs bg-background text-primary border border-border"
+                  className="text-xs flex  gap-2 bg-background text-primary border border-border"
                 >
                   {rightCollapsed ? "Show Inspector" : "Hide Inspector"}
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
+                    CTRL +<span className="text-xs">←</span>
+                  </span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -137,7 +152,7 @@ export function WorkflowEditorTemplate({
                 "w-80 h-full flex flex-col",
                 "bg-card/70 backdrop-blur-md",
                 "border border-border rounded-2xl",
-                "shadow-[-8px_0_32px_rgba(0,0,0,0.1)]"
+                "shadow-[-8px_0_32px_rgba(0,0,0,0.1)]",
               )}
             >
               {/* Header */}
@@ -155,8 +170,6 @@ export function WorkflowEditorTemplate({
               </div>
             </div>
           </div>
-
-
         </main>
       </div>
     </div>
