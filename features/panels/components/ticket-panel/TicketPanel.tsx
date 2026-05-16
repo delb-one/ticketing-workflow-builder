@@ -14,19 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type TicketFormState = {
-  id: string;
-  priority: "low" | "medium" | "high" | "critical";
-  impact: "low" | "medium" | "high";
-  category: string;
-  description: string;
-  autoSpawnCount: number;
-};
+import { TicketFormState } from "./types";
 
 export function TicketPanel() {
-  const { isSimulating, simulationConfig, addTicketTemplate, updateSimulationConfig } =
-    useWorkflowStore();
+  const {
+    isSimulating,
+    simulationConfig,
+    addTicketTemplate,
+    updateSimulationConfig,
+  } = useWorkflowStore();
   const [form, setForm] = useState<TicketFormState>({
     id: "",
     priority: "medium",
@@ -65,7 +61,10 @@ export function TicketPanel() {
       title="Ticket Pool"
       icon={Tickets}
       badge={
-        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full">
+        <Badge
+          variant="secondary"
+          className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 h-5 px-1.5 text-[10px] font-bold min-w-5 flex items-center justify-center rounded-full"
+        >
           {totalTickets}
         </Badge>
       }
@@ -84,7 +83,9 @@ export function TicketPanel() {
             placeholder="Template ID"
             value={form.id}
             disabled={isSimulating}
-            onChange={(e) => setForm((prev) => ({ ...prev, id: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, id: e.target.value }))
+            }
           />
           <input
             className="h-8 rounded-md border bg-background/60 px-2 text-xs"
@@ -183,11 +184,15 @@ export function TicketPanel() {
         />
 
         {hasDuplicateId && (
-          <div className="text-[11px] text-red-400">Template ID must be unique.</div>
+          <div className="text-[11px] text-red-400">
+            Template ID must be unique.
+          </div>
         )}
 
         <div className="pt-1 space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">Launch List</div>
+          <div className="text-xs font-medium text-muted-foreground">
+            Launch List
+          </div>
           {simulationConfig.ticketTemplates.length === 0 ? (
             <div className="text-xs text-muted-foreground">
               No templates configured. Add at least one template to start.
@@ -207,9 +212,10 @@ export function TicketPanel() {
                     disabled={isSimulating}
                     onClick={() =>
                       updateSimulationConfig({
-                        ticketTemplates: simulationConfig.ticketTemplates.filter(
-                          (t) => t.id !== template.id,
-                        ),
+                        ticketTemplates:
+                          simulationConfig.ticketTemplates.filter(
+                            (t) => t.id !== template.id,
+                          ),
                       })
                     }
                   >
@@ -217,7 +223,8 @@ export function TicketPanel() {
                   </Button>
                 </div>
                 <div className="mt-1 text-[11px] text-muted-foreground">
-                  {template.priority.toUpperCase()} | {template.impact.toUpperCase()} |{" "}
+                  {template.priority.toUpperCase()} |{" "}
+                  {template.impact.toUpperCase()} |{" "}
                   {template.category ?? "uncategorized"} | x
                   {Math.max(1, template.autoSpawnCount ?? 1)}
                 </div>

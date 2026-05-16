@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils";
-
-interface AnimatedPanelProps {
-  visible: boolean;
-  children: React.ReactNode;
-  className?: string;
-}
+import { AnimatedPanelProps } from "./types";
 
 export function AnimatedPanel({
   visible,
@@ -18,7 +13,7 @@ export function AnimatedPanel({
         visible
           ? "opacity-100 translate-y-0 scale-100 visible"
           : "opacity-0 translate-y-6 scale-95 pointer-events-none invisible",
-        className
+        className,
       )}
       aria-hidden={!visible}
     >

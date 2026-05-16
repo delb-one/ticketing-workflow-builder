@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSLA } from "../hooks/useSLA";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
@@ -13,6 +12,7 @@ import {
   ShieldAlert,
   ArrowUpDown,
 } from "lucide-react";
+import { useSLA } from "../../hooks/useSLA";
 
 export function SLAPanel() {
   const { overview, allSLATickets } = useSLA();

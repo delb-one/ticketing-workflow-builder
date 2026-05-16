@@ -1,6 +1,5 @@
 "use client";
 
-import { useMetrics } from "../hooks/useMetrics";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -26,6 +25,7 @@ import {
   TICKET_STATE_COLOR_MAP,
 } from "@/lib/colors/color-map";
 import { Ticket } from "@/lib/simulation/types";
+import { useMetrics } from "../../hooks/useMetrics";
 
 export function MetricsPanel() {
   const metrics = useMetrics();

@@ -34,12 +34,12 @@ import {
   SimulationPanel,
   MetricsPanel,
   SLAPanel,
-} from "@/features/simulation";
+} from "@/features/panels";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
-import ControlsPanel from "@/features/simulation/components/ControlsPanel";
-import { ToolsContainerPanel } from "@/features/simulation/components/ToolsContainerPanel";
-import { GettingStartedPanel } from "@/features/simulation/components/GettingStartedPanel";
+import ControlsPanel from "@/features/panels/components/controls-panel/ControlsPanel";
+import { ToolsContainerPanel } from "@/features/panels/components/tools-container-panel/ToolsContainerPanel";
+import { GettingStartedPanel } from "@/features/panels/components/getting-started-panel/GettingStartedPanel";
 import { CustomEdge } from "./CustomEdge";
 import { FlowBackground } from "./FlowBackground";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { AnimatedPanel } from "./AnimatedPanel";
+import { AnimatedPanel } from "../../panels/components/animated-panel/AnimatedPanel";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
