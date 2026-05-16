@@ -5,7 +5,7 @@ import {
   selectActiveSLATickets,
   selectSLAOverview,
   selectSLATrend,
-} from "@/lib/selectors/sla-selectors";
+} from "@/features/panels/logic/sla-selectors";
 
 export function useSLA() {
   return useWorkflowStore(

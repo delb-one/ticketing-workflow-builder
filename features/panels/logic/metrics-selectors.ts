@@ -43,7 +43,7 @@ export const selectClosedTicketsCount = (state: WorkflowStore): number => {
   return Object.values(state.engineState.runtimes).filter(
     (rt) => rt.ticket.state === "closed",
   ).length;
-}
+};
 
 export const selectResolvedTicketsCount = (state: WorkflowStore): number => {
   if (!state.engineState) return 0;
@@ -150,55 +150,68 @@ export const selectThroughput = memoize(
     const sortedEvents = [...events].sort((a, b) => a.timestamp - b.timestamp);
     const startTime = sortedEvents[0].timestamp;
     const lastEventTime = sortedEvents[sortedEvents.length - 1].timestamp;
-    
+
     const buckets: ThroughputData[] = [];
     const bucketInterval = 5000; // 5 seconds
-    
+
     // Track the current state of each ticket as we process events
     const ticketStates: Record<string, string> = {};
     let eventIdx = 0;
-    
+
     // We iterate from startTime to slightly past lastEventTime to capture the final state
-    for (let t = startTime; t <= lastEventTime + bucketInterval; t += bucketInterval) {
+    for (
+      let t = startTime;
+      t <= lastEventTime + bucketInterval;
+      t += bucketInterval
+    ) {
       // Process all events that occurred up to this point in time
-      while (eventIdx < sortedEvents.length && sortedEvents[eventIdx].timestamp <= t) {
+      while (
+        eventIdx < sortedEvents.length &&
+        sortedEvents[eventIdx].timestamp <= t
+      ) {
         const e = sortedEvents[eventIdx];
         let newState = "";
-        
+
         if (e.type === "ticket.created") newState = "open";
         else if (e.type === "agent.assigned") newState = "assigned";
         else if (e.type === "ticket.resolved") newState = "resolved";
         else if (e.type === "ticket.closed") newState = "closed";
         else if (e.type === "ticket.reopened") newState = "reopened";
-        else if (e.type === "ticket.updated" && e.payload?.state) {
-          newState = e.payload.state as string;
+        else if (e.type === "ticket.updated" && e.payload?.newState) {
+          newState = e.payload.newState as string;
         }
-        
+
         if (newState) {
           ticketStates[e.ticketId] = newState;
         }
         eventIdx++;
       }
-      
+
       // Calculate counts of tickets in each of the 5 main states at this point in time
-      const counts = { open: 0, assigned: 0, resolved: 0, reopened: 0, closed: 0 };
+      const counts = {
+        open: 0,
+        assigned: 0,
+        resolved: 0,
+        reopened: 0,
+        closed: 0,
+      };
       Object.values(ticketStates).forEach((s) => {
         if (s in counts) {
           counts[s as keyof typeof counts]++;
         }
       });
-      
+
       const timeSec = Math.floor((t - startTime) / 1000);
       buckets.push({
         time: timeSec,
         timeLabel: `${timeSec}s`,
         ...counts,
       });
-      
+
       // If we've processed all events and reached the end of the timeline, we can stop
       if (eventIdx >= sortedEvents.length && t >= lastEventTime) break;
     }
-    
+
     return buckets;
   },
   (state) => [state.simulationEvents],
@@ -209,7 +222,10 @@ export const selectWorkflowHealth = (state: WorkflowStore): number => {
 
   const slaBreaches = selectSlaBreachesCount(state);
   const queueLoad = selectQueueLoad(state);
-  const queueSizes = queueLoad.reduce((acc, q) => acc + q.size, 0);
+  const queueSizes = queueLoad.reduce(
+    (acc: number, q: { size: number }) => acc + q.size,
+    0,
+  );
   const busyAgents = selectBusyAgentsCount(state);
   const availableAgents = selectAvailableAgentsCount(state);
 

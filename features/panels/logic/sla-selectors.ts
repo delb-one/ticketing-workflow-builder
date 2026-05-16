@@ -41,8 +41,14 @@ export const selectSLATicketStates = memoize(
         const ticket = rt.ticket;
         const sla = ticket.sla!;
 
-        const isActuallyCompleted = !!sla.completed || rt.completed || ticket.state === "resolved" || ticket.state === "closed";
-        const referenceTime = isActuallyCompleted ? (sla.completedAt || ticket.updatedAt || now) : now;
+        const isActuallyCompleted =
+          !!sla.completed ||
+          rt.completed ||
+          ticket.state === "resolved" ||
+          ticket.state === "closed";
+        const referenceTime = isActuallyCompleted
+          ? sla.completedAt || ticket.updatedAt || now
+          : now;
         const elapsedTime = referenceTime - sla.startTime;
         const remainingTime = Math.max(0, sla.deadline - referenceTime);
         const totalDuration = sla.deadline - sla.startTime;
@@ -56,7 +62,10 @@ export const selectSLATicketStates = memoize(
           status = "warning";
         }
 
-        const riskPercentage = Math.min(100, (elapsedTime / totalDuration) * 100);
+        const riskPercentage = Math.min(
+          100,
+          (elapsedTime / totalDuration) * 100,
+        );
 
         return {
           ticketId: ticket.id,
@@ -70,21 +79,25 @@ export const selectSLATicketStates = memoize(
           riskPercentage,
           status,
           completed: isActuallyCompleted,
-          completedAt: sla.completedAt || (isActuallyCompleted ? (sla.completedAt || ticket.updatedAt || now) : undefined),
+          completedAt:
+            sla.completedAt ||
+            (isActuallyCompleted
+              ? sla.completedAt || ticket.updatedAt || now
+              : undefined),
           ticketState: ticket.state,
         };
       });
   },
-  (state) => [state.engineState?.runtimes]
+  (state) => [state.engineState?.runtimes],
 );
 
 // Returns only active tickets with an SLA (not completed and not breached yet)
 export const selectActiveSLATickets = memoize(
   (state: WorkflowStore): SLATicketState[] => {
     const allStates = selectSLATicketStates(state);
-    return allStates.filter((s) => !s.completed);
+    return allStates.filter((s: SLATicketState) => !s.completed);
   },
-  (state) => [state.engineState?.runtimes]
+  (state) => [state.engineState?.runtimes],
 );
 
 export const selectSLAOverview = memoize(
@@ -93,14 +106,21 @@ export const selectSLAOverview = memoize(
     const totalTickets = allStates.length;
 
     if (totalTickets === 0) {
-      return { totalTickets: 0, ok: 0, warning: 0, breached: 0, breachRate: 0, avgTimeToBreach: 0 };
+      return {
+        totalTickets: 0,
+        ok: 0,
+        warning: 0,
+        breached: 0,
+        breachRate: 0,
+        avgTimeToBreach: 0,
+      };
     }
 
     let ok = 0;
     let warning = 0;
     let breached = 0;
 
-    allStates.forEach(s => {
+    allStates.forEach((s: SLATicketState) => {
       if (s.status === "ok") ok++;
       else if (s.status === "warning") warning++;
       else if (s.status === "breached") breached++;
@@ -108,13 +128,21 @@ export const selectSLAOverview = memoize(
 
     const breachRate = (breached / totalTickets) * 100;
 
-    const breachedTickets = allStates.filter(s => s.status === "breached");
-    const totalBreachTime = breachedTickets.reduce((acc, s) => {
-      const breachTime = s.completedAt ? s.completedAt - s.slaDeadline : Date.now() - s.slaDeadline;
-      return acc + Math.max(0, breachTime);
-    }, 0);
+    const breachedTickets = allStates.filter(
+      (s: SLATicketState) => s.status === "breached",
+    );
+    const totalBreachTime = breachedTickets.reduce(
+      (acc: number, s: SLATicketState) => {
+        const breachTime = s.completedAt
+          ? s.completedAt - s.slaDeadline
+          : Date.now() - s.slaDeadline;
+        return acc + Math.max(0, breachTime);
+      },
+      0,
+    );
 
-    const avgTimeToBreach = breachedTickets.length > 0 ? totalBreachTime / breachedTickets.length : 0;
+    const avgTimeToBreach =
+      breachedTickets.length > 0 ? totalBreachTime / breachedTickets.length : 0;
 
     return {
       totalTickets,
@@ -125,7 +153,7 @@ export const selectSLAOverview = memoize(
       avgTimeToBreach,
     };
   },
-  (state) => [state.engineState?.runtimes]
+  (state) => [state.engineState?.runtimes],
 );
 
 export interface SLATrendData {
@@ -149,14 +177,32 @@ export const selectSLATrend = memoize(
 
     const buckets: SLATrendData[] = [];
     const bucketInterval = 5000; // 5 seconds
-    const globalWarningThreshold = state.simulationConfig.slaConfig?.warningThreshold ?? 0.75;
+    const globalWarningThreshold =
+      state.simulationConfig.slaConfig?.warningThreshold ?? 0.75;
 
     // We need to replay SLA states
-    const activeSLAs: Record<string, { startTime: number, deadline: number, warningThreshold: number, completed: boolean, completedAt?: number, breached: boolean }> = {};
+    const activeSLAs: Record<
+      string,
+      {
+        startTime: number;
+        deadline: number;
+        warningThreshold: number;
+        completed: boolean;
+        completedAt?: number;
+        breached: boolean;
+      }
+    > = {};
     let eventIdx = 0;
 
-    for (let t = startTime; t <= lastEventTime + bucketInterval; t += bucketInterval) {
-      while (eventIdx < sortedEvents.length && sortedEvents[eventIdx].timestamp <= t) {
+    for (
+      let t = startTime;
+      t <= lastEventTime + bucketInterval;
+      t += bucketInterval
+    ) {
+      while (
+        eventIdx < sortedEvents.length &&
+        sortedEvents[eventIdx].timestamp <= t
+      ) {
         const e = sortedEvents[eventIdx];
 
         if (e.type === "sla.started") {
@@ -167,9 +213,10 @@ export const selectSLATrend = memoize(
             activeSLAs[e.ticketId] = {
               startTime: runtime.ticket.sla.startTime,
               deadline: runtime.ticket.sla.deadline,
-              warningThreshold: runtime.ticket.sla.warningThreshold ?? globalWarningThreshold,
+              warningThreshold:
+                runtime.ticket.sla.warningThreshold ?? globalWarningThreshold,
               completed: false,
-              breached: false
+              breached: false,
             };
           }
         } else if (e.type === "sla.breached") {
@@ -189,14 +236,20 @@ export const selectSLATrend = memoize(
       let warningCount = 0;
       let breachedCount = 0;
 
-      Object.values(activeSLAs).forEach(sla => {
-        const referenceTime = sla.completed && sla.completedAt && sla.completedAt <= t ? sla.completedAt : t;
+      Object.values(activeSLAs).forEach((sla) => {
+        const referenceTime =
+          sla.completed && sla.completedAt && sla.completedAt <= t
+            ? sla.completedAt
+            : t;
         const elapsedTime = referenceTime - sla.startTime;
         const totalDuration = sla.deadline - sla.startTime;
 
         if (sla.breached || referenceTime > sla.deadline) {
           breachedCount++;
-        } else if (!sla.completed && elapsedTime >= totalDuration * sla.warningThreshold) {
+        } else if (
+          !sla.completed &&
+          elapsedTime >= totalDuration * sla.warningThreshold
+        ) {
           warningCount++;
         } else {
           okCount++;
@@ -209,7 +262,7 @@ export const selectSLATrend = memoize(
         timeLabel: `${timeSec}s`,
         ok: okCount,
         warning: warningCount,
-        breached: breachedCount
+        breached: breachedCount,
       });
 
       if (eventIdx >= sortedEvents.length && t >= lastEventTime) break;
@@ -217,5 +270,5 @@ export const selectSLATrend = memoize(
 
     return buckets;
   },
-  (state) => [state.simulationEvents, state.engineState?.runtimes]
+  (state) => [state.simulationEvents, state.engineState?.runtimes],
 );

@@ -26,6 +26,7 @@ import {
 } from "@/lib/colors/color-map";
 import { Ticket } from "@/lib/simulation/types";
 import { useMetrics } from "../../hooks/useMetrics";
+import { WorkflowStore } from "@/lib/store";
 
 export function MetricsPanel() {
   const metrics = useMetrics();
@@ -129,7 +130,7 @@ export function MetricsPanel() {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                {metrics.queueLoad.map((q) => (
+                {metrics.queueLoad.map((q: { name: string; size: number }) => (
                   <div
                     key={q.name}
                     className="flex flex-col items-center p-2 rounded-lg bg-card-800/60 border border-card-700/60"
@@ -156,8 +157,6 @@ export function MetricsPanel() {
           <div className="text-xs font-semibold text-primary-300 uppercase">
             Ticket Status Volume
           </div>
-
-          
 
           <div className="h-80 w-full rounded-lg bg-card-800/60 border border-card-700/60 p-3">
             {metrics.throughput.length > 0 ? (
@@ -249,7 +248,7 @@ export function MetricsPanel() {
               </div>
             )}
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
             {(Object.keys(TICKET_STATE_COLOR_MAP) as Ticket["state"][]).map(
               (state) => (

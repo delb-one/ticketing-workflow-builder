@@ -13,7 +13,7 @@ import {
   selectReopenedTicketsCount,
   selectAssignedTicketsCount,
   selectClosedTicketsCount
-} from "@/lib/selectors/metrics-selectors";
+} from "@/features/panels/logic/metrics-selectors";
 
 export function useMetrics() {
   return useWorkflowStore(useShallow((state) => ({

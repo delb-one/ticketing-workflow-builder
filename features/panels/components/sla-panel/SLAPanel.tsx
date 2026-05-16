@@ -13,6 +13,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { useSLA } from "../../hooks/useSLA";
+import { SLATicketState } from "../../logic/sla-selectors";
 
 export function SLAPanel() {
   const { overview, allSLATickets } = useSLA();
@@ -37,14 +38,15 @@ export function SLAPanel() {
   const now = Date.now();
 
   // Keep timers live in the UI, but preserve SLA status computed by selectors/store.
-  const liveTickets = allSLATickets.map((ticket) => {
+  const liveTickets = allSLATickets.map((ticket: SLATicketState) => {
     if (ticket.completed) return ticket;
-
-    
 
     const elapsedTime = now - ticket.slaStartTime;
     const remainingTime = Math.max(0, ticket.slaDeadline - now);
-    const riskPercentage = Math.min(100, (elapsedTime / ticket.totalDuration) * 100);
+    const riskPercentage = Math.min(
+      100,
+      (elapsedTime / ticket.totalDuration) * 100,
+    );
 
     return {
       ...ticket,
