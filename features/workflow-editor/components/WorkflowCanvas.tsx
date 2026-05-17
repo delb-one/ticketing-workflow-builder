@@ -3,21 +3,16 @@
 import React, {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import {
   ReactFlow,
   Edge,
-  Controls,
-  Background,
   Connection,
   ConnectionMode,
   MiniMap,
   NodeTypes,
-  BackgroundVariant,
   useReactFlow,
   Panel,
 } from "@xyflow/react";
@@ -25,7 +20,6 @@ import "@xyflow/react/dist/style.css";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import CanvasNode from "./CanvasNode";
-import { useTheme } from "next-themes";
 import {
   QueuePanel,
   AgentPanel,
@@ -166,7 +160,6 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     setEdges: setStoreEdges,
     selectedNodeId,
   } = useWorkflowStore();
-  const { theme } = useTheme();
 
   const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>(
     INITIAL_VISIBLE_PANELS,
@@ -208,10 +201,10 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      const sourceNode = nodes.find((n) => n.id === connection.source);
-      const color = sourceNode
-        ? getNodeTypeColorVar(sourceNode.data.type)
-        : "var(--primary)";
+      // const sourceNode = nodes.find((n) => n.id === connection.source);
+      // const color = sourceNode
+      //   ? getNodeTypeColorVar(sourceNode.data.type)
+      //   : "var(--primary)";
 
       const edge: Edge = {
         id: `${connection.source}-${connection.target}-${Date.now()}`,
@@ -222,7 +215,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       };
       addStoreEdge(edge);
     },
-    [addStoreEdge, nodes],
+    [addStoreEdge],
   );
 
   const onEdgeDoubleClick = useCallback(
@@ -476,7 +469,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       {/*Panels */}
 
       <div className="absolute inset-0 pointer-events-none z-10">
-        {PANELS.map((panel, i) => (
+        {PANELS.map((panel) => (
           <AnimatedPanel
             key={panel.id}
             visible={visiblePanels[panel.id]}

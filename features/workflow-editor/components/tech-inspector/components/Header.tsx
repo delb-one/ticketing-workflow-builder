@@ -1,10 +1,7 @@
 "use client";
 
-import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
-import { useWorkflowStore } from "@/lib/store";
 import { CustomNode } from "@/lib/store";
 
 interface HeaderProps {
@@ -13,22 +10,17 @@ interface HeaderProps {
   selectedNode: CustomNode;
 }
 
-export const Header = ({ loadPercentage, loadColor, selectedNode }: HeaderProps) => {
-  const { updateNode } = useWorkflowStore();
-  const handleLabelChange = (newLabel: string) => {
-    updateNode(selectedNode.id, {
-      data: {
-        ...selectedNode.data,
-        label: newLabel,
-      },
-    });
-  };
-
+export const Header = ({
+  loadPercentage,
+  loadColor,
+  selectedNode,
+}: HeaderProps) => {
   return (
     <div className="p-3 space-y-2">
       <div className="sticky top-0  pb-2 mb-2 space-y-2">
-
-        <h2 className="font-semibold text-foreground">Node Inspector - {selectedNode.data.label}</h2>
+        <h2 className="font-semibold text-foreground">
+          Node Inspector - {selectedNode.data.label}
+        </h2>
 
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground">Type:</span>

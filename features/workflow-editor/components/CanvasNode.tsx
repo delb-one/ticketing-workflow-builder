@@ -18,7 +18,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
 export default function CanvasNode(props: CanvasNodeProps) {

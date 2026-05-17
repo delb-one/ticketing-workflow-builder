@@ -16,7 +16,6 @@ export default function ControlsPanel() {
   const {
     nodes,
     isSimulating,
-    simulationConfig,
     showDecisionDialog,
     isPaused,
     setIsPaused,
@@ -24,7 +23,6 @@ export default function ControlsPanel() {
     toolbarRef,
     pausedRuntime,
     pendingOutcomes,
-    totalSpawnedTickets,
     preflightError,
     startSimulationFlow,
     handleStop,

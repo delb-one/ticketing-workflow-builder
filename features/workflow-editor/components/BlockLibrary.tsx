@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BlockDefinition } from "@/lib/blocks/types";

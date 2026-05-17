@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
@@ -113,7 +112,7 @@ export function SLAInspector({ selectedNode }: SLAInspectorProps) {
               onValueChange={([val]) => handleConfigChange({ warningThreshold: val / 100 })}
             />
             <p className="text-xs text-muted-foreground leading-tight">
-              Tickets will enter the "warning" state when {Math.round(warningThreshold * 100)}% of their resolution time has elapsed.
+              Tickets will enter the &quot;warning&quot; state when {Math.round(warningThreshold * 100)}% of their resolution time has elapsed.
             </p>
           </div>
         </PropertyCard>

@@ -1,7 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useWorkflowStore, CustomNode } from "@/lib/store";
 import type { NodeConfig } from "@/lib/simulation/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,7 +16,6 @@ import { Bell, GitBranch, UserCog } from "lucide-react";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCard } from "@/components/molecules/PropertyCard";
-import { Card } from "@/components/ui/card";
 import { TechInspector } from "./tech-inspector/TechInspector";
 import { SLAInspector } from "./sla-inspector/SLAInspector";
 
@@ -41,7 +38,7 @@ const mergeNodeConfig = (
 };
 
 export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
-  const { updateNode, deleteNode } = useWorkflowStore();
+  const { updateNode } = useWorkflowStore();
 
   if (!selectedNode) {
     return (
@@ -55,14 +52,7 @@ export default function InspectorPanel({ selectedNode }: InspectorPanelProps) {
 
   const blockId = selectedNode.data.blockId ?? selectedNode.data.id;
 
-  const handleLabelChange = (newLabel: string) => {
-    updateNode(selectedNode.id, {
-      data: {
-        ...selectedNode.data,
-        label: newLabel,
-      },
-    });
-  };
+  
 
   const handleConfigChange = (patch: Partial<NodeConfig>) => {
     updateNode(selectedNode.id, {

@@ -2,7 +2,6 @@ import { SimulationEventBus } from "./event-bus";
 import { NODE_HANDLER_REGISTRY } from "./node-handlers";
 import type {
   Agent,
-  DecisionOutcome,
   EngineRuntimeState,
   NodeConfig,
   QueueState,
