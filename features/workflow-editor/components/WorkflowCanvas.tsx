@@ -34,6 +34,7 @@ import {
   LogPanel,
   MetricsPanel,
   SLAPanel,
+  ValidationPanel,
 } from "@/features/panels";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import Draggable from "react-draggable";
@@ -149,6 +150,7 @@ const PANELS = [
   { id: "log-panel", component: LogPanel, initial: { x: 630, y: 320 } },
   { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
   { id: "sla-panel", component: SLAPanel, initial: { x: 930, y: 320 } },
+  { id: "validation-panel", component: ValidationPanel, initial: { x: 1230, y: 20 } },
 ];
 const CLOSE_PANELS_TOOL_ID = "close-panels";
 

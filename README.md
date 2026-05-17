@@ -80,30 +80,26 @@ The application will be available at `http://localhost:3000`
 | Automation | Automated processes (SLA, escalation, notifications) |
 | Decision | Manual or rule-based branching |
 | Condition | Conditional logic evaluation |
-| Status | Ticket state changes |
 | Event | Custom event triggers |
 
 ## Project Structure
 
 ```
-├── app/                    # Next.js app directory
-│   ├── page.tsx           # Main application page
-│   └── layout.tsx         # Root layout
-├── components/            # React components
-│   ├── BlockLibrary.tsx   # Draggable block palette
-│   ├── CanvasNode.tsx     # Custom node rendering
-│   ├── InspectorPanel.tsx # Node property editor
-│   ├── SimulationPanel.tsx# Simulation controls
-│   ├── Toolbar.tsx        # Top toolbar
-│   └── WorkflowCanvas.tsx # React Flow canvas
-├── lib/                   # Core logic
-│   ├── blocks/            # Block definitions and registry
-│   ├── simulation/        # Workflow simulation engine
-│   │   ├── engine.ts      # Main simulation engine
-│   │   ├── types.ts       # TypeScript definitions
-│   │   └── node-handlers.ts # Node execution handlers
-│   └── store.ts           # Zustand state management
-└── hooks/                 # Custom React hooks
+├── app/                    # Next.js app router (layout, pages)
+├── components/             # Shared UI components (shadcn/ui, molecules, templates)
+├── features/               # Feature-based modules
+│   ├── panels/             # Simulation panels (agent, controls, log, metrics, SLA, etc.)
+│   └── workflow-editor/    # React Flow editor (canvas, nodes, edges, inspectors)
+├── hooks/                  # Shared custom React hooks
+├── lib/                    # Core logic
+│   ├── blocks/             # Block definitions & registry
+│   ├── simulation/         # Workflow simulation engine
+│   ├── canvasNode/         # Canvas node styling/types
+│   ├── colors/             # Color mapping utilities
+│   └── flow-template/      # Workflow template presets
+├── public/                 # Static assets
+├── styles/                 # Additional style files
+└── doc/                    # Documentation & implementation plans
 ```
 
 ## Simulation Engine
@@ -125,6 +121,4 @@ The built-in simulation engine (`lib/simulation/engine.ts`) provides:
 | `pnpm start` | Start production server |
 | `pnpm lint` | Run ESLint |
 
-## License
 
-MIT

@@ -93,6 +93,14 @@ export const tools: SimulationTool[] = [
     category: "monitoring",
     shortcut: "S",
   },
+  {
+    id: "validation-panel",
+    name: "Flow Validation",
+    description: "Detect invalid states and graph issues",
+    icon: Workflow,
+    category: "monitoring",
+    shortcut: "V",
+  },
 
   {
     id: "performance-panel",
@@ -110,13 +118,7 @@ export const tools: SimulationTool[] = [
     status: "coming-soon",
   },
 
-  {
-    id: "validation-panel",
-    name: "Flow Validation",
-    description: "Detect invalid states and graph issues",
-    icon: Workflow,
-    status: "coming-soon",
-  },
+  
 
   {
     id: "ai-panel",
