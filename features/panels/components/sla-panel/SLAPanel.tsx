@@ -19,11 +19,11 @@ export function SLAPanel() {
   const { overview, allSLATickets } = useSLA();
 
   const [sortBy, setSortBy] = useState<"time" | "urgency">("urgency");
+  const [now, setNow] = useState(() => Date.now());
 
   // Force re-render every second to update timers
-  const [, setTick] = useState(0);
   useEffect(() => {
-    const timer = setInterval(() => setTick((t) => t + 1), 1000);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -34,8 +34,6 @@ export function SLAPanel() {
     medium: 2,
     low: 1,
   };
-
-  const now = Date.now();
 
   // Keep timers live in the UI, but preserve SLA status computed by selectors/store.
   const liveTickets = allSLATickets.map((ticket: SLATicketState) => {
@@ -88,23 +86,23 @@ export function SLAPanel() {
     <CustomPanel value="sla-panel" title="SLA Monitor" icon={ShieldAlert} defaultExpanded>
       <div className="flex h-full flex-col gap-4 p-4 min-w-85">
         <div className="grid grid-cols-3 gap-2 shrink-0">
-          <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
-            <CheckCircle2 className="mb-1 h-5 w-5 text-emerald-500" />
-            <div className="text-2xl font-bold">{overview.ok}</div>
+          <div className="rounded-lg border  p-2 flex flex-col  items-center justify-center min-w-0">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <div className="text-lg font-semibold">{overview.ok}</div>
             <div className="text-[10px] uppercase text-muted-foreground">
               Healthy
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
-            <AlertTriangle className="mb-1 h-5 w-5 text-amber-500" />
-            <div className="text-2xl font-bold">{overview.warning}</div>
+          <div className="rounded-lg border  p-2 flex flex-col  items-center justify-center min-w-0">
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <div className="text-lg font-semibold">{overview.warning}</div>
             <div className="text-[10px] uppercase text-muted-foreground">
               Warning
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
-            <XCircle className="mb-1 h-5 w-5 text-red-500" />
-            <div className="text-2xl font-bold">{overview.breached}</div>
+          <div className="rounded-lg border  p-2 flex flex-col  items-center justify-center min-w-0">
+            <XCircle className="w-4 h-4 text-red-500" />
+            <div className="text-lg font-semibold">{overview.breached}</div>
             <div className="text-[10px] uppercase text-muted-foreground">
               Breached
             </div>

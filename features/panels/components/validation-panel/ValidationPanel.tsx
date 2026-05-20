@@ -127,7 +127,7 @@ export function ValidationPanel() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="errors">
-            <ScrollArea className="h-40">
+            <ScrollArea className="h-40 px-2">
               {errors.length === 0 && (
                 <div className="flex h-full items-center justify-center p-4 text-sm text-muted-foreground ">
                   No errors
@@ -140,7 +140,7 @@ export function ValidationPanel() {
                   onClick={() => focusNode(issue.nodeId)}
                 >
                   <div className="text-red-500 font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                    <CircleX className="w-3 h-3" />
                     {issue.title}
                   </div>
                   {issue.description && (
@@ -153,7 +153,7 @@ export function ValidationPanel() {
             </ScrollArea>
           </TabsContent>
           <TabsContent value="warnings">
-            <ScrollArea className="h-40">
+            <ScrollArea className="h-40 px-2">
               {warnings.length === 0 && (
                 <div className="flex h-full items-center justify-center p-4 text-sm text-muted-foreground">
                   No warnings
@@ -180,7 +180,7 @@ export function ValidationPanel() {
           </TabsContent>
           <TabsContent value="info">
             {" "}
-            <ScrollArea className="h-40">
+            <ScrollArea className="h-40 px-2">
               {info.length === 0 && (
                 <div className="flex h-full items-center justify-center p-4 text-sm text-muted-foreground">
                   No suggestions

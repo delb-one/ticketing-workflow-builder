@@ -101,63 +101,61 @@ export const tools: SimulationTool[] = [
     category: "monitoring",
     shortcut: "V",
   },
-
-  {
-    id: "performance-panel",
-    name: "Performance",
-    description: "Inspect throughput and processing performance",
-    icon: Gauge,
-    status: "coming-soon",
-  },
-
-  {
-    id: "heatmap-panel",
-    name: "Heatmap",
-    description: "Visualize node congestion and activity",
-    icon: Radar,
-    status: "coming-soon",
-  },
-
-  
-
-  {
-    id: "ai-panel",
-    name: "AI Suggestions",
-    description: "Receive workflow optimization suggestions",
-    icon: BrainCircuit,
-    status: "coming-soon",
-  },
-  {
-    id: "notification-panel",
-    name: "Notifications",
-    description: "View alerts and simulation warnings",
-    icon: Bell,
-    status: "coming-soon",
-  },
-
-  {
-    id: "dependency-panel",
-    name: "Dependencies",
-    description: "Inspect workflow relationships and dependencies",
-    icon: GitBranch,
-    status: "coming-soon",
-  },
-
-  {
-    id: "network-panel",
-    name: "Network",
-    description: "Inspect workflow communication graph",
-    icon: Network,
-    status: "coming-soon",
-  },
-
   {
     id: "search-panel",
     name: "Search",
     description: "Search nodes, tickets and events",
     icon: ScanSearch,
-    status: "coming-soon",
+    category: "monitoring",
+    shortcut: "K",
   },
+
+  // {
+  //   id: "performance-panel",
+  //   name: "Performance",
+  //   description: "Inspect throughput and processing performance",
+  //   icon: Gauge,
+  //   status: "coming-soon",
+  // },
+
+  // {
+  //   id: "heatmap-panel",
+  //   name: "Heatmap",
+  //   description: "Visualize node congestion and activity",
+  //   icon: Radar,
+  //   status: "coming-soon",
+  // },
+
+  // {
+  //   id: "ai-panel",
+  //   name: "AI Suggestions",
+  //   description: "Receive workflow optimization suggestions",
+  //   icon: BrainCircuit,
+  //   status: "coming-soon",
+  // },
+  // {
+  //   id: "notification-panel",
+  //   name: "Notifications",
+  //   description: "View alerts and simulation warnings",
+  //   icon: Bell,
+  //   status: "coming-soon",
+  // },
+
+  // {
+  //   id: "dependency-panel",
+  //   name: "Dependencies",
+  //   description: "Inspect workflow relationships and dependencies",
+  //   icon: GitBranch,
+  //   status: "coming-soon",
+  // },
+
+  // {
+  //   id: "network-panel",
+  //   name: "Network",
+  //   description: "Inspect workflow communication graph",
+  //   icon: Network,
+  //   status: "coming-soon",
+  // },
 
   {
     id: "close-panels",
