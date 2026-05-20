@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import {  Boxes, Tickets, Activity, XCircle, ScanSearch } from "lucide-react";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
@@ -52,6 +52,7 @@ const ResultGroup = ({
 
 export function SearchPanel() {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { setSelectedNode } = useWorkflowStore();
   const { fitView } = useReactFlow();
   const { nodes, tickets, events } = useSearch(query);
@@ -67,11 +68,41 @@ export function SearchPanel() {
     fitView({ nodes: [{ id: result.targetId }], duration: 350, padding: 0.2 });
   };
 
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const panelContainer = input.closest("[aria-hidden]");
+    if (!panelContainer) return;
+
+    const focusIfVisible = () => {
+      if (panelContainer.getAttribute("aria-hidden") === "false") {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            input.focus();
+            input.select();
+          });
+        });
+      }
+    };
+
+    focusIfVisible();
+
+    const observer = new MutationObserver(focusIfVisible);
+    observer.observe(panelContainer, {
+      attributes: true,
+      attributeFilter: ["aria-hidden"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <CustomPanel value="search-panel" title="Search" icon={ScanSearch} defaultExpanded>
       <div className="space-y-2 w-90">
         <div className="flex items-center gap-2">
           <Input
+            ref={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search nodes, tickets, events..."
