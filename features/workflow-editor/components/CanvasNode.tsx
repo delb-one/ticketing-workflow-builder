@@ -2,7 +2,7 @@
 
 import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { motion } from "framer-motion";
-import { getNodeIcon } from "@/lib/node-icons";
+import { BLOCK_ICON_MAP, TYPE_ICON_MAP } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
 import { CanvasNodeProps } from "@/lib/canvasNode/types";
 import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from "@/lib/canvasNode/color-map";
@@ -48,7 +48,9 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const isActive = activeTicketCount > 0;
   const theme = TYPE_THEME_MAP[data.type];
   const blockId = data.blockId ?? data.id;
-  const Icon = getNodeIcon(data.type, blockId);
+  const IconComponent = blockId
+    ? BLOCK_ICON_MAP[blockId] ?? TYPE_ICON_MAP[data.type]
+    : TYPE_ICON_MAP[data.type];
   const subtitle = blockId
     ? blockId.replace(/-/g, " ")
     : TYPE_LABEL_MAP[data.type];
@@ -97,7 +99,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
                       backgroundImage: getNodeTypeIconGradient(data.type),
                     }}
                   >
-                    <Icon className="h-4 w-4" />
+                    <IconComponent className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">

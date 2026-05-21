@@ -70,6 +70,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
 
   useEffect(() => {
     const validIds = new Set(allAgents.map((agent) => agent.id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedAgents((prev) => {
       const next = prev.filter((id) => validIds.has(id));
       if (next.length === prev.length && next.every((id, index) => id === prev[index])) {
@@ -85,6 +86,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
 
   useEffect(() => {
     if (selectedAgents.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSingleDraft(null);
       setCapacityDraft(null);
       setEfficiencyDraft(null);

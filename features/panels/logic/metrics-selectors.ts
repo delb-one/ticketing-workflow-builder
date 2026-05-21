@@ -1,12 +1,15 @@
 import type { WorkflowStore } from "@/lib/store";
 
 // Simple memoization helper for selectors
-export const memoize = <T extends (state: WorkflowStore) => any>(
+export const memoize = <
+  TResult,
+  T extends (state: WorkflowStore) => TResult,
+>(
   fn: T,
-  getDeps: (state: WorkflowStore) => any[],
+  getDeps: (state: WorkflowStore) => readonly unknown[],
 ) => {
-  let lastDeps: any[] = [];
-  let lastResult: any;
+  let lastDeps: readonly unknown[] = [];
+  let lastResult: TResult | undefined;
   let firstRun = true;
 
   return (state: WorkflowStore) => {
@@ -18,7 +21,7 @@ export const memoize = <T extends (state: WorkflowStore) => any>(
     lastDeps = deps;
     lastResult = result;
     firstRun = false;
-    return result;
+    return result as TResult;
   };
 };
 
