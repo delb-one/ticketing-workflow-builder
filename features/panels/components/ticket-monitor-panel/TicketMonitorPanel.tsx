@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTicketMonitor } from "@/features/panels/hooks/useTicketMonitor";
+import { tools } from "../tools-container-panel/data";
 
 export function TicketMonitorPanel() {
   const {
@@ -26,9 +27,16 @@ export function TicketMonitorPanel() {
     resetFilters,
     getNodeLabel,
   } = useTicketMonitor();
+  const shortcut = tools.find((tool) => tool.id === "activity-panel")?.shortcut;
 
   return (
-    <CustomPanel value="ticket-monitor" title="Ticket Monitor" icon={Activity} defaultExpanded>
+    <CustomPanel
+      value="ticket-monitor"
+      title="Ticket Monitor"
+      icon={Activity}
+      defaultExpanded
+      shortcut={shortcut}
+    >
       <div className="mb-2">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
@@ -87,7 +95,12 @@ export function TicketMonitorPanel() {
               </SelectContent>
             </Select>
           </div>
-          <Button type="button" size="icon" variant="outline" onClick={resetFilters}>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={resetFilters}
+          >
             <FilterX className="h-4 w-4" />
           </Button>
         </div>
@@ -144,15 +157,21 @@ export function TicketMonitorPanel() {
                     </td>
 
                     <td className="px-2 py-2 text-xs truncate">
-                      {runtime.completed ? "Completed" : getNodeLabel(runtime.currentNodeId)}
+                      {runtime.completed
+                        ? "Completed"
+                        : getNodeLabel(runtime.currentNodeId)}
                     </td>
 
                     <td className="px-2 py-2 text-xs truncate">
-                      {runtime.ticket.assignedAgent ? `${runtime.ticket.assignedAgent}` : "-"}
+                      {runtime.ticket.assignedAgent
+                        ? `${runtime.ticket.assignedAgent}`
+                        : "-"}
                     </td>
 
                     <td className="px-2 py-2 text-xs uppercase font-mono truncate">
-                      {runtime.ticket.queue != null ? `${runtime.ticket.queue}` : "-"}
+                      {runtime.ticket.queue != null
+                        ? `${runtime.ticket.queue}`
+                        : "-"}
                     </td>
                   </tr>
                 ))

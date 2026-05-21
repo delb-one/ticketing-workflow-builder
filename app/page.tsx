@@ -130,7 +130,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!event.ctrlKey) return;
+      // if (!event.ctrlKey) return;
 
       const target = event.target as HTMLElement | null;
       if (

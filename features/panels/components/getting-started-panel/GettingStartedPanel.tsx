@@ -9,14 +9,20 @@ import {
   simulationSetupSection,
   workFlowSteps,
 } from "./data";
+import { tools } from "../tools-container-panel/data";
 
 export function GettingStartedPanel() {
+  const shortcut = tools.find(
+    (tool) => tool.id === "getting-started-panel",
+  )?.shortcut;
+
   return (
     <CustomPanel
       title="Getting Started"
       value="getting-started"
       icon={Sparkles}
       defaultExpanded
+      shortcut={shortcut}
     >
       <ScrollArea className="h-162.5 w-full">
         <div className="flex flex-col gap-3 p-1 pr-3">

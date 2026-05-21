@@ -4,13 +4,26 @@ import { Pause, Terminal } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { useLog } from "../../hooks/useLog";
+import { tools } from "../tools-container-panel/data";
 
 export function LogPanel() {
-  const { simulationEvents, bottomRef, getSimulationEventIcon, getSimulationEventText } =
-    useLog();
+  const {
+    simulationEvents,
+    bottomRef,
+    getSimulationEventIcon,
+    getSimulationEventText,
+  } = useLog();
+
+  const shortcut = tools.find((tool) => tool.id === "log-panel")?.shortcut;
 
   return (
-    <CustomPanel title="Log Panel" value="log-panel" icon={Terminal} defaultExpanded>
+    <CustomPanel
+      title="Log Panel"
+      value="log-panel"
+      icon={Terminal}
+      defaultExpanded
+      shortcut={shortcut}
+    >
       <ScrollArea className="w-full">
         <div className="space-y-1.5 font-mono text-sm p-2 max-h-56">
           {simulationEvents.length === 0 ? (

@@ -15,6 +15,7 @@ interface CustomPanelProps {
   badge?: ReactNode;
   children: ReactNode;
   defaultExpanded?: boolean;
+  shortcut?: string;
 }
 
 export function CustomPanel({
@@ -24,6 +25,7 @@ export function CustomPanel({
   badge,
   children,
   defaultExpanded,
+  shortcut,
 }: CustomPanelProps) {
   return (
     <Accordion
@@ -31,7 +33,6 @@ export function CustomPanel({
       collapsible
       className="h-full pointer-events-auto "
       defaultValue={defaultExpanded ? value : undefined}
-
     >
       <Card className="min-w-50  p-0 bg-card/70 rounded-xl border backdrop-blur-md flex flex-col h-full overflow-hidden ">
         <AccordionItem value={value} className="flex flex-col h-full">
@@ -39,13 +40,19 @@ export function CustomPanel({
             <GripHorizontal className="w-4 h-4 text-primary/70" />
           </div>
           <AccordionTrigger className="p-4 shrink-0 hover:no-underline">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full">
               <Icon className="w-4 h-4 text-primary" />
+
               <h3 className="font-semibold text-primary text-sm">{title}</h3>
+
               {badge}
+
+              <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5">
+                {shortcut}
+              </span>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="p-2" >{children}</AccordionContent>
+          <AccordionContent className="p-2">{children}</AccordionContent>
         </AccordionItem>
       </Card>
     </Accordion>

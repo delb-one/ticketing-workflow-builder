@@ -15,8 +15,13 @@ import {
 } from "@/components/ui/select";
 import { useAgent } from "@/features/panels/hooks/useAgent";
 import { Input } from "@/components/ui/input";
+import { tools } from "../tools-container-panel/data";
 
 export function AgentPanel() {
+  const shortcut = tools.find(
+    (tool) => tool.id === "agent-panel",
+  )?.shortcut;
+
   const {
     isSimulating,
     agents,
@@ -44,6 +49,7 @@ export function AgentPanel() {
           {totalAgents}
         </Badge>
       }
+      shortcut={shortcut}
     >
       {!isSimulating ? (
         <div className="space-y-3 pt-1">
@@ -97,43 +103,45 @@ export function AgentPanel() {
             </Button>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-[11px] text-muted-foreground">
-              Efficiency: {form.efficiency.toFixed(1)}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <div className="text-[11px] text-muted-foreground">
+                Efficiency: {form.efficiency.toFixed(1)}
+              </div>
+              <Slider
+                value={[form.efficiency]}
+                min={0.1}
+                max={2}
+                step={0.1}
+                disabled={isSimulating}
+                onValueChange={(value) =>
+                  setForm((prev) => ({ ...prev, efficiency: value[0] ?? 1 }))
+                }
+              />
             </div>
-            <Slider
-              value={[form.efficiency]}
-              min={0.1}
-              max={2}
-              step={0.1}
-              disabled={isSimulating}
-              onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, efficiency: value[0] ?? 1 }))
-              }
-            />
+
+            <div className="space-y-2">
+              <div className="text-[11px] text-muted-foreground">
+                Capacity: {form.capacity}
+              </div>
+              <Slider
+                value={[form.capacity]}
+                min={1}
+                max={5}
+                step={1}
+                disabled={isSimulating}
+                onValueChange={(value) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    capacity: Math.max(1, Math.round(value[0] ?? 1)),
+                  }))
+                }
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="text-[11px] text-muted-foreground">
-              Capacity: {form.capacity}
-            </div>
-            <Slider
-              value={[form.capacity]}
-              min={1}
-              max={5}
-              step={1}
-              disabled={isSimulating}
-              onValueChange={(value) =>
-                setForm((prev) => ({
-                  ...prev,
-                  capacity: Math.max(1, Math.round(value[0] ?? 1)),
-                }))
-              }
-            />
-          </div>
-
-          <input
-            className="h-8 w-full rounded-md border bg-background/60 px-2 text-xs"
+          <Input
+            className="h-8 text-xs"
             placeholder="Skills (comma separated)"
             value={form.skills}
             disabled={isSimulating}
@@ -149,6 +157,9 @@ export function AgentPanel() {
           )}
 
           <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground">
+              Launch List
+            </div>
             {agentPool.length === 0 ? (
               <div className="text-xs text-muted-foreground">
                 No agents configured

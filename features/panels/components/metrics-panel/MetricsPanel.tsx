@@ -24,9 +24,12 @@ import {
 } from "@/lib/colors/color-map";
 import { Ticket } from "@/lib/simulation/types";
 import { useMetrics } from "../../hooks/useMetrics";
+import { tools } from "../tools-container-panel/data";
 
 export function MetricsPanel() {
   const metrics = useMetrics();
+
+  const shortcut = tools.find((tool) => tool.id === "metrics-panel")?.shortcut;
 
   return (
     <CustomPanel
@@ -42,6 +45,7 @@ export function MetricsPanel() {
           {metrics.workflowHealth}%
         </Badge>
       }
+      shortcut={shortcut}
     >
       <div className="space-y-4 pt-1">
         {/* TOP SECTION */}

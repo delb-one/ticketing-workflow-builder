@@ -16,6 +16,7 @@ import { useValidation } from "@/features/panels/hooks/useValidation";
 import { useWorkflowStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { statusConfig } from "./data";
+import { tools } from "../tools-container-panel/data";
 
 export function ValidationPanel() {
   const { errors, warnings, info, all, isValid, hasErrors, hasWarnings } =
@@ -23,6 +24,10 @@ export function ValidationPanel() {
   const nodesCount = useWorkflowStore((state) => state.nodes.length);
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const { fitView } = useReactFlow();
+
+  const shortcut = tools.find(
+    (tool) => tool.id === "validation-panel",
+  )?.shortcut;
 
   const getStatusIcon = () => {
     if (hasErrors) return AlertCircle;
@@ -64,6 +69,7 @@ export function ValidationPanel() {
           )}
         </div>
       }
+      shortcut={shortcut}
     >
       <div className="space-y-2 pt-1 w-90">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-1.5">

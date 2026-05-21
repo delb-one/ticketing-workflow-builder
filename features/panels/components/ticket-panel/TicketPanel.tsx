@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/select";
 import { useTicket } from "@/features/panels/hooks/useTicket";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { tools } from "../tools-container-panel/data";
 
 export function TicketPanel() {
+  const ticketPanelShortcut = tools.find(
+    (tool) => tool.id === "ticket-panel",
+  )?.shortcut;
+
   const {
     isSimulating,
     ticketTemplates,
@@ -42,6 +48,7 @@ export function TicketPanel() {
           {totalTickets}
         </Badge>
       }
+      shortcut={ticketPanelShortcut}
     >
       <div className="space-y-3 pt-1">
         <div className="flex items-center gap-2 mb-3">
@@ -51,67 +58,84 @@ export function TicketPanel() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            className="h-8 text-xs"
-            placeholder="Template ID"
-            value={form.id}
-            disabled={isSimulating}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, id: e.target.value }))
-            }
-          />
-          <Input
-            className="h-8 text-xs"
-            placeholder="Category (optional)"
-            value={form.category}
-            disabled={isSimulating}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, category: e.target.value }))
-            }
-          />
-          <Select
-            value={form.priority}
-            onValueChange={(value) =>
-              setForm((prev) => ({
-                ...prev,
-                priority: value as "low" | "medium" | "high" | "critical",
-              }))
-            }
-            disabled={isSimulating}
-          >
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Priority: Low</SelectItem>
-              <SelectItem value="medium">Priority: Medium</SelectItem>
-              <SelectItem value="high">Priority: High</SelectItem>
-              <SelectItem value="critical">Priority: Critical</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={form.impact}
-            onValueChange={(value) =>
-              setForm((prev) => ({
-                ...prev,
-                impact: value as "low" | "medium" | "high",
-              }))
-            }
-            disabled={isSimulating}
-          >
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Impact" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Impact: Low</SelectItem>
-              <SelectItem value="medium">Impact: Medium</SelectItem>
-              <SelectItem value="high">Impact: High</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" disabled={!canAdd} onClick={addTemplate}>
-            Add Template
-          </Button>
+        <div className="space-y-2">
+          {/* Inputs */}
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              className="h-8 text-xs"
+              placeholder="Template ID"
+              value={form.id}
+              disabled={isSimulating}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, id: e.target.value }))
+              }
+            />
+
+            <Input
+              className="h-8 text-xs"
+              placeholder="Category (optional)"
+              value={form.category}
+              disabled={isSimulating}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, category: e.target.value }))
+              }
+            />
+          </div>
+
+          {/* Select + Button in single row */}
+          <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <Select
+              value={form.priority}
+              onValueChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  priority: value as "low" | "medium" | "high" | "critical",
+                }))
+              }
+              disabled={isSimulating}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="low">Priority: Low</SelectItem>
+                <SelectItem value="medium">Priority: Medium</SelectItem>
+                <SelectItem value="high">Priority: High</SelectItem>
+                <SelectItem value="critical">Priority: Critical</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={form.impact}
+              onValueChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  impact: value as "low" | "medium" | "high",
+                }))
+              }
+              disabled={isSimulating}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Impact" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="low">Impact: Low</SelectItem>
+                <SelectItem value="medium">Impact: Medium</SelectItem>
+                <SelectItem value="high">Impact: High</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              size="sm"
+              className="h-8 whitespace-nowrap"
+              disabled={!canAdd}
+              onClick={addTemplate}
+            >
+              Add Template
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -133,7 +157,7 @@ export function TicketPanel() {
           />
         </div>
 
-        <textarea
+        <Textarea
           className="min-h-16 w-full rounded-md border bg-background/60 px-2 py-1.5 text-xs"
           placeholder="Description (optional)"
           value={form.description}

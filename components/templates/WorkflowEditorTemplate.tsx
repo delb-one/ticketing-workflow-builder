@@ -93,7 +93,7 @@ export function WorkflowEditorTemplate({
                 >
                   {leftCollapsed ? "Show Library" : "Hide Library"}
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
-                    CTRL +<span className="text-xs">→</span>
+                    <span className="text-xs">→</span>
                   </span>
                 </TooltipContent>
               </Tooltip>
@@ -140,7 +140,7 @@ export function WorkflowEditorTemplate({
                 >
                   {rightCollapsed ? "Show Inspector" : "Hide Inspector"}
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5 flex items-center gap-1">
-                    CTRL +<span className="text-xs">←</span>
+                    <span className="text-xs">←</span>
                   </span>
                 </TooltipContent>
               </Tooltip>

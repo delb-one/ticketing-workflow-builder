@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
-import {  Boxes, Tickets, Activity, XCircle, ScanSearch } from "lucide-react";
+import { Boxes, Tickets, Activity, XCircle, ScanSearch } from "lucide-react";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSearch } from "@/features/panels/hooks/useSearch";
 import { useWorkflowStore } from "@/lib/store";
 import type { SearchResult } from "@/features/panels/logic/search-selectors";
+import { tools } from "../tools-container-panel/data";
 
 const ResultGroup = ({
   title,
@@ -39,10 +40,14 @@ const ResultGroup = ({
         >
           <div className="text-xs font-medium text-primary">{result.title}</div>
           {result.subtitle && (
-            <div className="text-[11px] text-muted-foreground">{result.subtitle}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {result.subtitle}
+            </div>
           )}
           {result.metadata && (
-            <div className="text-[10px] text-muted-foreground/80">{result.metadata}</div>
+            <div className="text-[10px] text-muted-foreground/80">
+              {result.metadata}
+            </div>
           )}
         </button>
       ))}
@@ -56,6 +61,7 @@ export function SearchPanel() {
   const { setSelectedNode } = useWorkflowStore();
   const { fitView } = useReactFlow();
   const { nodes, tickets, events } = useSearch(query);
+  const shortcut = tools.find((tool) => tool.id === "search-panel")?.shortcut;
 
   const totalResults = useMemo(
     () => nodes.length + tickets.length + events.length,
@@ -98,7 +104,13 @@ export function SearchPanel() {
   }, []);
 
   return (
-    <CustomPanel value="search-panel" title="Search" icon={ScanSearch} defaultExpanded>
+    <CustomPanel
+      value="search-panel"
+      title="Search"
+      icon={ScanSearch}
+      defaultExpanded
+      shortcut={shortcut}
+    >
       <div className="space-y-2 w-90">
         <div className="flex items-center gap-2">
           <Input
@@ -123,22 +135,36 @@ export function SearchPanel() {
 
         <ScrollArea className="w-full">
           <div className="space-y-1.5  text-sm p-2 max-h-56">
-          {!query.trim() ? (
-            <div className="px-2 py-6 text-center text-xs text-muted-foreground ">
-              Start typing to search...
-            </div>
-          ) : totalResults === 0 ? (
-            <div className="px-2 py-6 text-center text-xs text-muted-foreground">
-              No results found
-            </div>
-          ) : (
-            <div className="space-y-2 pr-2">
-              <ResultGroup title="Nodes" icon={Boxes} results={nodes} onResultClick={handleResultClick} />
-              <ResultGroup title="Tickets" icon={Tickets} results={tickets} onResultClick={handleResultClick} />
-              <ResultGroup title="Events" icon={Activity} results={events} onResultClick={handleResultClick} />
-            </div>
-          )}
-
+            {!query.trim() ? (
+              <div className="px-2 py-6 text-center text-xs text-muted-foreground ">
+                Start typing to search...
+              </div>
+            ) : totalResults === 0 ? (
+              <div className="px-2 py-6 text-center text-xs text-muted-foreground">
+                No results found
+              </div>
+            ) : (
+              <div className="space-y-2 pr-2">
+                <ResultGroup
+                  title="Nodes"
+                  icon={Boxes}
+                  results={nodes}
+                  onResultClick={handleResultClick}
+                />
+                <ResultGroup
+                  title="Tickets"
+                  icon={Tickets}
+                  results={tickets}
+                  onResultClick={handleResultClick}
+                />
+                <ResultGroup
+                  title="Events"
+                  icon={Activity}
+                  results={events}
+                  onResultClick={handleResultClick}
+                />
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>
