@@ -12,7 +12,6 @@ import { useAgent } from "../../hooks/useAgent";
 import { useTicket } from "../../hooks/useTicket";
 import { useQueue } from "../../hooks/useQueue";
 import { useValidation } from "../../hooks/useValidation";
-import { log } from "node:console";
 
 export function ToolsContainerPanel({
   activeToolIds,
@@ -125,11 +124,11 @@ export function ToolsContainerPanel({
                     <span className="font-medium leading-tight">
                       {tool.name}
                     </span>
-                    {/* {tool.shortcut !== undefined && (
-                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground border  px-1.5 py-0.5">
-                        {tool.shortcut}
+                    {tool.category !== undefined && (
+                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground border rounded-md bg-primary/5  px-1.5 py-0.5">
+                        {tool.category}
                       </span>
-                    )} */}
+                    )}
 
                     {statusLabel && (
                       <span className="text-[10px] uppercase tracking-wide text-muted-foreground border rounded-md px-1.5 py-0.5">

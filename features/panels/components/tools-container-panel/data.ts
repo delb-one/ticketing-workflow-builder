@@ -98,16 +98,24 @@ export const tools: SimulationTool[] = [
     name: "Flow Validation",
     description: "Detect invalid states and graph issues",
     icon: Workflow,
-    category: "monitoring",
+    category: "traversal",
     badgeKey: "validation",
     shortcut: "V",
+  },
+   {
+    id: "network-panel",
+    name: "Network",
+    description: "Inspect workflow communication graph",
+    icon: Network,
+    category: "traversal",
+    shortcut: "N",
   },
   {
     id: "search-panel",
     name: "Search",
     description: "Search nodes, tickets and events",
     icon: ScanSearch,
-    category: "monitoring",
+    category: "traversal",
     shortcut: "K",
   },
 
@@ -150,14 +158,7 @@ export const tools: SimulationTool[] = [
   //   status: "coming-soon",
   // },
 
-  {
-    id: "network-panel",
-    name: "Network",
-    description: "Inspect workflow communication graph",
-    icon: Network,
-    category: "monitoring",
-    shortcut: "N",
-  },
+ 
 
   {
     id: "close-panels",

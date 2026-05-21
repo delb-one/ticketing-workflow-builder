@@ -18,7 +18,7 @@ export type SimulationTool = {
   description?: string;
   icon: LucideIcon;
 
-  category?: "core" | "monitoring" | "advanced";
+  category?: "core" | "monitoring" | "traversal";
 
   badgeKey?: ToolBadgeKey;
 
