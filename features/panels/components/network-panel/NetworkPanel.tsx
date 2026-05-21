@@ -212,24 +212,27 @@ export function NetworkPanel() {
                       No connected nodes yet
                     </div>
                   )}
-                  {criticalNodes.map((node) => (
-                    <button
-                      key={node.nodeId}
-                      type="button"
-                      onClick={() => focusNode(node.nodeId)}
-                      className="w-full rounded border px-2 py-1 text-left hover:bg-muted/60"
-                      style={getNodeChipStyle(
-                        node.nodeId,
-                        node.nodeId === selectedNodeId,
-                      )}
-                    >
-                      <div className="text-xs font-medium">{node.label}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {node.degree} connections · in {node.incoming} / out{" "}
-                        {node.outgoing}
-                      </div>
-                    </button>
-                  ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    {" "}
+                    {criticalNodes.map((node) => (
+                      <button
+                        key={node.nodeId}
+                        type="button"
+                        onClick={() => focusNode(node.nodeId)}
+                        className="w-full rounded border px-2 py-1 text-left hover:bg-muted/60"
+                        style={getNodeChipStyle(
+                          node.nodeId,
+                          node.nodeId === selectedNodeId,
+                        )}
+                      >
+                        <div className="text-xs font-medium">{node.label}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {node.degree} connections · in {node.incoming} / out{" "}
+                          {node.outgoing}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </ScrollArea>
             </div>
