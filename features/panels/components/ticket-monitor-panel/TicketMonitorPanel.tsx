@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTicketMonitor } from "@/features/panels/hooks/useTicketMonitor";
-import { tools } from "../tools-container-panel/data";
 
 export function TicketMonitorPanel() {
   const {
@@ -27,7 +26,6 @@ export function TicketMonitorPanel() {
     resetFilters,
     getNodeLabel,
   } = useTicketMonitor();
-  const shortcut = tools.find((tool) => tool.id === "activity-panel")?.shortcut;
 
   return (
     <CustomPanel
@@ -35,7 +33,6 @@ export function TicketMonitorPanel() {
       title="Ticket Monitor"
       icon={Activity}
       defaultExpanded
-      shortcut={shortcut}
     >
       <div className="mb-2">
         <div className="flex items-center justify-between">

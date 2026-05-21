@@ -15,7 +15,6 @@ interface CustomPanelProps {
   badge?: ReactNode;
   children: ReactNode;
   defaultExpanded?: boolean;
-  shortcut?: string;
 }
 
 export function CustomPanel({
@@ -25,7 +24,6 @@ export function CustomPanel({
   badge,
   children,
   defaultExpanded,
-  shortcut,
 }: CustomPanelProps) {
   return (
     <Accordion
@@ -46,10 +44,6 @@ export function CustomPanel({
               <h3 className="font-semibold text-primary text-sm">{title}</h3>
 
               {badge}
-
-              <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground border px-1.5 py-0.5">
-                {shortcut}
-              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="p-2">{children}</AccordionContent>

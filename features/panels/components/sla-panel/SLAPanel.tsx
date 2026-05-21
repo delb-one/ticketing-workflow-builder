@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useSLA } from "../../hooks/useSLA";
 import { SLATicketState } from "../../logic/sla-selectors";
-import { tools } from "../tools-container-panel/data";
 
 export function SLAPanel() {
   const { overview, allSLATickets } = useSLA();
@@ -22,7 +21,6 @@ export function SLAPanel() {
   const [sortBy, setSortBy] = useState<"time" | "urgency">("urgency");
   const [now, setNow] = useState(() => Date.now());
 
-  const shortcut = tools.find((tool) => tool.id === "sla-panel")?.shortcut;
 
   // Force re-render every second to update timers
   useEffect(() => {
@@ -91,7 +89,6 @@ export function SLAPanel() {
       title="SLA Monitor"
       icon={ShieldAlert}
       defaultExpanded
-      shortcut={shortcut}
     >
       <div className="flex h-full flex-col gap-4 p-4 min-w-85">
         <div className="grid grid-cols-3 gap-2 shrink-0">

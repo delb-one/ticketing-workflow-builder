@@ -15,12 +15,9 @@ import {
 } from "@/components/ui/select";
 import { useAgent } from "@/features/panels/hooks/useAgent";
 import { Input } from "@/components/ui/input";
-import { tools } from "../tools-container-panel/data";
 
 export function AgentPanel() {
-  const shortcut = tools.find(
-    (tool) => tool.id === "agent-panel",
-  )?.shortcut;
+  
 
   const {
     isSimulating,
@@ -49,7 +46,6 @@ export function AgentPanel() {
           {totalAgents}
         </Badge>
       }
-      shortcut={shortcut}
     >
       {!isSimulating ? (
         <div className="space-y-3 pt-1">

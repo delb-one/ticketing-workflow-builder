@@ -10,7 +10,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSearch } from "@/features/panels/hooks/useSearch";
 import { useWorkflowStore } from "@/lib/store";
 import type { SearchResult } from "@/features/panels/logic/search-selectors";
-import { tools } from "../tools-container-panel/data";
 
 const ResultGroup = ({
   title,
@@ -61,7 +60,6 @@ export function SearchPanel() {
   const { setSelectedNode } = useWorkflowStore();
   const { fitView } = useReactFlow();
   const { nodes, tickets, events } = useSearch(query);
-  const shortcut = tools.find((tool) => tool.id === "search-panel")?.shortcut;
 
   const totalResults = useMemo(
     () => nodes.length + tickets.length + events.length,
@@ -109,7 +107,6 @@ export function SearchPanel() {
       title="Search"
       icon={ScanSearch}
       defaultExpanded
-      shortcut={shortcut}
     >
       <div className="space-y-2 w-90">
         <div className="flex items-center gap-2">

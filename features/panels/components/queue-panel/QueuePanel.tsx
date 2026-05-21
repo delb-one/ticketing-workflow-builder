@@ -5,11 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { useQueue } from "@/features/panels/hooks/useQueue";
-import { tools } from "../tools-container-panel/data";
 
 export function QueuePanel() {
   const { queues, totalWaiting, levels } = useQueue();
-  const shortcut = tools.find((tool) => tool.id === "queue-panel")?.shortcut;
 
   return (
     <CustomPanel
@@ -25,7 +23,6 @@ export function QueuePanel() {
           {totalWaiting}
         </Badge>
       }
-      shortcut={shortcut}
     >
       <div className="flex-1 grid grid-cols-3 gap-2 overflow-hidden">
         {levels.map((level) => (

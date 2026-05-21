@@ -15,12 +15,9 @@ import {
 import { useTicket } from "@/features/panels/hooks/useTicket";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { tools } from "../tools-container-panel/data";
 
 export function TicketPanel() {
-  const ticketPanelShortcut = tools.find(
-    (tool) => tool.id === "ticket-panel",
-  )?.shortcut;
+ 
 
   const {
     isSimulating,
@@ -48,7 +45,6 @@ export function TicketPanel() {
           {totalTickets}
         </Badge>
       }
-      shortcut={ticketPanelShortcut}
     >
       <div className="space-y-3 pt-1">
         <div className="flex items-center gap-2 mb-3">

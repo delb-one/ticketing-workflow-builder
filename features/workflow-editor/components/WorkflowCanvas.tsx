@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ReactFlow,
   Edge,
@@ -146,9 +141,13 @@ const PANELS = [
   { id: "log-panel", component: LogPanel, initial: { x: 630, y: 320 } },
   { id: "metrics-panel", component: MetricsPanel, initial: { x: 930, y: 20 } },
   { id: "sla-panel", component: SLAPanel, initial: { x: 930, y: 320 } },
-  { id: "validation-panel", component: ValidationPanel, initial: { x: 1230, y: 20 } },
-  { id: "search-panel", component: SearchPanel, initial: { x: 1230, y: 320 } },
-  { id: "network-panel", component: NetworkPanel, initial: { x: 1530, y: 20 } },
+  {
+    id: "validation-panel",
+    component: ValidationPanel,
+    initial: { x: 30, y: 420 },
+  },
+  { id: "search-panel", component: SearchPanel, initial: { x: 930, y: 420 } },
+  { id: "network-panel", component: NetworkPanel, initial: { x: 530, y: 20 } },
 ];
 const CLOSE_PANELS_TOOL_ID = "close-panels";
 
@@ -309,13 +308,16 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         .map(([panelId]) => panelId),
     [visiblePanels],
   );
-  const handleToolToggle = useCallback((toolId: string) => {
-    if (toolId === CLOSE_PANELS_TOOL_ID) {
-      handleCloseAll();
-      return;
-    }
-    setVisiblePanels((prev) => ({ ...prev, [toolId]: !prev[toolId] }));
-  }, [handleCloseAll]);
+  const handleToolToggle = useCallback(
+    (toolId: string) => {
+      if (toolId === CLOSE_PANELS_TOOL_ID) {
+        handleCloseAll();
+        return;
+      }
+      setVisiblePanels((prev) => ({ ...prev, [toolId]: !prev[toolId] }));
+    },
+    [handleCloseAll],
+  );
 
   const shortcutsByKey = useMemo(() => {
     const entries = tools

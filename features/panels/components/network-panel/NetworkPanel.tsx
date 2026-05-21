@@ -8,7 +8,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { useWorkflowStore } from "@/lib/store";
 import { useNetwork } from "@/features/panels/hooks/useNetwork";
-import { tools } from "../tools-container-panel/data";
 
 const densityLabel = (density: number): string => {
   if (density < 0.15) return "Sparse workflow";
@@ -29,7 +28,6 @@ export function NetworkPanel() {
     selectedNodeConnectivity,
   } = useNetwork();
 
-  const shortcut = tools.find((tool) => tool.id === "network-panel")?.shortcut;
 
   const nodeLabelMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -54,7 +52,6 @@ export function NetworkPanel() {
       title="Network"
       icon={Network}
       defaultExpanded
-      shortcut={shortcut}
     >
       <div className="w-90 space-y-2">
         {topology.totalNodes === 0 ? (
