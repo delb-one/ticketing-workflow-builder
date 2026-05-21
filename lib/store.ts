@@ -52,6 +52,8 @@ export interface WorkflowStore {
   edges: Edge[];
   selectedNodeId: string | null;
   isSimulating: boolean;
+  isPaused: boolean;
+  pauseStartedAt: number | null;
   simulationStep: number;
   activeNodeId: string | null;
   simulationLog: string[];
@@ -73,6 +75,7 @@ export interface WorkflowStore {
 
   startSimulation: () => void;
   endSimulation: () => void;
+  setPaused: (paused: boolean) => void;
   nextStep: () => void;
   previousStep: () => void;
   setActiveNode: (id: string | null) => void;
@@ -100,6 +103,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   isSimulating: false,
+  isPaused: false,
+  pauseStartedAt: null,
   simulationStep: 0,
   activeNodeId: null,
   simulationLog: [],
@@ -212,6 +217,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   startSimulation: () =>
     set({
       isSimulating: true,
+      isPaused: false,
+      pauseStartedAt: null,
       simulationStep: 0,
       simulationLog: ["Simulation started..."],
       activeNodeId: null,
@@ -223,7 +230,31 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   endSimulation: () =>
     set({
       isSimulating: false,
+      isPaused: false,
+      pauseStartedAt: null,
       activeNodeId: null,
+    }),
+
+  setPaused: (paused) =>
+    set((state) => {
+      if (!state.isSimulating) return state;
+      if (paused === state.isPaused) return state;
+
+      if (paused) {
+        return {
+          isPaused: true,
+          pauseStartedAt: Date.now(),
+        };
+      }
+
+      const pausedDelta = state.pauseStartedAt
+        ? Date.now() - state.pauseStartedAt
+        : 0;
+
+      return {
+        isPaused: false,
+        pauseStartedAt: null,
+      };
     }),
 
   nextStep: () =>
@@ -283,6 +314,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       edges: [],
       selectedNodeId: null,
       isSimulating: false,
+      isPaused: false,
+      pauseStartedAt: null,
       simulationStep: 0,
       activeNodeId: null,
       simulationLog: [],

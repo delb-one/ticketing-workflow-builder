@@ -16,7 +16,7 @@ import { useSLA } from "../../hooks/useSLA";
 import { SLATicketState } from "../../logic/sla-selectors";
 
 export function SLAPanel() {
-  const { overview, allSLATickets } = useSLA();
+  const { overview, allSLATickets, isSimulating, isPaused } = useSLA();
 
   const [sortBy, setSortBy] = useState<"time" | "urgency">("urgency");
   const [now, setNow] = useState(() => Date.now());
@@ -24,9 +24,11 @@ export function SLAPanel() {
 
   // Force re-render every second to update timers
   useEffect(() => {
+    if (!isSimulating || isPaused) return;
+
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isSimulating, isPaused]);
 
   // Priority score mapping for sorting
   const PRIORITY_SCORE: Record<string, number> = {

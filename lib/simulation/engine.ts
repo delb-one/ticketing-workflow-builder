@@ -241,6 +241,19 @@ export class SimulationEngine {
     this.notify();
   }
 
+  shiftActiveSlaClocks(deltaMs: number): void {
+    if (deltaMs <= 0) return;
+
+    for (const runtime of Object.values(this.runtimes)) {
+      const sla = runtime.ticket.sla;
+      if (!sla) continue;
+      if (runtime.completed || sla.completed || sla.breached) continue;
+
+      sla.startTime += deltaMs;
+      sla.deadline += deltaMs;
+    }
+  }
+
   private stepRuntime(ticketId: string): void {
     const runtime = this.runtimes[ticketId];
     if (!runtime || !runtime.currentNodeId) return;

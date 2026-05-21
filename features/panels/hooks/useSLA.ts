@@ -10,6 +10,8 @@ import {
 export function useSLA() {
   return useWorkflowStore(
     useShallow((state) => ({
+      isSimulating: state.isSimulating,
+      isPaused: state.isPaused,
       allSLATickets: selectSLATicketStates(state),
       activeSLATickets: selectActiveSLATickets(state),
       overview: selectSLAOverview(state),

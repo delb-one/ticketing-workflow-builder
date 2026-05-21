@@ -18,7 +18,7 @@ export default function ControlsPanel() {
     isSimulating,
     showDecisionDialog,
     isPaused,
-    setIsPaused,
+    handleTogglePause,
     canvasHost,
     toolbarRef,
     pausedRuntime,
@@ -71,7 +71,7 @@ export default function ControlsPanel() {
                   if (preflightError) return;
                   return startSimulationFlow();
                 }
-                setIsPaused(!isPaused);
+                handleTogglePause();
               }}
               disabled={!isSimulating && (nodes.length === 0 || Boolean(preflightError))}
               size="icon"

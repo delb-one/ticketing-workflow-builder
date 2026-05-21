@@ -18,6 +18,9 @@ export function useControls() {
     nodes,
     edges,
     isSimulating,
+    isPaused,
+    pauseStartedAt,
+    setPaused,
     startSimulation,
     endSimulation,
     syncEngineState,
@@ -30,6 +33,9 @@ export function useControls() {
       nodes: state.nodes,
       edges: state.edges,
       isSimulating: state.isSimulating,
+      isPaused: state.isPaused,
+      pauseStartedAt: state.pauseStartedAt,
+      setPaused: state.setPaused,
       startSimulation: state.startSimulation,
       endSimulation: state.endSimulation,
       syncEngineState: state.syncEngineState,
@@ -41,7 +47,6 @@ export function useControls() {
   );
 
   const [showDecisionDialog, setShowDecisionDialog] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const [canvasHost, setCanvasHost] = useState<HTMLElement | null>(null);
 
@@ -63,7 +68,7 @@ export function useControls() {
   const startSimulationFlow = () => {
     clearSimulationEvents();
     setShowDecisionDialog(false);
-    setIsPaused(false);
+    setPaused(false);
 
     const workflow = toWorkflowDefinition(nodes, edges as WorkflowEdge[]);
     const engine = new SimulationEngine(workflow);
@@ -99,7 +104,22 @@ export function useControls() {
   const handleStop = () => {
     stopAndCleanup(true);
     setShowDecisionDialog(false);
-    setIsPaused(false);
+    setPaused(false);
+  };
+
+  const handleTogglePause = () => {
+    if (!isSimulating) return;
+
+    if (isPaused) {
+      const pausedDelta = pauseStartedAt ? Date.now() - pauseStartedAt : 0;
+      if (pausedDelta > 0) {
+        engineRef.current?.shiftActiveSlaClocks(pausedDelta);
+      }
+      setPaused(false);
+      return;
+    }
+
+    setPaused(true);
   };
 
   useEffect(() => {
@@ -177,7 +197,7 @@ export function useControls() {
     simulationConfig,
     showDecisionDialog,
     isPaused,
-    setIsPaused,
+    handleTogglePause,
     canvasHost,
     toolbarRef,
     pausedRuntime,
