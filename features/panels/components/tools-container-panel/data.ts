@@ -107,7 +107,7 @@ export const tools: SimulationTool[] = [
     description: "Search nodes, tickets and events",
     icon: ScanSearch,
     category: "monitoring",
-    shortcut: "K",
+    shortcut: "C",
   },
 
   // {
