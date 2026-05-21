@@ -9,7 +9,8 @@ export interface ToolsContainerPanelProps {
 export type ToolBadgeKey =
   | "agents"
   | "tickets"
-  | "queue";
+  | "queue"
+  | "validation"
 
 export type SimulationTool = {
   id: string;

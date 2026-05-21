@@ -99,6 +99,8 @@ export const tools: SimulationTool[] = [
     description: "Detect invalid states and graph issues",
     icon: Workflow,
     category: "monitoring",
+        badgeKey: "validation",
+
     shortcut: "V",
   },
   {

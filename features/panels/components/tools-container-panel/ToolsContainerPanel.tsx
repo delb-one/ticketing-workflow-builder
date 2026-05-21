@@ -11,6 +11,8 @@ import { tools } from "./data";
 import { useAgent } from "../../hooks/useAgent";
 import { useTicket } from "../../hooks/useTicket";
 import { useQueue } from "../../hooks/useQueue";
+import { useValidation } from "../../hooks/useValidation";
+import { log } from "node:console";
 
 export function ToolsContainerPanel({
   activeToolIds,
@@ -22,6 +24,7 @@ export function ToolsContainerPanel({
   const { totalAgents } = useAgent();
   const { totalTickets } = useTicket();
   const { totalWaiting } = useQueue();
+  const { all } = useValidation();
 
   const getStatusLabel = (status?: SimulationTool["status"]) => {
     switch (status) {
@@ -32,12 +35,15 @@ export function ToolsContainerPanel({
     }
   };
 
-  // const closeTools = tools.pop();
+  const totaltIssues = all.filter(
+    (a) => a.severity == "error" || a.severity == "warning",
+  ).length;
 
   const badgeCounts = {
     agents: totalAgents,
     tickets: totalTickets,
     queue: totalWaiting,
+    validation: totaltIssues,
   } as const;
 
   return (

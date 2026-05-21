@@ -162,7 +162,7 @@ export function AgentPanel() {
             </div>
             {agentPool.length === 0 ? (
               <div className="text-xs text-muted-foreground">
-                No agents configured
+                No agents configured. Add at least one Agent to start.
               </div>
             ) : (
               agentPool.map((agent) => (

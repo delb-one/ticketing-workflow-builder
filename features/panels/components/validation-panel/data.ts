@@ -9,7 +9,7 @@ export const statusConfig = {
     icon: ShieldCheck,
   },
   warning: {
-    label: "Warnings",
+    label: "Warning",
     color: "text-amber-500",
     border: "border-amber-500/20",
     bg: "bg-amber-500/5",
