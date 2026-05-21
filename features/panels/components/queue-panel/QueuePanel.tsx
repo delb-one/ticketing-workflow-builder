@@ -28,7 +28,7 @@ export function QueuePanel() {
         {levels.map((level) => (
           <div
             key={level}
-            className="flex flex-col bg-card/60 rounded-lg border border-card-700/60 p-2 overflow-hidden backdrop-blur-md"
+            className="flex flex-col bg-card/50 rounded-lg border border-card-700/60 p-2 overflow-hidden"
           >
             <div className="flex justify-between items-center mb-2 px-1">
               <span className="text-[10px] font-bold text-primary uppercase tracking-wider">

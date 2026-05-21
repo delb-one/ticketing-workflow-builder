@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { useWorkflowStore } from "@/lib/store";
 import { useNetwork } from "@/features/panels/hooks/useNetwork";
+import { cn } from "@/lib/utils";
 
 const densityLabel = (density: number): string => {
   if (density < 0.15) return "Sparse workflow";
@@ -28,6 +29,9 @@ export function NetworkPanel() {
     selectedNodeConnectivity,
   } = useNetwork();
 
+
+  console.log(selectedNodeId);
+  
 
   const nodeLabelMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -60,7 +64,7 @@ export function NetworkPanel() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5">
               <div className="rounded-lg border p-2">
                 <div className="text-[10px] text-muted-foreground">Nodes</div>
                 <div className="text-base font-semibold">{topology.totalNodes}</div>
@@ -201,7 +205,7 @@ export function NetworkPanel() {
                       <button
                         type="button"
                         onClick={() => focusNode(nodeId)}
-                        className="rounded border px-1.5 py-0.5 text-[11px] hover:bg-muted/70"
+                        className={cn(`rounded border px-1.5 py-0.5 text-[11px] hover:bg-muted/70`, nodeId === selectedNodeId ? "bg-primary/20 border-primary" : "")}
                       >
                         {nodeLabelMap.get(nodeId) ?? nodeId}
                       </button>
