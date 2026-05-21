@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAgent } from "@/features/panels/hooks/useAgent";
+import { Input } from "@/components/ui/input";
 
 export function AgentPanel() {
   const {
@@ -54,8 +55,8 @@ export function AgentPanel() {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <input
-              className="h-8 rounded-md border bg-background/60 px-2 text-xs"
+            <Input
+              className="h-8 text-xs"
               placeholder="Agent ID"
               value={form.id}
               disabled={isSimulating}
@@ -63,8 +64,8 @@ export function AgentPanel() {
                 setForm((prev) => ({ ...prev, id: e.target.value }))
               }
             />
-            <input
-              className="h-8 rounded-md border bg-background/60 px-2 text-xs"
+            <Input
+              className="h-8 text-xs"
               placeholder="Name (optional)"
               value={form.name}
               disabled={isSimulating}
@@ -142,12 +143,16 @@ export function AgentPanel() {
           />
 
           {hasDuplicateId && (
-            <div className="text-[11px] text-red-400">Agent ID must be unique.</div>
+            <div className="text-[11px] text-red-400">
+              Agent ID must be unique.
+            </div>
           )}
 
           <div className="space-y-2">
             {agentPool.length === 0 ? (
-              <div className="text-xs text-muted-foreground">No agents configured</div>
+              <div className="text-xs text-muted-foreground">
+                No agents configured
+              </div>
             ) : (
               agentPool.map((agent) => (
                 <div
@@ -155,7 +160,9 @@ export function AgentPanel() {
                   className="rounded-md border bg-background/40 p-2 text-xs"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-semibold truncate">{agent.name ?? agent.id}</div>
+                    <div className="font-semibold truncate">
+                      {agent.name ?? agent.id}
+                    </div>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -167,7 +174,8 @@ export function AgentPanel() {
                     </Button>
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground uppercase">
-                    {agent.level} | eff {agent.efficiency} | cap {agent.capacity}
+                    {agent.level} | eff {agent.efficiency} | cap{" "}
+                    {agent.capacity}
                   </div>
                 </div>
               ))
@@ -178,7 +186,9 @@ export function AgentPanel() {
         <ScrollArea className="w-full pr-2">
           <div className="max-h-80 space-y-2">
             {agents.length === 0 ? (
-              <div className="text-xs text-primary-500 text-center py-4">No agents active</div>
+              <div className="text-xs text-primary-500 text-center py-4">
+                No agents active
+              </div>
             ) : (
               agents.map((agent) => (
                 <div

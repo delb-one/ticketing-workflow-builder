@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTicket } from "@/features/panels/hooks/useTicket";
+import { Input } from "@/components/ui/input";
 
 export function TicketPanel() {
   const {
@@ -51,8 +52,8 @@ export function TicketPanel() {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <input
-            className="h-8 rounded-md border bg-background/60 px-2 text-xs"
+          <Input
+            className="h-8 text-xs"
             placeholder="Template ID"
             value={form.id}
             disabled={isSimulating}
@@ -60,8 +61,8 @@ export function TicketPanel() {
               setForm((prev) => ({ ...prev, id: e.target.value }))
             }
           />
-          <input
-            className="h-8 rounded-md border bg-background/60 px-2 text-xs"
+          <Input
+            className="h-8 text-xs"
             placeholder="Category (optional)"
             value={form.category}
             disabled={isSimulating}
@@ -143,11 +144,15 @@ export function TicketPanel() {
         />
 
         {hasDuplicateId && (
-          <div className="text-[11px] text-red-400">Template ID must be unique.</div>
+          <div className="text-[11px] text-red-400">
+            Template ID must be unique.
+          </div>
         )}
 
         <div className="pt-1 space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">Launch List</div>
+          <div className="text-xs font-medium text-muted-foreground">
+            Launch List
+          </div>
           {ticketTemplates.length === 0 ? (
             <div className="text-xs text-muted-foreground">
               No templates configured. Add at least one template to start.
@@ -171,7 +176,8 @@ export function TicketPanel() {
                   </Button>
                 </div>
                 <div className="mt-1 text-[11px] text-muted-foreground">
-                  {template.priority.toUpperCase()} | {template.impact.toUpperCase()} |{" "}
+                  {template.priority.toUpperCase()} |{" "}
+                  {template.impact.toUpperCase()} |{" "}
                   {template.category ?? "uncategorized"} | x
                   {Math.max(1, template.autoSpawnCount ?? 1)}
                 </div>
