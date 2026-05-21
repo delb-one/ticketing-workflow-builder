@@ -45,7 +45,7 @@ export const tools: SimulationTool[] = [
     icon: Tickets,
     badgeKey: "tickets",
     category: "core",
-    shortcut: "K",
+    shortcut: "T",
   },
 
   {
@@ -107,7 +107,7 @@ export const tools: SimulationTool[] = [
     description: "Search nodes, tickets and events",
     icon: ScanSearch,
     category: "monitoring",
-    shortcut: "C",
+    shortcut: "K",
   },
 
   // {

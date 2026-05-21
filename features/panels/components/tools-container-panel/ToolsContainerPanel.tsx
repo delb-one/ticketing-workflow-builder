@@ -100,7 +100,7 @@ export function ToolsContainerPanel({
                     </span>
                     {tool.shortcut !== undefined && (
                       <span className="text-[10px] uppercase tracking-wide text-muted-foreground border  px-1.5 py-0.5">
-                        CTRL + {tool.shortcut}
+                        {tool.shortcut}
                       </span>
                     )}
 

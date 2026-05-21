@@ -325,7 +325,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!event.ctrlKey) return;
+      // if (!event.ctrlKey) return;
 
       const target = event.target as HTMLElement | null;
       if (
