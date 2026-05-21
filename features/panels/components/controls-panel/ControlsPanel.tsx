@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   GitBranch,
@@ -8,6 +15,7 @@ import {
   Square,
   StepBack,
   StepForward,
+  Timer,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useControls } from "@/features/panels/hooks/useControls";
@@ -29,6 +37,8 @@ export default function ControlsPanel() {
     handleStepBackward,
     handleStepForward,
     handleDecision,
+    simulationConfig,
+    updateSimulationConfig,
   } = useControls();
 
   return (
@@ -73,7 +83,9 @@ export default function ControlsPanel() {
                 }
                 handleTogglePause();
               }}
-              disabled={!isSimulating && (nodes.length === 0 || Boolean(preflightError))}
+              disabled={
+                !isSimulating && (nodes.length === 0 || Boolean(preflightError))
+              }
               size="icon"
               variant="outline"
               className={`h-8 w-8 transition  ${
@@ -113,16 +125,27 @@ export default function ControlsPanel() {
               <Square />
             </Button>
           </div>
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <Timer className="h-4 w-4" />
+            <Select
+              value={String(simulationConfig.stepDelayMs / 1000)}
+              onValueChange={(value) =>
+                updateSimulationConfig({ stepDelayMs: Number(value) * 1000 })
+              }
+              disabled={isSimulating}
+            >
+              
+              <SelectTrigger className="h-7 w-auto text-[11px]">
+                <SelectValue placeholder="Delay" />
+              </SelectTrigger>
+              <SelectContent className="w-auto">
+                <SelectItem value="1">1s</SelectItem>
+                <SelectItem value="2">2s</SelectItem>
+                <SelectItem value="3">3s</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        {/* <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-          <span>Templates: {simulationConfig.ticketTemplates.length}</span>
-          <span>Spawned Tickets: {totalSpawnedTickets}</span>
-          <span>Agents: {simulationConfig.agentPool.length}</span>
-          <span>Step Delay: {simulationConfig.stepDelayMs}ms</span>
-        </div>
-        {!isSimulating && preflightError && (
-          <div className="text-[11px] text-amber-400">{preflightError}</div>
-        )} */}
       </div>
 
       {canvasHost &&
@@ -138,7 +161,10 @@ export default function ControlsPanel() {
                 <Card className="max-w-sm p-6">
                   <h3 className="mb-4 text-lg font-semibold">
                     {pausedRuntime.pausedAt
-                      ? `${[pausedRuntime.ticket.assignedAgent, pausedRuntime.pausedAt]
+                      ? `${[
+                          pausedRuntime.ticket.assignedAgent,
+                          pausedRuntime.pausedAt,
+                        ]
                           .filter(Boolean)
                           .join(" ")} (${pausedRuntime.ticket.id})`
                       : "What is your decision?"}
@@ -147,7 +173,9 @@ export default function ControlsPanel() {
                     {pendingOutcomes.map((outcome) => (
                       <Button
                         key={outcome.label}
-                        onClick={() => handleDecision(pausedRuntime.ticket.id, outcome.label)}
+                        onClick={() =>
+                          handleDecision(pausedRuntime.ticket.id, outcome.label)
+                        }
                         className="flex-1"
                       >
                         <GitBranch className="h-4 w-4 mr-2" />

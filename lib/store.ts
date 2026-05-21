@@ -117,7 +117,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     ticketTemplates: [],
     // ticketCount: 1,
     // agentsCount: { l1: 1, l2: 1, l3: 1 },
-    stepDelayMs: 900,
+    stepDelayMs: 1000,
     slaConfig: {
       defaultMaxResolutionTime: 60,
       warningThreshold: 0.75,

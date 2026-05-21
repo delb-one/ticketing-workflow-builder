@@ -28,6 +28,7 @@ export function useControls() {
     addSimulationEvent,
     engineState,
     simulationConfig,
+    updateSimulationConfig,
   } = useWorkflowStore(
     useShallow((state) => ({
       nodes: state.nodes,
@@ -43,6 +44,7 @@ export function useControls() {
       addSimulationEvent: state.addSimulationEvent,
       engineState: state.engineState,
       simulationConfig: state.simulationConfig,
+      updateSimulationConfig: state.updateSimulationConfig,
     })),
   );
 
@@ -195,6 +197,7 @@ export function useControls() {
     nodes,
     isSimulating,
     simulationConfig,
+    updateSimulationConfig,
     showDecisionDialog,
     isPaused,
     handleTogglePause,
