@@ -134,11 +134,10 @@ export default function ControlsPanel() {
               }
               disabled={isSimulating}
             >
-              
-              <SelectTrigger className="h-7 w-auto text-[11px]">
+              <SelectTrigger className="h-4 w-16 text-[11px]">
                 <SelectValue placeholder="Delay" />
               </SelectTrigger>
-              <SelectContent className="w-auto">
+              <SelectContent>
                 <SelectItem value="1">1s</SelectItem>
                 <SelectItem value="2">2s</SelectItem>
                 <SelectItem value="3">3s</SelectItem>

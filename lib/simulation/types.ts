@@ -184,7 +184,7 @@ export interface Agent {
   id: string;
   name?: string;
   level: "l1" | "l2" | "l3";
-  type: "default" | "custom";
+  // type: "default" | "custom";
   status: "available" | "busy";
   currentTicketId?: string;
   capacity: number;

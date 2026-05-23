@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { Agent } from "../TechInspector";
 import { Slider } from "@/components/ui/slider";
 
@@ -87,10 +88,10 @@ export const EditSection = ({
           {/* HEADER */}
           <div className="flex items-center justify-between">
             <div>
-              <input
+              <Input
                 value={singleView?.name ?? selectedAgent.name}
                 onChange={(event) => handleNameChange(event.target.value)}
-                className="text-sm font-semibold bg-transparent border rounded px-2 py-1 w-full"
+            className="h-8 text-xs"
               />
             </div>
 

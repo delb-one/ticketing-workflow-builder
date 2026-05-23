@@ -15,10 +15,9 @@ import {
 import { useTicket } from "@/features/panels/hooks/useTicket";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TicketPanel() {
- 
-
   const {
     isSimulating,
     ticketTemplates,
@@ -178,31 +177,37 @@ export function TicketPanel() {
               No templates configured. Add at least one template to start.
             </div>
           ) : (
-            ticketTemplates.map((template) => (
-              <div
-                key={template.id}
-                className="rounded-md border bg-background/40 p-2 text-xs"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold truncate">{template.id}</div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 px-2 text-[11px]"
-                    disabled={isSimulating}
-                    onClick={() => removeTemplate(template.id)}
+            <ScrollArea className="w-full pr-2">
+              <div className="max-h-80 space-y-2">
+                {ticketTemplates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="rounded-md border bg-background/40 p-2 text-xs"
                   >
-                    <X className=" h-2 w-2" />
-                  </Button>
-                </div>
-                <div className="mt-1 text-[11px] text-muted-foreground">
-                  {template.priority.toUpperCase()} |{" "}
-                  {template.impact.toUpperCase()} |{" "}
-                  {template.category ?? "uncategorized"} | x
-                  {Math.max(1, template.autoSpawnCount ?? 1)}
-                </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-semibold truncate">
+                        {template.id}
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 px-2 text-[11px]"
+                        disabled={isSimulating}
+                        onClick={() => removeTemplate(template.id)}
+                      >
+                        <X className=" h-2 w-2" />
+                      </Button>
+                    </div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">
+                      {template.priority.toUpperCase()} |{" "}
+                      {template.impact.toUpperCase()} |{" "}
+                      {template.category ?? "uncategorized"} | x
+                      {Math.max(1, template.autoSpawnCount ?? 1)}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
+            </ScrollArea>
           )}
         </div>
       </div>

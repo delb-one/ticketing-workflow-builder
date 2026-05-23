@@ -6,12 +6,8 @@ import {
   Terminal,
   BarChart3,
   ShieldAlert,
-  Gauge,
-  Radar,
   Workflow,
   BrainCircuit,
-  Bell,
-  GitBranch,
   ScanSearch,
   Activity,
   Network,
@@ -102,7 +98,7 @@ export const tools: SimulationTool[] = [
     badgeKey: "validation",
     shortcut: "V",
   },
-   {
+  {
     id: "network-panel",
     name: "Network",
     description: "Inspect workflow communication graph",
@@ -118,47 +114,14 @@ export const tools: SimulationTool[] = [
     category: "traversal",
     shortcut: "K",
   },
-
   // {
-  //   id: "performance-panel",
-  //   name: "Performance",
-  //   description: "Inspect throughput and processing performance",
-  //   icon: Gauge,
-  //   status: "coming-soon",
-  // },
-
-  // {
-  //   id: "heatmap-panel",
-  //   name: "Heatmap",
-  //   description: "Visualize node congestion and activity",
-  //   icon: Radar,
-  //   status: "coming-soon",
-  // },
-
-  // {
-  //   id: "ai-panel",
-  //   name: "AI Suggestions",
-  //   description: "Receive workflow optimization suggestions",
+  //   id: "insights-panel",
+  //   name: "Insights",
+  //   description: "Workflow intelligence and optimization insights",
   //   icon: BrainCircuit,
-  //   status: "coming-soon",
+  //   category: "intelligence",
+  //   shortcut: "I",
   // },
-  // {
-  //   id: "notification-panel",
-  //   name: "Notifications",
-  //   description: "View alerts and simulation warnings",
-  //   icon: Bell,
-  //   status: "coming-soon",
-  // },
-
-  // {
-  //   id: "dependency-panel",
-  //   name: "Dependencies",
-  //   description: "Inspect workflow relationships and dependencies",
-  //   icon: GitBranch,
-  //   status: "coming-soon",
-  // },
-
- 
 
   {
     id: "close-panels",

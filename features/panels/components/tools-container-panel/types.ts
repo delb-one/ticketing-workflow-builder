@@ -6,11 +6,7 @@ export interface ToolsContainerPanelProps {
   onCloseAll: () => void;
 }
 
-export type ToolBadgeKey =
-  | "agents"
-  | "tickets"
-  | "queue"
-  | "validation"
+export type ToolBadgeKey = "agents" | "tickets" | "queue" | "validation";
 
 export type SimulationTool = {
   id: string;
@@ -18,7 +14,7 @@ export type SimulationTool = {
   description?: string;
   icon: LucideIcon;
 
-  category?: "core" | "monitoring" | "traversal";
+  category?: "core" | "monitoring" | "traversal" | "intelligence";
 
   badgeKey?: ToolBadgeKey;
 

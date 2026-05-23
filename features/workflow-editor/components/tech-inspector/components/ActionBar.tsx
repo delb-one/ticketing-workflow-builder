@@ -1,61 +1,58 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Edit, Plus, RotateCcw, SlidersHorizontal } from "lucide-react";
 
 interface ActionBarProps {
-  addDefaultAgent: () => void;
+  addAgent: () => void;
   isSelectionMode: boolean;
   normalizeAgents: () => void;
-  resetCustomAgents: () => void;
+  // resetCustomAgents: () => void;
   activeSelectionMode: () => void;
   disabled?: boolean;
 }
 
 export const ActionBar = ({
-  addDefaultAgent,
+  addAgent,
   isSelectionMode,
   normalizeAgents,
-  resetCustomAgents,
   activeSelectionMode,
   disabled = false,
 }: ActionBarProps) => {
   return (
     <div className="p-2 flex items-center justify-between ">
-      <div className="flex items-center bg-primary gap-2 p-2 rounded-md border-none shadow-none ">
-        <button
-          onClick={addDefaultAgent}
-          disabled={disabled}
-          className="font-semibold text-xs text-secondary flex items-center gap-2"
-        >
-          <span>Add Agent</span>
-          <Plus className="h-4 w-4 text-secondary" />
-        </button>
-      </div>
+      <Button onClick={addAgent} disabled={disabled}>
+        <span>Add Agent</span>
+        {/* <Plus className="h-4 w-4 text-secondary" /> */}
+      </Button>
       <div className="flex gap-2">
-        <button
+        <Button
+          size="icon"
+          variant="ghost"
           onClick={activeSelectionMode}
-          disabled={disabled}
-          className={`p-2 rounded-md transition-colors
-  ${isSelectionMode ? "bg-primary text-secondary" : "hover:bg-muted/60"}
-  `}
+          className={cn(
+            isSelectionMode ? "bg-primary text-secondary hover:bg-primary/80! hover:text-secondary!" : "hover:bg-muted/60",
+          )}
         >
           <Edit className="h-4 w-4" />
-        </button>
+        </Button>
 
-        <button
+        <Button
+          size="icon"
+          variant="ghost"
           onClick={normalizeAgents}
           disabled={disabled}
-          className="p-2 rounded-md bg-transparent border-none shadow-none hover:bg-muted/60 cursor-pointer transition-colors"
         >
           <SlidersHorizontal className="h-4 w-4" />
-        </button>
+        </Button>
 
-        <button
+        {/* <button
           onClick={resetCustomAgents}
           disabled={disabled}
           className="p-2 rounded-md bg-transparent border-none shadow-none hover:bg-muted/60 cursor-pointer transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Header } from "./components/Header";
 import { Overview } from "./components/Overview";
 import { ActionBar } from "./components/ActionBar";
-import { AgentTabs } from "./components/AgentTabs";
+import { AgentList } from "./components/AgentList";
 import { Footer } from "./components/Footer";
 import { EditSection, SKILL_POOL } from "./components/EditSection";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
@@ -13,7 +13,6 @@ export type Agent = SimulationAgent;
 
 interface TechInspectorProps {
   selectedNode: CustomNode;
-
 }
 
 const BULK_DEFAULT_CAPACITY = 2;
@@ -33,7 +32,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     replaceAgentPool,
     isSimulating,
   } = useWorkflowStore();
-  const [activeTab, setActiveTab] = useState<string>("custom-agents");
+  // const [activeTab, setActiveTab] = useState<string>("custom-agents");
   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
@@ -48,24 +47,28 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   const liveAgents = engineState?.agents ?? [];
   const allAgents = isSimulating
     ? simulationConfig.agentPool.map((agent) => {
-      const live = liveAgents.find((a) => a.id === agent.id);
-      return live ? { ...agent, status: live.status, currentTicketId: live.currentTicketId } : agent;
-    })
+        const live = liveAgents.find((a) => a.id === agent.id);
+        return live
+          ? {
+              ...agent,
+              status: live.status,
+              currentTicketId: live.currentTicketId,
+            }
+          : agent;
+      })
     : simulationConfig.agentPool;
-  const customAgents = allAgents.filter((agent) => agent.type === "custom");
-  const defaultAgents = allAgents.filter((agent) => agent.type === "default");
+  // const customAgents = allAgents.filter((agent) => agent.type === "custom");
+  // const defaultAgents = allAgents.filter((agent) => agent.type === "default");
 
-  const getNextDefaultAgentId = () => {
-    const used = new Set(
-      allAgents.map((agent) => agent.id),
-    );
+  const getNextAgentId = () => {
+    // const used = new Set(allAgents.map((agent) => agent.id));  
+    const date = Date.now();
+    // let index = 0;
+    // while (used.has(`${date}-${index}`)) {
+    //   index += 1;
+    // }
 
-    let index = 0;
-    while (used.has(`d-${index}`)) {
-      index += 1;
-    }
-
-    return `d-${index}`;
+    return `${date}`;
   };
 
   useEffect(() => {
@@ -73,7 +76,10 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedAgents((prev) => {
       const next = prev.filter((id) => validIds.has(id));
-      if (next.length === prev.length && next.every((id, index) => id === prev[index])) {
+      if (
+        next.length === prev.length &&
+        next.every((id, index) => id === prev[index])
+      ) {
         return prev;
       }
       return next;
@@ -110,11 +116,11 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     selectedAgent === null
       ? null
       : {
-        name: singleDraft?.name ?? selectedAgent.name ?? selectedAgent.id,
-        capacity: singleDraft?.capacity ?? selectedAgent.capacity,
-        efficiency: singleDraft?.efficiency ?? selectedAgent.efficiency,
-        skills: singleDraft?.skills ?? selectedAgent.skills ?? [],
-      };
+          name: singleDraft?.name ?? selectedAgent.name ?? selectedAgent.id,
+          capacity: singleDraft?.capacity ?? selectedAgent.capacity,
+          efficiency: singleDraft?.efficiency ?? selectedAgent.efficiency,
+          skills: singleDraft?.skills ?? selectedAgent.skills ?? [],
+        };
 
   const isBulkMode = selectedAgents.length > 1;
 
@@ -128,16 +134,16 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
       singleDraft.capacity !== selectedAgent.capacity ||
       singleDraft.efficiency !== selectedAgent.efficiency ||
       JSON.stringify(singleDraft.skills) !==
-      JSON.stringify(selectedAgent.skills ?? []));
+        JSON.stringify(selectedAgent.skills ?? []));
 
-  const addDefaultAgent = () => {
+  const addAgent = () => {
     if (isSimulating) return;
-    const nextId = getNextDefaultAgentId();
+    const nextId = getNextAgentId();
     addAgentProfile({
       id: nextId,
-      name: `L1-${defaultAgents.length + 1}`,
+      name: `L1-${allAgents.length + 1}`,
       status: "available",
-      type: "default",
+      // type: "default",
       efficiency: 1,
       capacity: 1,
       skills: [],
@@ -147,16 +153,12 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
 
   const normalizeAgents = () => {
     if (isSimulating) return;
-    const normalized = allAgents.map((agent) =>
-      agent.type === "custom"
-        ? {
-        ...agent,
-        skills: ["network", "hardware"],
-        efficiency: 0.8,
-        capacity: 2,
-          }
-        : agent,
-    );
+    const normalized = allAgents.map((agent) => ({
+      ...agent,
+      skills: ["network", "hardware"],
+      efficiency: 0.8,
+      capacity: 2,
+    }));
     replaceAgentPool(normalized);
   };
 
@@ -169,11 +171,11 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     setBulkSkillsDraft(null);
   };
 
-  const resetCustomAgents = () => {
-    if (isSimulating) return;
-    removeAgentProfiles(customAgents.map((agent) => agent.id));
-    clearSelection();
-  };
+  // const resetCustomAgents = () => {
+  //   if (isSimulating) return;
+  //   removeAgentProfiles(allAgents.map((agent) => agent.id));
+  //   clearSelection();
+  // };
 
   const totalAgents = allAgents.length;
 
@@ -211,7 +213,8 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
   };
 
   const removeSelectedAgents = () => removeAgents(selectedAgents);
-  const removeSingleAgent = () => selectedAgent && removeAgents([selectedAgent.id]);
+  const removeSingleAgent = () =>
+    selectedAgent && removeAgents([selectedAgent.id]);
 
   const getCurrentCapacity = () => {
     if (isSingleEditMode && selectedAgent) {
@@ -263,9 +266,7 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     if (ids.length === 0) return;
 
     const next = allAgents.map((agent) =>
-      ids.includes(agent.id)
-        ? { ...agent, ...patch, type: "custom" as const }
-        : agent,
+      ids.includes(agent.id) ? { ...agent, ...patch } : agent,
     );
     replaceAgentPool(next);
   };
@@ -279,9 +280,12 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     if (!hasCapacityDraft && !hasEfficiencyDraft && !hasSkillsDraft) return;
 
     const patch: Partial<Agent> = {};
-    if (hasCapacityDraft && capacityDraft !== null) patch.capacity = capacityDraft;
-    if (hasEfficiencyDraft && efficiencyDraft !== null) patch.efficiency = efficiencyDraft;
-    if (hasSkillsDraft && bulkSkillsDraft !== null) patch.skills = bulkSkillsDraft;
+    if (hasCapacityDraft && capacityDraft !== null)
+      patch.capacity = capacityDraft;
+    if (hasEfficiencyDraft && efficiencyDraft !== null)
+      patch.efficiency = efficiencyDraft;
+    if (hasSkillsDraft && bulkSkillsDraft !== null)
+      patch.skills = bulkSkillsDraft;
 
     updateAgents(selectedAgents, patch);
     setCapacityDraft(null);
@@ -294,7 +298,6 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     if (!singleView) return;
     setSingleDraft({ ...singleView, name });
   };
-
 
   const toggleSkill = (skill: string) => {
     if (isSimulating) return;
@@ -341,15 +344,15 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     clearSelection();
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    clearSelection();
-  };
+  // const handleTabChange = (tab: string) => {
+  //   setActiveTab(tab);
+  //   clearSelection();
+  // };
 
   const handleAgentSelection = (agent: Agent) => {
     if (isSimulating) return;
-    const expectedType = activeTab === "custom-agents" ? "custom" : "default";
-    if (agent.type !== expectedType) return;
+    // const expectedType = activeTab === "custom-agents" ? "custom" : "default";
+    // if (agent.type !== expectedType) return;
 
     if (!isSelectionMode) {
       setActiveAgentId(agent.id);
@@ -398,7 +401,11 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     <div className="flex h-full w-80 flex-col overflow-hidden bg-transparent">
       <div className="flex flex-1 min-h-0 flex-col">
         {/* HEADER */}
-        <Header selectedNode={selectedNode} loadPercentage={loadPercentage} loadColor={loadColor} />
+        <Header
+          selectedNode={selectedNode}
+          loadPercentage={loadPercentage}
+          loadColor={loadColor}
+        />
 
         {/* OVERVIEW */}
         <Overview
@@ -410,23 +417,24 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
 
         {/* ACTION BAR */}
         <ActionBar
-          addDefaultAgent={addDefaultAgent}
+          addAgent={addAgent}
           isSelectionMode={isSelectionMode}
           normalizeAgents={normalizeAgents}
-          resetCustomAgents={resetCustomAgents}
+          // resetCustomAgents={resetCustomAgents}
           activeSelectionMode={activeSelectionMode}
           disabled={isSimulating}
         />
 
         {/* LIST */}
-        <AgentTabs
-          customAgents={customAgents}
-          defaultAgents={defaultAgents}
+        <AgentList
+          // customAgents={customAgents}
+          // defaultAgents={defaultAgents}
+          agents={allAgents}
           selectedAgents={selectedAgents}
           activeAgentId={activeAgentId}
           isSelectionMode={isSelectionMode}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
+          // activeTab={activeTab}
+          // onTabChange={handleTabChange}
           handleAgentSelection={handleAgentSelection}
         />
       </div>
@@ -457,7 +465,6 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
         isSingleEditMode={isSingleEditMode}
         disabled={isSimulating}
       />
-
 
       {/* FOOTER STATUS */}
       <Footer

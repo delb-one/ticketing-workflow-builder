@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Settings2, Users, X } from "lucide-react";
+import { Briefcase, Scroll, Settings2, Users, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +17,6 @@ import { useAgent } from "@/features/panels/hooks/useAgent";
 import { Input } from "@/components/ui/input";
 
 export function AgentPanel() {
-  
-
   const {
     isSimulating,
     agents,
@@ -161,31 +159,35 @@ export function AgentPanel() {
                 No agents configured. Add at least one Agent to start.
               </div>
             ) : (
-              agentPool.map((agent) => (
-                <div
-                  key={agent.id}
-                  className="rounded-md border bg-background/40 p-2 text-xs"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-semibold truncate">
-                      {agent.name ?? agent.id}
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 px-2 text-[11px] "
-                      disabled={isSimulating}
-                      onClick={() => removeAgent(agent.id)}
+              <ScrollArea className="w-full pr-2">
+                <div className="max-h-80 space-y-2">
+                  {agentPool.map((agent) => (
+                    <div
+                      key={agent.id}
+                      className="rounded-md border bg-background/40 p-2 text-xs"
                     >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground uppercase">
-                    {agent.level} | eff {agent.efficiency} | cap{" "}
-                    {agent.capacity}
-                  </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-semibold truncate">
+                          {agent.name ?? agent.id}
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 px-2 text-[11px] "
+                          disabled={isSimulating}
+                          onClick={() => removeAgent(agent.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground uppercase">
+                        {agent.level} | eff {agent.efficiency} | cap{" "}
+                        {agent.capacity}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+              </ScrollArea>
             )}
           </div>
         </div>
