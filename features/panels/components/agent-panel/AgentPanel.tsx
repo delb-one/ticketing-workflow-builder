@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Scroll, Settings2, Users, X } from "lucide-react";
+import { Briefcase, Settings2, Users, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +160,7 @@ export function AgentPanel() {
               </div>
             ) : (
               <ScrollArea className="w-full pr-2">
-                <div className="max-h-80 space-y-2">
+                <div className="max-h-60 grid grid-cols-2 gap-2">
                   {agentPool.map((agent) => (
                     <div
                       key={agent.id}

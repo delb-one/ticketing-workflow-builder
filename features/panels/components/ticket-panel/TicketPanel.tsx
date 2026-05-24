@@ -178,7 +178,7 @@ export function TicketPanel() {
             </div>
           ) : (
             <ScrollArea className="w-full pr-2">
-              <div className="max-h-80 space-y-2">
+              <div className="max-h-60 grid grid-cols-2 gap-2">
                 {ticketTemplates.map((template) => (
                   <div
                     key={template.id}
