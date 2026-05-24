@@ -10,7 +10,7 @@ export const createInitialAgentForm = (): AgentFormState => ({
   level: "l1",
   efficiency: 1,
   capacity: 1,
-  skills: "",
+  skills: [],
 });
 
 export const selectEngineAgents = (state: WorkflowStore): Agent[] =>
@@ -34,11 +34,14 @@ export const selectHasDuplicateAgentId = (
   );
 };
 
-export const parseAgentSkills = (skills: string): string[] =>
-  skills
-    .split(",")
-    .map((skill) => skill.trim())
-    .filter(Boolean);
+export const parseAgentSkills = (skills: string[]): string[] =>
+  Array.from(
+    new Set(
+      skills
+        .map((skill) => skill.trim())
+        .filter(Boolean),
+    ),
+  );
 
 export const buildAgentFromForm = (form: AgentFormState): Agent => {
   const parsedSkills = parseAgentSkills(form.skills);
@@ -51,7 +54,6 @@ export const buildAgentFromForm = (form: AgentFormState): Agent => {
     capacity: form.capacity,
     skills: parsedSkills.length > 0 ? parsedSkills : undefined,
     status: "available",
-    type: "custom",
   };
 };
 

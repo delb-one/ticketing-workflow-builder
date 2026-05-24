@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useAgent } from "@/features/panels/hooks/useAgent";
 import { Input } from "@/components/ui/input";
+import { SKILL_POOL } from "@/features/workflow-editor/components/tech-inspector/components/EditSection";
 
 export function AgentPanel() {
   const {
@@ -28,6 +29,7 @@ export function AgentPanel() {
     canAdd,
     addAgent,
     removeAgent,
+    toggleSkill,
   } = useAgent();
 
   return (
@@ -64,6 +66,7 @@ export function AgentPanel() {
                 setForm((prev) => ({ ...prev, id: e.target.value }))
               }
             />
+
             <Input
               className="h-8 text-xs"
               placeholder="Name (optional)"
@@ -97,52 +100,65 @@ export function AgentPanel() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-2">
-              <div className="text-[11px] text-muted-foreground">
-                Efficiency: {form.efficiency.toFixed(1)}
-              </div>
-              <Slider
-                value={[form.efficiency]}
-                min={0.1}
-                max={2}
-                step={0.1}
-                disabled={isSimulating}
-                onValueChange={(value) =>
-                  setForm((prev) => ({ ...prev, efficiency: value[0] ?? 1 }))
-                }
-              />
+          <div className="space-y-2">
+            <div className="text-[11px] text-muted-foreground">
+              Capacity: {form.capacity}
             </div>
-
-            <div className="space-y-2">
-              <div className="text-[11px] text-muted-foreground">
-                Capacity: {form.capacity}
-              </div>
-              <Slider
-                value={[form.capacity]}
-                min={1}
-                max={5}
-                step={1}
-                disabled={isSimulating}
-                onValueChange={(value) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    capacity: Math.max(1, Math.round(value[0] ?? 1)),
-                  }))
-                }
-              />
+            <Slider
+              value={[form.capacity]}
+              min={1}
+              max={5}
+              step={1}
+              disabled={isSimulating}
+              onValueChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  capacity: Math.max(1, Math.round(value[0] ?? 1)),
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="text-[11px] text-muted-foreground">
+              Efficiency: {form.efficiency.toFixed(1)}
             </div>
+            <Slider
+              value={[form.efficiency]}
+              min={0.1}
+              max={2}
+              step={0.1}
+              disabled={isSimulating}
+              onValueChange={(value) =>
+                setForm((prev) => ({ ...prev, efficiency: value[0] ?? 1 }))
+              }
+            />
           </div>
 
-          <Input
-            className="h-8 text-xs"
-            placeholder="Skills (comma separated)"
-            value={form.skills}
-            disabled={isSimulating}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, skills: e.target.value }))
-            }
-          />
+          <div className="space-y-2">
+            <p className="text-[11px] text-muted-foreground">Skills</p>
+
+            <div className="flex gap-1 flex-wrap">
+              {SKILL_POOL.map((skill) => {
+                const isActive = form.skills.includes(skill);
+
+                return (
+                  <button
+                    key={skill}
+                    onClick={() => toggleSkill(skill)}
+                    disabled={isSimulating}
+                    className={`text-[10px] px-2 py-1 rounded border transition-colors ${
+                      isActive
+                        ? "bg-primary text-secondary border-primary"
+                        : "bg-muted hover:bg-muted/80 border-transparent"
+                    }`}
+                  >
+                    {skill}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+         
 
           {hasDuplicateId && (
             <div className="text-[11px] text-red-400">
@@ -183,6 +199,11 @@ export function AgentPanel() {
                       <div className="mt-1 text-[11px] text-muted-foreground uppercase">
                         {agent.level} | eff {agent.efficiency} | cap{" "}
                         {agent.capacity}
+                        {agent.skills && agent.skills.length > 0 && (
+                          <div className="mt-1">
+                            Skills: {agent.skills.join(", ")}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

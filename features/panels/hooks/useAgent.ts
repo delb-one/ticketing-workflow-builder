@@ -38,6 +38,8 @@ export function useAgent() {
   );
 
   const addAgent = () => {
+    if (!selectCanAddAgent(agentPool, isSimulating, form)) return;
+
     updateSimulationConfig({
       agentPool: buildAgentPoolWithNewAgent(agentPool, form),
     });
@@ -47,6 +49,16 @@ export function useAgent() {
   const removeAgent = (agentId: string) => {
     updateSimulationConfig({
       agentPool: buildAgentPoolWithoutAgent(agentPool, agentId),
+    });
+  };
+
+  const toggleSkill = (skill: string) => {
+    setForm((prev) => {
+      const skills = prev.skills.includes(skill)
+        ? prev.skills.filter((currentSkill) => currentSkill !== skill)
+        : [...prev.skills, skill];
+
+      return { ...prev, skills };
     });
   };
 
@@ -61,5 +73,6 @@ export function useAgent() {
     canAdd,
     addAgent,
     removeAgent,
+    toggleSkill,
   };
 }

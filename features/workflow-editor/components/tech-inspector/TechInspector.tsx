@@ -155,9 +155,9 @@ export function TechInspector({ selectedNode }: TechInspectorProps) {
     if (isSimulating) return;
     const normalized = allAgents.map((agent) => ({
       ...agent,
-      skills: ["network", "hardware"],
-      efficiency: 0.8,
-      capacity: 2,
+      skills: [],
+      efficiency: 1,
+      capacity: 1,
     }));
     replaceAgentPool(normalized);
   };
