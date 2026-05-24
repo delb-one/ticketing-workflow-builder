@@ -16,7 +16,6 @@ import { useValidation } from "@/features/panels/hooks/useValidation";
 import { useWorkflowStore } from "@/lib/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { statusConfig } from "./data";
-import { tools } from "../tools-container-panel/data";
 
 export function ValidationPanel() {
   const { errors, warnings, info, all, isValid, hasErrors, hasWarnings } =
@@ -24,10 +23,6 @@ export function ValidationPanel() {
   const nodesCount = useWorkflowStore((state) => state.nodes.length);
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const { fitView } = useReactFlow();
-
-  const shortcut = tools.find(
-    (tool) => tool.id === "validation-panel",
-  )?.shortcut;
 
   const getStatusIcon = () => {
     if (hasErrors) return AlertCircle;
@@ -52,24 +47,23 @@ export function ValidationPanel() {
       title="Flow validation"
       icon={getStatusIcon()}
       defaultExpanded
-      badge={
-        <div className="flex items-center gap-1.5">
-          {errors.length > 0 && (
-            <Badge
-              variant="destructive"
-              className="h-5 px-1.5  font-bold min-w-5"
-            >
-              {errors.length}
-            </Badge>
-          )}
-          {warnings.length > 0 && (
-            <Badge className="h-5 px-1.5  font-bold min-w-5 bg-amber-500/20 text-amber-600">
-              {warnings.length}
-            </Badge>
-          )}
-        </div>
-      }
-      shortcut={shortcut}
+      // badge={
+      //   <div className="flex items-center gap-1.5">
+      //     {errors.length > 0 && (
+      //       <Badge
+      //         variant="destructive"
+      //         className="h-5 px-1.5  font-bold min-w-5"
+      //       >
+      //         {errors.length}
+      //       </Badge>
+      //     )}
+      //     {warnings.length > 0 && (
+      //       <Badge className="h-5 px-1.5  font-bold min-w-5 bg-amber-500/20 text-amber-200">
+      //         {warnings.length}
+      //       </Badge>
+      //     )}
+      //   </div>
+      // }
     >
       <div className="space-y-2 pt-1 w-90">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-1.5">
@@ -117,19 +111,38 @@ export function ValidationPanel() {
               value="errors"
               className="bg-card-200/40 hover:bg-card-200/30"
             >
-              Errors {errors.length > 0 && `(${errors.length})`}
+              Errors{" "}
+              {errors.length > 0 && (
+                <Badge
+                  className="h-5 px-1.5 font-bold min-w-5 bg-red-500/20 text-red-200"
+                >
+                  {errors.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger
               value="warnings"
               className="bg-card-200/40 hover:bg-card-200/30"
             >
-              Warnings {warnings.length > 0 && `(${warnings.length})`}
+              Warnings {warnings.length > 0 && (
+                <Badge
+                  className="h-5 px-1.5  font-bold min-w-5 bg-amber-500/20  text-amber-200"
+                >
+                  {warnings.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger
               value="info"
               className="bg-card-200/40 hover:bg-card-200/30"
             >
-              Suggestions {info.length > 0 && `(${info.length})`}
+              Suggestions {info.length > 0 && (
+                <Badge
+                  className="h-5 px-1.5  font-bold min-w-5 bg-blue-500/20 text-blue-200"
+                >
+                  {info.length}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="errors">
