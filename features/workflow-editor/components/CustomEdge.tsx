@@ -32,6 +32,8 @@ export function CustomEdge({
   });
 
   const color = (data?.color as string) ?? "var(--primary)";
+  const isHighlighted = Boolean(data?.isHighlighted);
+  const isActive = selected || isHighlighted;
   const gradientId = `edge-gradient-${id}`;
   return (
     <>
@@ -55,8 +57,8 @@ export function CustomEdge({
         className={cn("edge")}
         style={{
           stroke: color,
-          strokeWidth: selected ? 2.5 : 1,
-          filter: selected
+          strokeWidth: isActive ? 2.5 : 1,
+          filter: isActive
             ? `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 20px ${color}) drop-shadow(0 0 32px ${color})`
             : `drop-shadow(0 0 2px ${color})`,
         }}
@@ -64,20 +66,20 @@ export function CustomEdge({
 
       {/* PARTICLES (flow) */}
       {Array.from(
-        selected
+        isActive
           ? { length: PARTICLE_COUNT * 1.5 }
           : { length: PARTICLE_COUNT },
       ).map((_, i) => (
         <ellipse
           key={`${id}-particle-${i}`}
-          rx={selected ? "6.4" : "4.6"}
-          ry={selected ? "2.4" : "1.6"}
+          rx={isActive ? "6.4" : "4.6"}
+          ry={isActive ? "2.4" : "1.6"}
           fill={`url(#${gradientId})`}
-          opacity={selected ? 1 : 0.7}
+          opacity={isActive ? 1 : 0.7}
         >
           <animateMotion
             path={edgePath}
-            dur={selected ? `${ANIMATE_DURATION * 0.3}` : `${ANIMATE_DURATION}`}
+            dur={isActive ? `${ANIMATE_DURATION * 0.3}` : `${ANIMATE_DURATION}`}
             repeatCount="indefinite"
             begin={`${-i * (ANIMATE_DURATION / PARTICLE_COUNT)}s`}
             rotate="auto"
@@ -100,13 +102,13 @@ export function CustomEdge({
             <div
               className={cn(
                 "group flex items-center gap-1.5 rounded-full border bg-card/90 px-2.5 py-1 text-[10px] font-bold tracking-tight text-foreground shadow-[0_2px_10px_-3px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all hover:scale-105 hover:shadow-md",
-                selected
+                isActive
                   ? "border-primary ring-1 ring-primary/20"
                   : "border-border/50",
               )}
               style={{
-                borderLeftColor: selected ? undefined : color,
-                borderLeftWidth: selected ? undefined : "3px",
+                borderLeftColor: isActive ? undefined : color,
+                borderLeftWidth: isActive ? undefined : "3px",
               }}
             >
               <div

@@ -169,6 +169,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   );
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [showMinimap, setShowMinimap] = useState<boolean>(false);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   const handleShowMinimap = () => {
     setShowMinimap(!showMinimap);
@@ -379,6 +380,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         edges={edges.map((edge) => {
           const sourceNode = nodes.find((n) => n.id === edge.source);
           const isSelected = edge.selected;
+          const isConnectedToHoveredNode =
+            hoveredNodeId !== null &&
+            (edge.source === hoveredNodeId || edge.target === hoveredNodeId);
           return {
             ...edge,
             type: edge.type ?? "glow",
@@ -386,6 +390,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
               color: sourceNode
                 ? getNodeTypeColorVar(sourceNode.data.type)
                 : "var(--primary)",
+              isHighlighted: isConnectedToHoveredNode,
             },
             selected: isSelected,
           };
@@ -393,6 +398,8 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
+        onNodeMouseEnter={(_event, node) => setHoveredNodeId(node.id)}
+        onNodeMouseLeave={() => setHoveredNodeId(null)}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
