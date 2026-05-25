@@ -8,6 +8,7 @@ import type {
   WorkflowEdge,
   WorkflowNode,
 } from './types';
+import { selectOutcomeByConditions } from './condition-evaluator';
 
 const DEFAULT_PRIORITY_MULTIPLIERS: Record<Ticket["priority"], number> = {
   critical: 0.5,
@@ -21,6 +22,7 @@ export interface HandlerResult {
   events?: SimulationEvent[];
   pause?: boolean;
   inputOptions?: DecisionOutcome[];
+  nextNodeId?: string;
   logMessage?: string;
   releaseAgent?: boolean;
   enqueueTo?: "l1" | "l2" | "l3";
@@ -257,13 +259,64 @@ class AutomationNodeHandler implements NodeHandler {
 }
 
 class DecisionNodeHandler implements NodeHandler {
-  execute(node: WorkflowNode, edges: WorkflowEdge[], ticket: Ticket): HandlerResult {
+  execute(
+    node: WorkflowNode,
+    edges: WorkflowEdge[],
+    ticket: Ticket,
+    context: SimulationContext,
+  ): HandlerResult {
     const config = node.data.config;
     const configuredOutcomes =
       config.nodeType === 'decision' ? config.outcomes : undefined;
     const outcomes = configuredOutcomes && configuredOutcomes.length > 0
       ? configuredOutcomes
       : getDefaultDecisionOutcomes(node, edges);
+    const isRuleBasedDecision =
+      config.nodeType === "decision" && config.decisionType === "rule-based";
+    const isConditionNode = node.data.type === "condition";
+
+    if (isRuleBasedDecision || isConditionNode) {
+      const selectedOutcome = selectOutcomeByConditions(
+        outcomes,
+        context.variables,
+      );
+
+      if (!selectedOutcome) {
+        return {
+          events: [
+            buildEvent("workflow.error", ticket.id, node, {
+              reason: "No matching outcome for rule-based decision/condition",
+            }),
+          ],
+        };
+      }
+
+      if (!selectedOutcome.targetNodeId?.trim()) {
+        return {
+          events: [
+            buildEvent("workflow.error", ticket.id, node, {
+              reason: `Selected outcome "${selectedOutcome.label}" has no target node`,
+            }),
+          ],
+        };
+      }
+
+      return {
+        nextNodeId: selectedOutcome.targetNodeId,
+        events: [
+          buildEvent("decision.made", ticket.id, node, {
+            newState: selectedOutcome.label,
+            mode: "rule-based",
+          }),
+        ],
+        ticketUpdates: {
+          context: {
+            ...ticket.context,
+            lastDecisionOutcome: selectedOutcome.label,
+          },
+        },
+      };
+    }
 
     return {
       pause: true,

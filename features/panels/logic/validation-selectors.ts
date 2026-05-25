@@ -1,5 +1,5 @@
 import type { CustomNode } from "@/lib/store";
-import type { NodeType } from "@/lib/simulation/types";
+import type { DecisionOutcome, NodeType, NodeConfig } from "@/lib/simulation/types";
 
 export type ValidationSeverity = "error" | "warning" | "info";
 
@@ -180,7 +180,7 @@ export const selectInvalidEdgeReferences = (
 
 export const selectAllIssues = (state: {
   nodes: CustomNode[];
-  edges: { source: string; target: string; id: string }[];
+  edges: { source: string; target: string; id: string; label?: string; condition?: DecisionOutcome["condition"] }[];
 }): ValidationIssue[] => [
   ...selectStartNodeIssues(state),
   ...selectEndNodeIssues(state),
@@ -189,6 +189,7 @@ export const selectAllIssues = (state: {
   ...selectDisconnectedNodes(state),
   ...selectDeadEndNodes(state),
   ...selectInvalidDecisionNodes(state),
+  ...selectRuleConditionIssues(state),
   ...selectActorIssues(state),
   ...selectAutomationIssues(state),
   ...selectInvalidStatusTransitions(state),
@@ -324,6 +325,136 @@ export const selectInvalidDecisionNodes = (state: {
         description: `"${node.data.label}" contains duplicated outcome labels.`,
       });
     }
+  }
+
+  return issues;
+};
+
+const isRuleBasedDecisionNode = (node: CustomNode): boolean => {
+  if (node.data.type !== "decision") return false;
+  const config = node.data.config as NodeConfig | undefined;
+  return config?.nodeType === "decision" && config.decisionType === "rule-based";
+};
+
+const isConditionNode = (node: CustomNode): boolean => node.data.type === "condition";
+
+type DecisionCondition = NonNullable<DecisionOutcome["condition"]>;
+
+const isOperatorCompatible = (
+  operator: DecisionCondition["operator"],
+  value: DecisionCondition["value"],
+): boolean => {
+  if (operator === "gt" || operator === "lt") {
+    return typeof value === "number";
+  }
+  return true;
+};
+
+export const selectRuleConditionIssues = (state: {
+  nodes: CustomNode[];
+  edges: { source: string; target: string; id: string; label?: string; condition?: DecisionOutcome["condition"] }[];
+}): ValidationIssue[] => {
+  const issues: ValidationIssue[] = [];
+
+  for (const node of state.nodes) {
+    const shouldValidate = isConditionNode(node) || isRuleBasedDecisionNode(node);
+    if (!shouldValidate) continue;
+
+    const config = node.data.config as NodeConfig | undefined;
+    const configOutcomes =
+      config?.nodeType === "decision" && Array.isArray(config.outcomes)
+        ? config.outcomes
+        : [];
+    const edgeOutcomes: DecisionOutcome[] = state.edges
+      .filter((edge) => edge.source === node.id)
+      .map((edge, index) => ({
+        label: (edge.label ?? "").trim() || `Option ${index + 1}`,
+        targetNodeId: edge.target,
+        condition: edge.condition,
+      }));
+    const outcomes = configOutcomes.length > 0 ? configOutcomes : edgeOutcomes;
+
+    if (outcomes.length === 0) continue;
+
+    const fallbackCount = outcomes.filter((outcome) => !outcome.condition).length;
+    if (fallbackCount === 0) {
+      issues.push({
+        id: `condition-no-default-branch-${node.id}`,
+        severity: "warning",
+        category: "logic",
+        nodeId: node.id,
+        title: "No Default Branch",
+        description: `"${node.data.label}" has no fallback outcome without condition.`,
+      });
+    }
+
+    const priorities = outcomes
+      .map((outcome) => outcome.priority)
+      .filter((priority): priority is number => typeof priority === "number");
+    const uniquePriorities = new Set(priorities);
+    if (uniquePriorities.size !== priorities.length) {
+      issues.push({
+        id: `condition-duplicate-priority-${node.id}`,
+        severity: "warning",
+        category: "logic",
+        nodeId: node.id,
+        title: "Duplicate Priorities",
+        description: `"${node.data.label}" contains duplicated outcome priorities.`,
+      });
+    }
+
+    outcomes.forEach((outcome, index) => {
+      if (!outcome.condition) return;
+
+      const condition = outcome.condition;
+      if (!condition.field?.trim()) {
+        issues.push({
+          id: `condition-missing-field-${node.id}-${index}`,
+          severity: "error",
+          category: "logic",
+          nodeId: node.id,
+          title: "Condition Missing Field",
+          description: `Outcome "${outcome.label}" has an empty condition field.`,
+        });
+      }
+
+      if (!condition.operator) {
+        issues.push({
+          id: `condition-missing-operator-${node.id}-${index}`,
+          severity: "error",
+          category: "logic",
+          nodeId: node.id,
+          title: "Condition Missing Operator",
+          description: `Outcome "${outcome.label}" is missing an operator.`,
+        });
+      }
+
+      const valueMissing =
+        condition.value === undefined ||
+        condition.value === null ||
+        (typeof condition.value === "string" && condition.value.trim().length === 0);
+      if (valueMissing) {
+        issues.push({
+          id: `condition-missing-value-${node.id}-${index}`,
+          severity: "error",
+          category: "logic",
+          nodeId: node.id,
+          title: "Condition Missing Value",
+          description: `Outcome "${outcome.label}" has no condition value.`,
+        });
+      }
+
+      if (!valueMissing && !isOperatorCompatible(condition.operator, condition.value)) {
+        issues.push({
+          id: `condition-invalid-operator-type-${node.id}-${index}`,
+          severity: "error",
+          category: "logic",
+          nodeId: node.id,
+          title: "Invalid Operator for Value Type",
+          description: `Outcome "${outcome.label}" uses "${condition.operator}" with a non-numeric value.`,
+        });
+      }
+    });
   }
 
   return issues;

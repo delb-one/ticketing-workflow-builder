@@ -1875,6 +1875,280 @@ export const WORKFLOW_TEMPLATES = [
       },
     ],
   },
+  {
+    id: "decision-condition-testing",
+    name: "Decision & Condition Testing",
+    description:
+      "Template to test manual decisions, rule-based decisions, and condition-node operator routing.",
+    nodes: [
+      {
+        id: "test-start",
+        data: {
+          label: "Start",
+          type: "start",
+          blockId: "start",
+          description: "Entry point",
+          config: {
+            nodeType: "start",
+          },
+        },
+        position: { x: 120, y: 60 },
+        type: "canvas",
+      },
+      {
+        id: "test-decision-rule",
+        data: {
+          label: "Rule-Based Routing",
+          type: "decision",
+          blockId: "decision-rule",
+          description: "Auto-route by ticket context variables",
+          config: {
+            nodeType: "decision",
+            decisionType: "rule-based",
+            outcomes: [
+              {
+                label: "critical-path",
+                targetNodeId: "test-decision-manual",
+                priority: 1,
+                condition: {
+                  field: "priority",
+                  operator: "equals",
+                  value: "critical",
+                },
+              },
+              {
+                label: "billing-path",
+                targetNodeId: "test-condition-node",
+                priority: 2,
+                condition: {
+                  field: "category",
+                  operator: "includes",
+                  value: "billing",
+                },
+              },
+              {
+                label: "default-path",
+                targetNodeId: "test-action-resolve",
+                priority: 99,
+              },
+            ],
+          },
+        },
+        position: { x: 120, y: 220 },
+        type: "canvas",
+      },
+      {
+        id: "test-decision-manual",
+        data: {
+          label: "Manual Decision",
+          type: "decision",
+          blockId: "decision-manual",
+          description: "Must keep pause + manual outcome selection",
+          config: {
+            nodeType: "decision",
+            decisionType: "manual",
+            outcomes: [],
+          },
+        },
+        position: { x: -120, y: 420 },
+        type: "canvas",
+      },
+      {
+        id: "test-condition-node",
+        data: {
+          label: "Condition Node",
+          type: "condition",
+          blockId: "condition-impact",
+          description: "Auto-route from edge conditions",
+          config: {
+            nodeType: "condition",
+          },
+        },
+        position: { x: 380, y: 420 },
+        type: "canvas",
+      },
+      {
+        id: "test-action-resolve",
+        data: {
+          label: "Resolve Ticket",
+          type: "action",
+          blockId: "resolve",
+          description: "Resolve flow branch",
+          config: {
+            nodeType: "action",
+            ticketAction: "resolve",
+          },
+        },
+        position: { x: 120, y: 620 },
+        type: "canvas",
+      },
+      {
+        id: "test-action-validate",
+        data: {
+          label: "Validate Ticket",
+          type: "action",
+          blockId: "validate",
+          description: "Validation step",
+          config: {
+            nodeType: "action",
+            ticketAction: "validate",
+          },
+        },
+        position: { x: -120, y: 620 },
+        type: "canvas",
+      },
+      {
+        id: "test-automation-reopen",
+        data: {
+          label: "Reopen Ticket",
+          type: "automation",
+          blockId: "reopen",
+          description: "Reopen if manual decision says no",
+          config: {
+            nodeType: "automation",
+            automationType: "reopen",
+          },
+        },
+        position: { x: -360, y: 620 },
+        type: "canvas",
+      },
+      {
+        id: "test-automation-notify",
+        data: {
+          label: "Notification",
+          type: "automation",
+          blockId: "notify",
+          description: "Notify branch from condition node",
+          config: {
+            nodeType: "automation",
+            automationType: "notify",
+            channel: "email",
+          },
+        },
+        position: { x: 380, y: 620 },
+        type: "canvas",
+      },
+      {
+        id: "test-action-close",
+        data: {
+          label: "Close Ticket",
+          type: "action",
+          blockId: "close",
+          description: "Close branch",
+          config: {
+            nodeType: "action",
+            ticketAction: "close",
+          },
+        },
+        position: { x: 120, y: 800 },
+        type: "canvas",
+      },
+      {
+        id: "test-end",
+        data: {
+          label: "End",
+          type: "end",
+          blockId: "end",
+          description: "End point",
+          config: {
+            nodeType: "end",
+          },
+        },
+        position: { x: 120, y: 960 },
+        type: "canvas",
+      },
+    ],
+    edges: [
+      {
+        id: "test-e-start-rule",
+        source: "test-start",
+        target: "test-decision-rule",
+      },
+      {
+        id: "test-e-rule-manual",
+        source: "test-decision-rule",
+        target: "test-decision-manual",
+        label: "critical-path",
+      },
+      {
+        id: "test-e-rule-condition",
+        source: "test-decision-rule",
+        target: "test-condition-node",
+        label: "billing-path",
+      },
+      {
+        id: "test-e-rule-resolve",
+        source: "test-decision-rule",
+        target: "test-action-resolve",
+        label: "default-path",
+      },
+      {
+        id: "test-e-manual-yes",
+        source: "test-decision-manual",
+        target: "test-action-validate",
+        label: "yes",
+      },
+      {
+        id: "test-e-manual-no",
+        source: "test-decision-manual",
+        target: "test-automation-reopen",
+        label: "no",
+      },
+      {
+        id: "test-e-reopen-back",
+        source: "test-automation-reopen",
+        target: "test-decision-rule",
+      },
+      {
+        id: "test-e-condition-notify",
+        source: "test-condition-node",
+        target: "test-automation-notify",
+        label: "category-billing",
+        condition: {
+          field: "category",
+          operator: "includes",
+          value: "billing",
+        },
+      },
+      {
+        id: "test-e-condition-validate",
+        source: "test-condition-node",
+        target: "test-action-validate",
+        label: "priority-high",
+        condition: {
+          field: "priority",
+          operator: "equals",
+          value: "high",
+        },
+      },
+      {
+        id: "test-e-condition-default",
+        source: "test-condition-node",
+        target: "test-action-close",
+        label: "default",
+      },
+      {
+        id: "test-e-resolve-close",
+        source: "test-action-resolve",
+        target: "test-action-close",
+      },
+      {
+        id: "test-e-validate-close",
+        source: "test-action-validate",
+        target: "test-action-close",
+      },
+      {
+        id: "test-e-notify-close",
+        source: "test-automation-notify",
+        target: "test-action-close",
+      },
+      {
+        id: "test-e-close-end",
+        source: "test-action-close",
+        target: "test-end",
+      },
+    ],
+  },
   //  {
   //   id: "l1-l2-escalation",
   //   name: "Escalation L1 -> L2",

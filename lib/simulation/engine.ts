@@ -367,7 +367,28 @@ export class SimulationEngine {
       return;
     }
 
-    const nextNode = this.resolveNextNode(currentNode.id);
+    const nextNodeFromResult = result.nextNodeId
+      ? this.workflow.nodes.find((node) => node.id === result.nextNodeId)
+      : undefined;
+
+    if (result.nextNodeId && !nextNodeFromResult) {
+      runtime.completed = true;
+      runtime.currentNodeId = null;
+      runtime.paused = false;
+      runtime.pausedAt = null;
+      runtime.pendingDecisionOutcomes = [];
+      this.emit({
+        type: "workflow.error",
+        ticketId,
+        timestamp: Date.now(),
+        nodeId: currentNode.id,
+        nodeLabel: currentNode.data.label,
+        payload: { reason: `Invalid next node id: ${result.nextNodeId}` },
+      });
+      return;
+    }
+
+    const nextNode = nextNodeFromResult ?? this.resolveNextNode(currentNode.id);
 
     if (!nextNode) {
       runtime.completed = true;

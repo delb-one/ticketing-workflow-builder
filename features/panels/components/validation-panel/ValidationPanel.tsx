@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle2,
-  CircleX,
-  Lightbulb,
-  TriangleAlert,
-} from "lucide-react";
+import { CircleX, Lightbulb, TriangleAlert, Workflow } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
 import { Badge } from "@/components/ui/badge";
 import { CustomPanel } from "@/components/molecules/CustomPanel";
@@ -24,12 +17,6 @@ export function ValidationPanel() {
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const { fitView } = useReactFlow();
 
-  const getStatusIcon = () => {
-    if (hasErrors) return AlertCircle;
-    if (hasWarnings) return AlertTriangle;
-    return CheckCircle2;
-  };
-
   const focusNode = (nodeId?: string) => {
     if (!nodeId) return;
     setSelectedNode(nodeId);
@@ -45,7 +32,7 @@ export function ValidationPanel() {
     <CustomPanel
       value="validation"
       title="Flow validation"
-      icon={getStatusIcon()}
+      icon={Workflow}
       defaultExpanded
       // badge={
       //   <div className="flex items-center gap-1.5">
@@ -113,9 +100,7 @@ export function ValidationPanel() {
             >
               Errors{" "}
               {errors.length > 0 && (
-                <Badge
-                  className="h-5 px-1.5 font-bold min-w-5 bg-red-500/20 text-red-200"
-                >
+                <Badge className="h-5 px-1.5 font-bold min-w-5 bg-red-500/20 text-red-200">
                   {errors.length}
                 </Badge>
               )}
@@ -124,10 +109,9 @@ export function ValidationPanel() {
               value="warnings"
               className="bg-card-200/40 hover:bg-card-200/30"
             >
-              Warnings {warnings.length > 0 && (
-                <Badge
-                  className="h-5 px-1.5  font-bold min-w-5 bg-amber-500/20  text-amber-200"
-                >
+              Warnings{" "}
+              {warnings.length > 0 && (
+                <Badge className="h-5 px-1.5  font-bold min-w-5 bg-amber-500/20  text-amber-200">
                   {warnings.length}
                 </Badge>
               )}
@@ -136,10 +120,9 @@ export function ValidationPanel() {
               value="info"
               className="bg-card-200/40 hover:bg-card-200/30"
             >
-              Suggestions {info.length > 0 && (
-                <Badge
-                  className="h-5 px-1.5  font-bold min-w-5 bg-blue-500/20 text-blue-200"
-                >
+              Suggestions{" "}
+              {info.length > 0 && (
+                <Badge className="h-5 px-1.5  font-bold min-w-5 bg-blue-500/20 text-blue-200">
                   {info.length}
                 </Badge>
               )}
