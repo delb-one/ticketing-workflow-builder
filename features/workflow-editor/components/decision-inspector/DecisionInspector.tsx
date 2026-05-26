@@ -17,6 +17,8 @@ import { PropertyCard } from "@/components/molecules/PropertyCard";
 import { getNodeTypeColorVar } from "@/lib/colors/color-map";
 import { CustomNode, useWorkflowStore } from "@/lib/store";
 import type { DecisionOutcome, NodeConfig } from "@/lib/simulation/types";
+import { useTicket } from "@/features/panels/hooks/useTicket";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface DecisionInspectorProps {
   selectedNode: CustomNode;
@@ -28,11 +30,19 @@ type ConditionValueType = "string" | "number" | "boolean";
 const DEFAULT_OPERATORS: ConditionOperator[] = [
   "equals",
   "includes",
-  "gt",
-  "lt",
+  // "gt",
+  // "lt",
 ];
 
 const BOOLEAN_OPTIONS = ["true", "false"] as const;
+const DEFAULT_TICKET_FIELDS = [
+  "id",
+  "priority",
+  "impact",
+  "category",
+  "description",
+  // "autoSpawnCount",
+] as const;
 
 const toDecisionConfig = (
   config: NodeConfig | undefined,
@@ -56,7 +66,9 @@ const parseNumberOrKeepString = (value: string): string | number => {
 
 export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
   const { nodes, edges, updateNode, setEdges } = useWorkflowStore();
-  const liveNode = nodes.find((node) => node.id === selectedNode.id) ?? selectedNode;
+  const { ticketTemplates } = useTicket();
+  const liveNode =
+    nodes.find((node) => node.id === selectedNode.id) ?? selectedNode;
   const nodeType = liveNode.data.type;
   const isDecisionNode = nodeType === "decision";
   const isConditionNode = nodeType === "condition";
@@ -65,14 +77,19 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
 
   const decisionConfig = toDecisionConfig(liveNode.data.config);
   const outgoingEdges = edges.filter((edge) => edge.source === liveNode.id);
-  const fallbackOutcomesFromEdges: DecisionOutcome[] = outgoingEdges.map((edge, index) => ({
-    label: typeof edge.label === "string" && edge.label.trim().length > 0 ? edge.label : `Option ${index + 1}`,
-    targetNodeId: edge.target,
-    condition:
-      "condition" in edge && edge.condition
-        ? (edge.condition as DecisionOutcome["condition"])
-        : undefined,
-  }));
+  const fallbackOutcomesFromEdges: DecisionOutcome[] = outgoingEdges.map(
+    (edge, index) => ({
+      label:
+        typeof edge.label === "string" && edge.label.trim().length > 0
+          ? edge.label
+          : `Option ${index + 1}`,
+      targetNodeId: edge.target,
+      condition:
+        "condition" in edge && edge.condition
+          ? (edge.condition as DecisionOutcome["condition"])
+          : undefined,
+    }),
+  );
   const activeOutcomes = isConditionNode
     ? fallbackOutcomesFromEdges
     : decisionConfig.outcomes && decisionConfig.outcomes.length > 0
@@ -147,11 +164,16 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
 
   const removeOutcome = (index: number) => {
     if (!isDecisionNode) return;
-    const nextOutcomes = activeOutcomes.filter((_, currentIndex) => currentIndex !== index);
+    const nextOutcomes = activeOutcomes.filter(
+      (_, currentIndex) => currentIndex !== index,
+    );
     updateDecisionConfig({ outcomes: nextOutcomes });
   };
 
-  const handleValueTypeChange = (index: number, nextType: ConditionValueType) => {
+  const handleValueTypeChange = (
+    index: number,
+    nextType: ConditionValueType,
+  ) => {
     updateOutcome(index, (current) => {
       const condition = current.condition ?? {
         field: "",
@@ -190,7 +212,9 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
     });
   };
 
-  const getConditionValueType = (outcome: DecisionOutcome): ConditionValueType => {
+  const getConditionValueType = (
+    outcome: DecisionOutcome,
+  ): ConditionValueType => {
     const value = outcome.condition?.value;
     if (typeof value === "boolean") return "boolean";
     if (typeof value === "number") return "number";
@@ -200,6 +224,29 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
   const shouldShowRules =
     isConditionNode ||
     (isDecisionNode && decisionConfig.decisionType === "rule-based");
+
+  const dynamicFields = new Set<string>(DEFAULT_TICKET_FIELDS);
+  ticketTemplates.forEach((template) => {
+    Object.keys(template).forEach((key) => {
+      dynamicFields.add(key);
+    });
+  });
+  const availableTicketFields = Array.from(dynamicFields);
+
+  const getFieldValueCandidates = (field: string): string[] => {
+    if (!field) return [];
+    const values = ticketTemplates
+      .map(
+        (template) => template[field as keyof (typeof ticketTemplates)[number]],
+      )
+      .filter(
+        (value): value is string | number | boolean => value !== undefined,
+      )
+      .map((value) => String(value).trim())
+      .filter((value) => value.length > 0);
+
+    return Array.from(new Set(values));
+  };
 
   return (
     <div className="flex h-full w-80 flex-col overflow-y-auto bg-transparent">
@@ -217,228 +264,347 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
           >
             {liveNode.data.type}
           </Badge>
-          <span className="text-muted-foreground truncate">{liveNode.data.label}</span>
+          <span className="text-muted-foreground truncate">
+            {liveNode.data.label}
+          </span>
         </div>
       </div>
 
-      <ScrollArea className="flex-1 space-y-4 p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {isDecisionNode && (
-          <PropertyCard label="Decision Mode">
-            <Select
-              value={decisionConfig.decisionType}
-              onValueChange={(value) =>
-                updateDecisionConfig({
-                  decisionType: value as "manual" | "rule-based",
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="manual">Manual Boolean</SelectItem>
-                <SelectItem value="rule-based">Rule-based</SelectItem>
-              </SelectContent>
-            </Select>
-          </PropertyCard>
-        )}
+      <ScrollArea className="flex-1 space-y-4 p-3">
+        <div className="max-h-0 flex-1 space-y-4">
+          {isDecisionNode && (
+            <div className="flex items-center justify-between gap-2 rounded-md border border-border/70 p-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70  block">
+                Decision Mode
+              </label>
+              <Select
+                value={decisionConfig.decisionType}
+                onValueChange={(value) =>
+                  updateDecisionConfig({
+                    decisionType: value as "manual" | "rule-based",
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Manual Boolean</SelectItem>
+                  <SelectItem value="rule-based">Rule-based</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            // <PropertyCard label="Decision Mode">
+            // </PropertyCard>
+          )}
 
-        <PropertyCard label="Outcomes">
           <div className="space-y-3">
-            {activeOutcomes.map((outcome, index) => {
-              const valueType = getConditionValueType(outcome);
-              return (
-                <div key={`${outcome.targetNodeId}-${index}`} className="rounded-md border border-border/70 p-2 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={outcome.label}
-                      onChange={(event) =>
-                        updateOutcome(index, (current) => ({
-                          ...current,
-                          label: event.target.value,
-                        }))
-                      }
-                      placeholder="Outcome label"
-                    />
-                    {isDecisionNode && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOutcome(index)}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 ml-2 block">
+              Outcomes List
+            </label>
+            <Accordion type="multiple" className="space-y-2">
+              {activeOutcomes.map((outcome, index) => {
+                const valueType = getConditionValueType(outcome);
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <Select
-                      value={outcome.targetNodeId}
-                      onValueChange={(value) =>
-                        updateOutcome(index, (current) => ({ ...current, targetNodeId: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Target node" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableTargets.map((target) => (
-                          <SelectItem key={target.id} value={target.id}>
-                            {target.data.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                return (
+                  <AccordionItem
+                    key={`${outcome.targetNodeId}-${index}`}
+                    value={`outcome-${index}`}
+                    className=" px-2"
+                  >
+                    <AccordionTrigger className="hover:no-underline py-3">
+                      <div className="flex items-center gap-2 flex-1 text-left">
+                        <span className="font-medium">
+                          {outcome.label || `Outcome ${index + 1}`}
+                        </span>
 
-                    <Input
-                      type="number"
-                      value={outcome.priority ?? ""}
-                      placeholder="Priority"
-                      onChange={(event) =>
-                        updateOutcome(index, (current) => ({
-                          ...current,
-                          priority:
-                            event.target.value.trim().length > 0
-                              ? Number(event.target.value)
-                              : undefined,
-                        }))
-                      }
-                    />
-                  </div>
+                        {/* {outcome.condition && (
+                          <Badge variant="secondary">Condition</Badge>
+                        )} */}
 
-                  {shouldShowRules && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between rounded border border-border/60 px-2 py-1">
-                        <Label className="text-xs">Use Condition</Label>
-                        <Switch
-                          checked={Boolean(outcome.condition)}
-                          onCheckedChange={(checked) =>
+                        {outcome.priority !== undefined && (
+                          <Badge variant="outline">P{outcome.priority}</Badge>
+                        )}
+
+                        {outcome.targetNodeId && (
+                          <span className="text-xs text-muted-foreground truncate">
+                            → 
+                            {
+                              availableTargets.find(
+                                (target) => target.id === outcome.targetNodeId,
+                              )?.data.label
+                            }
+                          </span>
+                        )}
+                      </div>
+                    </AccordionTrigger>
+
+                    <AccordionContent className="space-y-3 pb-3">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={outcome.label}
+                          onChange={(event) =>
                             updateOutcome(index, (current) => ({
                               ...current,
-                              condition: checked
-                                ? {
-                                    field: "",
-                                    operator: "equals" as ConditionOperator,
-                                    value: "",
-                                  }
-                                : undefined,
+                              label: event.target.value,
+                            }))
+                          }
+                          placeholder="Outcome label"
+                        />
+
+                        {isDecisionNode && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeOutcome(index)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={outcome.targetNodeId}
+                          onValueChange={(value) =>
+                            updateOutcome(index, (current) => ({
+                              ...current,
+                              targetNodeId: value,
+                            }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Target node" />
+                          </SelectTrigger>
+
+                          <SelectContent>
+                            {availableTargets.map((target) => (
+                              <SelectItem key={target.id} value={target.id}>
+                                {target.data.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <Input
+                          type="number"
+                          value={outcome.priority ?? ""}
+                          placeholder="Priority"
+                          onChange={(event) =>
+                            updateOutcome(index, (current) => ({
+                              ...current,
+                              priority:
+                                event.target.value.trim().length > 0
+                                  ? Number(event.target.value)
+                                  : undefined,
                             }))
                           }
                         />
                       </div>
 
-                      {outcome.condition && (
-                        <div className="space-y-2">
-                          <Input
-                            value={outcome.condition.field}
-                            placeholder="Field (ex: priority, category)"
-                            onChange={(event) =>
-                              updateOutcome(index, (current) => ({
-                                ...current,
-                                condition: {
-                                  ...current.condition!,
-                                  field: event.target.value,
-                                },
-                              }))
-                            }
-                          />
+                      {shouldShowRules && (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between rounded  px-2 py-2">
+                            <Label className="text-xs">Use Condition</Label>
 
-                          <div className="grid grid-cols-2 gap-2">
-                            <Select
-                              value={outcome.condition.operator}
-                              onValueChange={(value) =>
+                            <Switch
+                              checked={Boolean(outcome.condition)}
+                              onCheckedChange={(checked) =>
                                 updateOutcome(index, (current) => ({
                                   ...current,
-                                  condition: {
-                                    ...current.condition!,
-                                    operator: value as ConditionOperator,
-                                  },
+                                  condition: checked
+                                    ? {
+                                        field: "",
+                                        operator: "equals" as ConditionOperator,
+                                        value: "",
+                                      }
+                                    : undefined,
                                 }))
                               }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Operator" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {DEFAULT_OPERATORS.map((operator) => (
-                                  <SelectItem key={operator} value={operator}>
-                                    {operator}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-
-                            <Select
-                              value={valueType}
-                              onValueChange={(value) =>
-                                handleValueTypeChange(index, value as ConditionValueType)
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Value type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="string">string</SelectItem>
-                                <SelectItem value="number">number</SelectItem>
-                                <SelectItem value="boolean">boolean</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            />
                           </div>
 
-                          {valueType === "boolean" ? (
-                            <Select
-                              value={String(Boolean(outcome.condition.value))}
-                              onValueChange={(value) =>
-                                updateOutcome(index, (current) => ({
-                                  ...current,
-                                  condition: {
-                                    ...current.condition!,
-                                    value: value === "true",
-                                  },
-                                }))
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {BOOLEAN_OPTIONS.map((value) => (
-                                  <SelectItem key={value} value={value}>
-                                    {value}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input
-                              type={valueType === "number" ? "number" : "text"}
-                              value={String(outcome.condition.value ?? "")}
-                              placeholder="Condition value"
-                              onChange={(event) =>
-                                updateOutcome(index, (current) => {
-                                  const nextValue =
-                                    valueType === "number"
-                                      ? parseNumberOrKeepString(event.target.value)
-                                      : event.target.value;
-                                  return {
+                          {outcome.condition && (
+                            <div className="space-y-2 rounded-md border border-border/50 p-3">
+                              <Select
+                                value={outcome.condition.field}
+                                onValueChange={(value) =>
+                                  updateOutcome(index, (current) => ({
                                     ...current,
                                     condition: {
                                       ...current.condition!,
-                                      value: nextValue as string | number | boolean,
+                                      field: value,
                                     },
-                                  };
-                                })
-                              }
-                            />
+                                  }))
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Ticket property" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  {availableTicketFields.map((field) => (
+                                    <SelectItem key={field} value={field}>
+                                      {field}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+
+                              <div className="grid grid-cols-2 gap-2">
+                                <Select
+                                  value={outcome.condition.operator}
+                                  onValueChange={(value) =>
+                                    updateOutcome(index, (current) => ({
+                                      ...current,
+                                      condition: {
+                                        ...current.condition!,
+                                        operator: value as ConditionOperator,
+                                      },
+                                    }))
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Operator" />
+                                  </SelectTrigger>
+
+                                  <SelectContent>
+                                    {DEFAULT_OPERATORS.map((operator) => (
+                                      <SelectItem
+                                        key={operator}
+                                        value={operator}
+                                      >
+                                        {operator}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+
+                                <Select
+                                  value={valueType}
+                                  onValueChange={(value) =>
+                                    handleValueTypeChange(
+                                      index,
+                                      value as ConditionValueType,
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Value type" />
+                                  </SelectTrigger>
+
+                                  <SelectContent>
+                                    <SelectItem value="string">
+                                      string
+                                    </SelectItem>
+
+                                    <SelectItem value="number">
+                                      number
+                                    </SelectItem>
+
+                                    <SelectItem value="boolean">
+                                      boolean
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {valueType === "boolean" ? (
+                                <Select
+                                  value={String(
+                                    Boolean(outcome.condition.value),
+                                  )}
+                                  onValueChange={(value) =>
+                                    updateOutcome(index, (current) => ({
+                                      ...current,
+                                      condition: {
+                                        ...current.condition!,
+                                        value: value === "true",
+                                      },
+                                    }))
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+
+                                  <SelectContent>
+                                    {BOOLEAN_OPTIONS.map((value) => (
+                                      <SelectItem key={value} value={value}>
+                                        {value}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : valueType === "string" &&
+                                getFieldValueCandidates(outcome.condition.field)
+                                  .length > 0 ? (
+                                <Select
+                                  value={String(outcome.condition.value ?? "")}
+                                  onValueChange={(value) =>
+                                    updateOutcome(index, (current) => ({
+                                      ...current,
+                                      condition: {
+                                        ...current.condition!,
+                                        value,
+                                      },
+                                    }))
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Condition value" />
+                                  </SelectTrigger>
+
+                                  <SelectContent>
+                                    {getFieldValueCandidates(
+                                      outcome.condition.field,
+                                    ).map((value) => (
+                                      <SelectItem key={value} value={value}>
+                                        {value}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Input
+                                  type={
+                                    valueType === "number" ? "number" : "text"
+                                  }
+                                  value={String(outcome.condition.value ?? "")}
+                                  placeholder="Condition value"
+                                  onChange={(event) =>
+                                    updateOutcome(index, (current) => {
+                                      const nextValue =
+                                        valueType === "number"
+                                          ? parseNumberOrKeepString(
+                                              event.target.value,
+                                            )
+                                          : event.target.value;
+
+                                      return {
+                                        ...current,
+                                        condition: {
+                                          ...current.condition!,
+                                          value: nextValue as
+                                            | string
+                                            | number
+                                            | boolean,
+                                        },
+                                      };
+                                    })
+                                  }
+                                />
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
 
             {isDecisionNode && (
               <Button type="button" variant="outline" onClick={addOutcome}>
@@ -446,7 +612,9 @@ export function DecisionInspector({ selectedNode }: DecisionInspectorProps) {
               </Button>
             )}
           </div>
-        </PropertyCard>
+          {/* <PropertyCard label="Outcomes">
+        </PropertyCard> */}
+        </div>
       </ScrollArea>
     </div>
   );
