@@ -4,6 +4,7 @@ import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { motion } from "framer-motion";
 import { BLOCK_ICON_MAP, TYPE_ICON_MAP } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
+import type { ActiveNodeTicket } from "@/lib/store";
 import { CanvasNodeProps } from "@/lib/canvasNode/types";
 import { TYPE_LABEL_MAP, TYPE_THEME_MAP } from "@/lib/canvasNode/color-map";
 import {
@@ -20,25 +21,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
+const EMPTY_ACTIVE_TICKETS: ActiveNodeTicket[] = [];
+
 export default function CanvasNode(props: CanvasNodeProps) {
-  const { updateNodeData, deleteElements } = useReactFlow();
-  const { setSelectedNode, engineState, simulationConfig, isSimulating } =
-    useWorkflowStore();
   const { data, selected, id, isConnecting } = props;
+  const { updateNodeData, deleteElements } = useReactFlow();
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  const activeTickets = useWorkflowStore(
+    (state) => state.activeTicketsByNodeId[id] ?? EMPTY_ACTIVE_TICKETS,
+  );
+  const agentPool = useWorkflowStore((state) => state.simulationConfig.agentPool);
+  const isSimulating = useWorkflowStore((state) => state.isSimulating);
 
   const deleteNode = () => deleteElements({ nodes: [{ id }] });
-
-  const activeTickets = engineState
-    ? Object.values(engineState.runtimes).filter(
-        (r) => r.currentNodeId === id && !r.completed,
-      )
-    : [];
   const configuredAgentCount = (() => {
     if (data.type !== "actor") return 0;
     const actorLevel =
       data.config?.nodeType === "actor" ? data.config.agentLevel : undefined;
     if (actorLevel === "l1" || actorLevel === "l2" || actorLevel === "l3") {
-      return simulationConfig.agentPool.filter(
+      return agentPool.filter(
         (agent) => agent.level === actorLevel,
       ).length;
     }
@@ -220,8 +221,8 @@ export default function CanvasNode(props: CanvasNodeProps) {
             </div>
             <div className="space-y-1">
               {activeTickets.map((runtime) => (
-                <div key={runtime.ticket.id} className="font-mono text-[11px]">
-                  {runtime.ticket.id} ({runtime.ticket.state})
+                <div key={runtime.id} className="font-mono text-[11px]">
+                  {runtime.id} ({runtime.state})
                 </div>
               ))}
             </div>

@@ -152,22 +152,21 @@ const PANELS = [
 const CLOSE_PANELS_TOOL_ID = "close-panels";
 
 export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    addNode,
-    setSelectedNode,
-    addEdge: addStoreEdge,
-    setEdges: setStoreEdges,
-    selectedNodeId,
-  } = useWorkflowStore();
+  const nodes = useWorkflowStore((state) => state.nodes);
+  const edges = useWorkflowStore((state) => state.edges);
+  const onNodesChange = useWorkflowStore((state) => state.onNodesChange);
+  const onEdgesChange = useWorkflowStore((state) => state.onEdgesChange);
+  const addNode = useWorkflowStore((state) => state.addNode);
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  const addStoreEdge = useWorkflowStore((state) => state.addEdge);
+  const setStoreEdges = useWorkflowStore((state) => state.setEdges);
+  const selectedNodeId = useWorkflowStore((state) => state.selectedNodeId);
 
   const [visiblePanels, setVisiblePanels] = useState<Record<string, boolean>>(
     INITIAL_VISIBLE_PANELS,
   );
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const mouseRafRef = React.useRef<number | null>(null);
   const [showMinimap, setShowMinimap] = useState<boolean>(false);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
@@ -299,6 +298,42 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   );
 
   const selectedNodeData = nodes.find((node) => node.id === selectedNodeId);
+  const nodeTypeById = useMemo(() => {
+    const map = new Map<string, NodeType>();
+    for (const node of nodes) {
+      map.set(node.id, node.data.type);
+    }
+    return map;
+  }, [nodes]);
+  const renderedNodes = useMemo(
+    () =>
+      nodes.map((node) => ({
+        ...node,
+        selected: node.id === selectedNodeId,
+      })),
+    [nodes, selectedNodeId],
+  );
+  const renderedEdges = useMemo(
+    () =>
+      edges.map((edge) => {
+        const sourceType = nodeTypeById.get(edge.source);
+        const isConnectedToHoveredNode =
+          hoveredNodeId !== null &&
+          (edge.source === hoveredNodeId || edge.target === hoveredNodeId);
+
+        return {
+          ...edge,
+          type: edge.type ?? "glow",
+          data: {
+            color: sourceType
+              ? getNodeTypeColorVar(sourceType)
+              : "var(--primary)",
+            isHighlighted: isConnectedToHoveredNode,
+          },
+        };
+      }),
+    [edges, nodeTypeById, hoveredNodeId],
+  );
   const activeToolIds = useMemo(
     () =>
       Object.entries(visiblePanels)
@@ -357,6 +392,30 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   useEffect(() => {
     onNodeSelect?.(selectedNodeData ?? null);
   }, [onNodeSelect, selectedNodeData]);
+  useEffect(() => {
+    return () => {
+      if (mouseRafRef.current !== null) {
+        cancelAnimationFrame(mouseRafRef.current);
+      }
+    };
+  }, []);
+
+  const onPaneMouseMove = useCallback((event: React.MouseEvent) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const nextMouse = {
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    };
+
+    if (mouseRafRef.current !== null) {
+      cancelAnimationFrame(mouseRafRef.current);
+    }
+
+    mouseRafRef.current = requestAnimationFrame(() => {
+      setMouse(nextMouse);
+      mouseRafRef.current = null;
+    });
+  }, []);
 
   return (
     <div
@@ -365,36 +424,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       onDrop={onDrop}
     >
       <ReactFlow<CustomNode, Edge>
-        onPaneMouseMove={(event) => {
-          const bounds = event.currentTarget.getBoundingClientRect();
-
-          setMouse({
-            x: event.clientX - bounds.left,
-            y: event.clientY - bounds.top,
-          });
-        }}
-        nodes={nodes.map((node) => ({
-          ...node,
-          selected: node.id === selectedNodeId,
-        }))}
-        edges={edges.map((edge) => {
-          const sourceNode = nodes.find((n) => n.id === edge.source);
-          const isSelected = edge.selected;
-          const isConnectedToHoveredNode =
-            hoveredNodeId !== null &&
-            (edge.source === hoveredNodeId || edge.target === hoveredNodeId);
-          return {
-            ...edge,
-            type: edge.type ?? "glow",
-            data: {
-              color: sourceNode
-                ? getNodeTypeColorVar(sourceNode.data.type)
-                : "var(--primary)",
-              isHighlighted: isConnectedToHoveredNode,
-            },
-            selected: isSelected,
-          };
-        })}
+        onPaneMouseMove={onPaneMouseMove}
+        nodes={renderedNodes}
+        edges={renderedEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}

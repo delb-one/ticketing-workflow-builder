@@ -39,8 +39,11 @@ const WorkflowCanvas = dynamic(
 );
 
 export default function Home() {
-  const { nodes, edges, selectedNodeId, clearWorkflow, loadWorkflow } =
-    useWorkflowStore();
+  const nodes = useWorkflowStore((state) => state.nodes);
+  const edges = useWorkflowStore((state) => state.edges);
+  const selectedNodeId = useWorkflowStore((state) => state.selectedNodeId);
+  const clearWorkflow = useWorkflowStore((state) => state.clearWorkflow);
+  const loadWorkflow = useWorkflowStore((state) => state.loadWorkflow);
   const selectedNodeData = nodes.find((n) => n.id === selectedNodeId);
   const [leftCollapsed, setLeftCollapsed] = useState(true);
   const [rightCollapsed, setRightCollapsed] = useState(true);

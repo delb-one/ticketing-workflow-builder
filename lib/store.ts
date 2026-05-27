@@ -47,6 +47,11 @@ export interface CustomNodeData {
 
 export type CustomNode = Node<CustomNodeData, "canvas">;
 
+export interface ActiveNodeTicket {
+  id: string;
+  state: SimulationRuntime["ticket"]["state"];
+}
+
 export interface WorkflowStore {
   nodes: CustomNode[];
   edges: Edge[];
@@ -59,6 +64,7 @@ export interface WorkflowStore {
   simulationLog: string[];
   simulationRuntime: SimulationRuntime | null; // Keep for legacy UI compatibility
   engineState: EngineRuntimeState | null;
+  activeTicketsByNodeId: Record<string, ActiveNodeTicket[]>;
   schedulingMode: "fifo" | "priority";
   simulationEvents: SimulationEvent[];
   simulationConfig: SimulationConfig;
@@ -110,6 +116,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   simulationLog: [],
   simulationRuntime: null,
   engineState: null,
+  activeTicketsByNodeId: {},
   schedulingMode: "fifo",
   simulationEvents: [],
   simulationConfig: {
@@ -224,6 +231,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       activeNodeId: null,
       simulationRuntime: null,
       engineState: null,
+      activeTicketsByNodeId: {},
       simulationEvents: [],
     }),
 
@@ -283,15 +291,32 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }),
 
   syncEngineState: (state) =>
-    set({
-      engineState: state,
-      // For backward compatibility with UI, we can try to find the first active runtime
-      simulationRuntime: state
-        ? (Object.values(state.runtimes)[0] ?? null)
-        : null,
-      activeNodeId: state
-        ? (Object.values(state.runtimes)[0]?.currentNodeId ?? null)
-        : null,
+    set(() => {
+      const activeTicketsByNodeId: Record<string, ActiveNodeTicket[]> = {};
+
+      if (state) {
+        for (const runtime of Object.values(state.runtimes)) {
+          if (runtime.completed || !runtime.currentNodeId) continue;
+          const bucket = activeTicketsByNodeId[runtime.currentNodeId] ?? [];
+          bucket.push({
+            id: runtime.ticket.id,
+            state: runtime.ticket.state,
+          });
+          activeTicketsByNodeId[runtime.currentNodeId] = bucket;
+        }
+      }
+
+      return {
+        engineState: state,
+        activeTicketsByNodeId,
+        // For backward compatibility with UI, we can try to find the first active runtime
+        simulationRuntime: state
+          ? (Object.values(state.runtimes)[0] ?? null)
+          : null,
+        activeNodeId: state
+          ? (Object.values(state.runtimes)[0]?.currentNodeId ?? null)
+          : null,
+      };
     }),
 
   setSchedulingMode: (mode) => set({ schedulingMode: mode }),
@@ -321,6 +346,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       simulationLog: [],
       simulationRuntime: null,
       engineState: null,
+      activeTicketsByNodeId: {},
       simulationEvents: [],
     }),
 
@@ -332,6 +358,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       activeNodeId: null,
       simulationRuntime: null,
       engineState: null,
+      activeTicketsByNodeId: {},
       simulationEvents: [],
       simulationLog: [],
     }),
