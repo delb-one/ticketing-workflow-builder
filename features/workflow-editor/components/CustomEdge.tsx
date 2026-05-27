@@ -47,6 +47,7 @@ export function CustomEdge({
           fy="50%"
         >
           <stop offset="0%" stopColor={color} stopOpacity="1" />
+          <stop offset="50%" stopColor={color} stopOpacity="0.6" />
           <stop offset="100%" stopColor={color} stopOpacity="0.4" />
         </radialGradient>
       </defs>
@@ -56,19 +57,19 @@ export function CustomEdge({
         path={edgePath}
         className={cn("edge")}
         style={{
-          stroke: color,
-          strokeWidth: isActive ? 2.5 : 1,
+          stroke: isActive ? color : "slategray",
+          // strokeWidth: isActive ? 2.5 : 0.5,
           filter: isActive
             ? `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 20px ${color}) drop-shadow(0 0 32px ${color})`
-            : `drop-shadow(0 0 2px ${color})`,
+            : ``,
         }}
       />
 
       {/* PARTICLES (flow) */}
       {Array.from(
         isActive
-          ? { length: PARTICLE_COUNT * 1.5 }
-          : { length: PARTICLE_COUNT },
+          ? { length: PARTICLE_COUNT  }
+          : { length: 0 },
       ).map((_, i) => (
         <ellipse
           key={`${id}-particle-${i}`}
@@ -79,7 +80,7 @@ export function CustomEdge({
         >
           <animateMotion
             path={edgePath}
-            dur={isActive ? `${ANIMATE_DURATION * 0.3}` : `${ANIMATE_DURATION}`}
+            dur={isActive ? `${ANIMATE_DURATION }` : ``}
             repeatCount="indefinite"
             begin={`${-i * (ANIMATE_DURATION / PARTICLE_COUNT)}s`}
             rotate="auto"
