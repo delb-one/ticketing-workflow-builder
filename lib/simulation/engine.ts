@@ -35,8 +35,11 @@ const createTicketFromTemplate = (
     updatedAt: now,
     context: {
       variables: {
+        id: template.id,
         category: template.category,
         priority: template.priority,
+        impact: template.impact,
+        description: template.description,
       },
       events: [],
     },

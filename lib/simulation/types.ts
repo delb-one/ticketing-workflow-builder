@@ -129,8 +129,11 @@ export interface SLAConfig {
 
 export interface SimulationContext {
   variables: {
+    id?: string;
     category?: string;
     priority?: string;
+    impact?: string;
+    description?: string;
     source?: string;
     [key: string]: unknown;
   };
