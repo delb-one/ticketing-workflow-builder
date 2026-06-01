@@ -4,11 +4,26 @@ import type { NodeConfig, NodeType } from "@/lib/simulation/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BlockDefinition } from "@/lib/blocks/types";
 import { BLOCKS } from "@/lib/blocks/registry";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { BlockItem } from "@/components/molecules/BlockItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SubFlowTemplateLibrary } from "./SubFlowTemplateLibrary";
-import { Blocks, Workflow } from "lucide-react";
+import { Blocks, Plus, Workflow } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface BlockLibraryProps {
   onBlockDrag: (
@@ -21,6 +36,7 @@ interface BlockLibraryProps {
 }
 
 export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
+  const [open, setOpen] = useState(false);
   void onBlockDrag;
 
   const handleDragStart = (event: React.DragEvent, block: BlockDefinition) => {
@@ -70,8 +86,42 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
               <ScrollArea className="h-full overflow-y-auto">
                 <SubFlowTemplateLibrary />
               </ScrollArea>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setOpen(true)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+
+                <TooltipContent
+                  side="right"
+                  className="text-xs bg-background text-primary border border-border"
+                >
+                  <p>Add Group Flow</p>
+                </TooltipContent>
+              </Tooltip>
             </TabsContent>
           </Tabs>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create Custom Group Flow </DialogTitle>
+                <DialogDescription>
+                  This feature is coming soon! In the meantime, you can test out
+                  the sub-flow template feature by dragging and dropping the
+                  Group Flow template from the library, and customizing it to
+                  your needs. You can also create your own sub-flow templates by
+                  defining them in code.
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </TooltipProvider>
       </div>
     </div>
