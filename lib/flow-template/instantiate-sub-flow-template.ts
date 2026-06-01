@@ -47,7 +47,7 @@ export const instantiateSubFlowTemplate = (
         nodeType: "group",
         templateId: template.id,
         childNodeIds,
-        isCollapsed: false,
+        isCollapsed: true,
         entryNodeId: nodeIdMap.get(template.entryNodeId) ?? template.entryNodeId,
         exitNodeId: nodeIdMap.get(template.exitNodeId) ?? template.exitNodeId,
       },
