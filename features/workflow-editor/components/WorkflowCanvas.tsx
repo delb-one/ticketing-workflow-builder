@@ -424,17 +424,23 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             node.data.config?.nodeType === "group" &&
             node.data.config.isCollapsed;
 
+          if (isCollapsedGroup) {
+            return {
+              ...node,
+              deletable: !node.parentId,
+              selected: node.id === selectedNodeId,
+              // Override React Flow's internal layout dimensions
+              width: 240,
+              height: 44,
+              measured: { width: 240, height: 44 },
+              style: { ...node.style, width: 240, height: 44 },
+            };
+          }
+
           return {
             ...node,
             deletable: !node.parentId,
             selected: node.id === selectedNodeId,
-            style: isCollapsedGroup
-              ? {
-                ...node.style,
-                width: 240,
-                height: 44,
-              }
-              : node.style,
           };
         }),
     [collapsedChildNodeIds, nodes, selectedNodeId],
