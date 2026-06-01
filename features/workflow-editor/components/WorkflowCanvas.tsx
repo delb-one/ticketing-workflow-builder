@@ -9,6 +9,7 @@ import {
   MiniMap,
   NodeTypes,
   useReactFlow,
+  useUpdateNodeInternals,
   Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -215,21 +216,44 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      // const sourceNode = nodes.find((n) => n.id === connection.source);
-      // const color = sourceNode
-      //   ? getNodeTypeColorVar(sourceNode.data.type)
-      //   : "var(--primary)";
+      let source = connection.source || "";
+      let target = connection.target || "";
+
+      const sourceNode = nodes.find((n) => n.id === source);
+      if (sourceNode && sourceNode.data.type === "group") {
+        const groupConfig =
+          sourceNode.data.config?.nodeType === "group"
+            ? sourceNode.data.config
+            : null;
+        if (groupConfig && groupConfig.exitNodeId) {
+          source = groupConfig.exitNodeId;
+        } else if (groupConfig && groupConfig.childNodeIds && groupConfig.childNodeIds.length > 0) {
+          source = groupConfig.childNodeIds[groupConfig.childNodeIds.length - 1];
+        }
+      }
+
+      const targetNode = nodes.find((n) => n.id === target);
+      if (targetNode && targetNode.data.type === "group") {
+        const groupConfig =
+          targetNode.data.config?.nodeType === "group"
+            ? targetNode.data.config
+            : null;
+        if (groupConfig && groupConfig.entryNodeId) {
+          target = groupConfig.entryNodeId;
+        } else if (groupConfig && groupConfig.childNodeIds && groupConfig.childNodeIds.length > 0) {
+          target = groupConfig.childNodeIds[0];
+        }
+      }
 
       const edge: Edge = {
-        id: `${connection.source}-${connection.target}-${Date.now()}`,
-        source: connection.source || "",
-        target: connection.target || "",
-
+        id: `${source}-${target}-${Date.now()}`,
+        source,
+        target,
         type: "glow",
       };
       addStoreEdge(edge);
     },
-    [addStoreEdge],
+    [addStoreEdge, nodes],
   );
 
   const onEdgeDoubleClick = useCallback(
@@ -246,9 +270,9 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
       const updatedEdges = edges.map((currentEdge) =>
         currentEdge.id === edge.id
           ? {
-              ...currentEdge,
-              label: trimmedLabel || undefined,
-            }
+            ...currentEdge,
+            label: trimmedLabel || undefined,
+          }
           : currentEdge,
       );
 
@@ -337,26 +361,108 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     }
     return map;
   }, [nodes]);
+  const collapsedChildNodeIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    for (const node of nodes) {
+      if (
+        node.data.type !== "group" ||
+        node.data.config?.nodeType !== "group" ||
+        !node.data.config.isCollapsed
+      ) {
+        continue;
+      }
+
+      for (const childNodeId of node.data.config.childNodeIds ?? []) {
+        ids.add(childNodeId);
+      }
+    }
+
+    return ids;
+  }, [nodes]);
+
+  const collapsedChildToGroupMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const node of nodes) {
+      if (
+        node.data.type === "group" &&
+        node.data.config?.nodeType === "group" &&
+        node.data.config.isCollapsed
+      ) {
+        for (const childId of node.data.config.childNodeIds ?? []) {
+          map.set(childId, node.id);
+        }
+      }
+    }
+    return map;
+  }, [nodes]);
+
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => {
+    const groupNodeIds: string[] = [];
+    for (const node of nodes) {
+      if (node.data.type === "group") {
+        groupNodeIds.push(node.id);
+      }
+    }
+    if (groupNodeIds.length === 0) return;
+    const timer = setTimeout(() => {
+      for (const nodeId of groupNodeIds) {
+        updateNodeInternals(nodeId);
+      }
+    }, 30);
+    return () => clearTimeout(timer);
+  }, [collapsedChildNodeIds, updateNodeInternals, nodes]);
 
   const renderedNodes = useMemo(
     () =>
-      nodes.map((node) => ({
-        ...node,
-        deletable: !node.parentId,
-        selected: node.id === selectedNodeId,
-      })),
-    [nodes, selectedNodeId],
+      nodes
+        .filter((node) => !collapsedChildNodeIds.has(node.id))
+        .map((node) => {
+          const isCollapsedGroup =
+            node.data.type === "group" &&
+            node.data.config?.nodeType === "group" &&
+            node.data.config.isCollapsed;
+
+          return {
+            ...node,
+            deletable: !node.parentId,
+            selected: node.id === selectedNodeId,
+            style: isCollapsedGroup
+              ? {
+                ...node.style,
+                width: 240,
+                height: 44,
+              }
+              : node.style,
+          };
+        }),
+    [collapsedChildNodeIds, nodes, selectedNodeId],
   );
   const renderedEdges = useMemo(
-    () =>
-      edges.map((edge) => {
-        const sourceType = nodeTypeById.get(edge.source);
+    () => {
+      const result: Edge[] = [];
+      for (const edge of edges) {
+        const visualSource = collapsedChildToGroupMap.get(edge.source) ?? edge.source;
+        const visualTarget = collapsedChildToGroupMap.get(edge.target) ?? edge.target;
+
+        if (visualSource === visualTarget) {
+          continue;
+        }
+
+        if (collapsedChildNodeIds.has(visualSource) || collapsedChildNodeIds.has(visualTarget)) {
+          continue;
+        }
+
+        const sourceType = nodeTypeById.get(visualSource);
         const isConnectedToHoveredNode =
           hoveredNodeId !== null &&
-          (edge.source === hoveredNodeId || edge.target === hoveredNodeId);
+          (visualSource === hoveredNodeId || visualTarget === hoveredNodeId);
 
-        return {
+        result.push({
           ...edge,
+          source: visualSource,
+          target: visualTarget,
           type: edge.type ?? "glow",
           data: {
             color: sourceType
@@ -364,9 +470,11 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
               : "var(--primary)",
             isHighlighted: isConnectedToHoveredNode,
           },
-        };
-      }),
-    [edges, nodeTypeById, hoveredNodeId],
+        });
+      }
+      return result;
+    },
+    [collapsedChildToGroupMap, collapsedChildNodeIds, edges, nodeTypeById, hoveredNodeId],
   );
   const activeToolIds = useMemo(
     () =>

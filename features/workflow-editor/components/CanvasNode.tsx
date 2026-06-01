@@ -1,6 +1,8 @@
 "use client";
 
-import { Handle, NodeResizer, Position, useReactFlow } from "@xyflow/react";
+import { useMemo, useEffect } from "react";
+
+import { Handle, NodeResizer, Position, useReactFlow, useUpdateNodeInternals } from "@xyflow/react";
 import { motion } from "framer-motion";
 import { BLOCK_ICON_MAP, TYPE_ICON_MAP } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
@@ -19,7 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 
 const EMPTY_ACTIVE_TICKETS: ActiveNodeTicket[] = [];
 
@@ -28,9 +30,26 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const { updateNodeData } = useReactFlow();
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const deleteWorkflowNode = useWorkflowStore((state) => state.deleteNode);
-  const activeTickets = useWorkflowStore(
-    (state) => state.activeTicketsByNodeId[id] ?? EMPTY_ACTIVE_TICKETS,
-  );
+  const updateNode = useWorkflowStore((state) => state.updateNode);
+  const activeTicketsByNodeId = useWorkflowStore((state) => state.activeTicketsByNodeId);
+  const activeTickets = useMemo(() => {
+    const groupConfig = data.config?.nodeType === "group" ? data.config : null;
+    const isGroup = data.type === "group" && groupConfig !== null;
+    const isCollapsed = Boolean(groupConfig?.isCollapsed);
+    if (isGroup && isCollapsed) {
+      const childIds = groupConfig.childNodeIds ?? [];
+      const aggregated: ActiveNodeTicket[] = [];
+      for (const childId of childIds) {
+        const childTickets = activeTicketsByNodeId[childId];
+        if (childTickets) aggregated.push(...childTickets);
+      }
+      return aggregated;
+    }
+    return activeTicketsByNodeId[id] ?? EMPTY_ACTIVE_TICKETS;
+  }, [activeTicketsByNodeId, id, data.type, data.config]);
+
+
+
   const agentPool = useWorkflowStore(
     (state) => state.simulationConfig.agentPool,
   );
@@ -38,12 +57,31 @@ export default function CanvasNode(props: CanvasNodeProps) {
 
   const groupConfig = data.config?.nodeType === "group" ? data.config : null;
   const isGroup = data.type === "group" && groupConfig !== null;
+  const isCollapsed = Boolean(groupConfig?.isCollapsed);
   const isChildNode = Boolean(parentId);
   const childNodeIds = groupConfig?.childNodeIds ?? [];
   const childCount = childNodeIds.length;
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [isCollapsed, id, updateNodeInternals]);
   const deleteNode = () => {
     deleteWorkflowNode(id);
     setSelectedNode(null);
+  };
+  const toggleGroupCollapse = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!groupConfig) return;
+
+    updateNode(id, {
+      data: {
+        ...data,
+        config: {
+          ...groupConfig,
+          isCollapsed: !isCollapsed,
+        },
+      },
+    });
   };
   const configuredAgentCount = (() => {
     if (data.type !== "actor") return 0;
@@ -76,22 +114,22 @@ export default function CanvasNode(props: CanvasNodeProps) {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={() => setSelectedNode(id)}
-            className={`group relative ${isGroup ? "h-full min-h-40 w-full min-w-80" : "min-w-55"} cursor-pointer rounded-xl p-0 transition-all ${isGroup ? "shadow-sm" : "shadow-lg"} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+            className={`group relative ${isGroup ? (isCollapsed ? "h-full w-full min-w-56" : "h-full min-h-40 w-full min-w-80") : "min-w-55"} cursor-pointer rounded-xl p-0 transition-all ${isGroup ? "shadow-sm" : "shadow-lg"} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
             style={
               selected
                 ? {
-                    boxShadow: `0 0 10px ${getCssVarColor(theme.color)}, 0 0 18px ${getCssVarColor(theme.color)}`,
-                  }
+                  boxShadow: `0 0 10px ${getCssVarColor(theme.color)}, 0 0 18px ${getCssVarColor(theme.color)}`,
+                }
                 : isActive
                   ? {
-                      boxShadow: `0 0 6px ${getCssVarColor(theme.color)}, 0 0 12px ${getCssVarColor(theme.color)}`,
-                    }
+                    boxShadow: `0 0 6px ${getCssVarColor(theme.color)}, 0 0 12px ${getCssVarColor(theme.color)}`,
+                  }
                   : undefined
             }
           >
             {isGroup && (
               <NodeResizer
-                isVisible={selected}
+                isVisible={selected && !isCollapsed}
                 minWidth={320}
                 minHeight={160}
                 lineClassName="border-primary/70"
@@ -100,7 +138,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
             )}
 
             <div
-              className={`relative h-full rounded-[11px] border px-3 py-3 backdrop-blur-sm ${isGroup ? "border-dashed bg-card/20" : "bg-card"}`}
+              className={`relative h-full rounded-[11px] border backdrop-blur-sm ${isCollapsed ? "px-3 py-2" : "px-3 py-3"} ${isGroup ? "border-dashed bg-card/20" : "bg-card"}`}
               style={{
                 borderColor: getCssVarColor(theme.color),
                 backgroundColor: isGroup
@@ -121,6 +159,20 @@ export default function CanvasNode(props: CanvasNodeProps) {
                     }}
                   />
                 )}
+                {isGroup && (
+                  <button
+                    type="button"
+                    onClick={toggleGroupCollapse}
+                    className="absolute right-7 top-2 flex h-4 w-4 items-center justify-center rounded-sm opacity-0 transition-all hover:bg-muted group-hover:opacity-100"
+                    aria-label={isCollapsed ? "Expand group" : "Collapse group"}
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
                 <div className="flex items-center gap-2">
                   {!isGroup && (
                     <div
@@ -135,7 +187,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
 
                   <div className="min-w-0 flex-1">
                     {isGroup ? (
-                      <div className="w-[calc(100%-2rem)] truncate px-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">
+                      <div className="w-[calc(100%-3rem)] truncate px-1 text-sm font-semibold text-primary/80">
                         {data.label}
                       </div>
                     ) : (
@@ -206,7 +258,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
                   </div>
                 )}
             </div>
-            {!isGroup && data.type !== "start" && (
+            {(!isGroup || isCollapsed) && data.type !== "start" && (
               <Handle
                 type="target"
                 position={Position.Top}
@@ -222,7 +274,7 @@ export default function CanvasNode(props: CanvasNodeProps) {
                 }}
               />
             )}
-            {!isGroup && data.type !== "end" && (
+            {(!isGroup || isCollapsed) && data.type !== "end" && (
               <Handle
                 type="source"
                 position={Position.Bottom}

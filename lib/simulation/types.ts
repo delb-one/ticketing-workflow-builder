@@ -73,6 +73,9 @@ export type NodeConfig =
       nodeType: "group";
       templateId?: string;
       childNodeIds?: string[];
+      isCollapsed?: boolean;
+      entryNodeId?: string;
+      exitNodeId?: string;
     }
   | {
       nodeType: "start" | "end" | "condition";
