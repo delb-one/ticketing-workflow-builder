@@ -1,6 +1,6 @@
 "use client";
 
-import { Boxes, Layers } from "lucide-react";
+import { Blocks, Boxes, Layers } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,12 +12,12 @@ import {
   SUB_FLOW_TEMPLATES,
   type SubFlowTemplate,
 } from "@/lib/flow-template/sub-flow-templates";
-import { getNodeTypeIconGradient, getNodeTypeColorVar } from "@/lib/colors/color-map";
+import {
+  getNodeTypeIconGradient,
+  getNodeTypeColorVar,
+} from "@/lib/colors/color-map";
 
-const handleDragStart = (
-  event: React.DragEvent,
-  template: SubFlowTemplate,
-) => {
+const handleDragStart = (event: React.DragEvent, template: SubFlowTemplate) => {
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.setData(
     "application/reactflow",
@@ -45,7 +45,7 @@ export function SubFlowTemplateLibrary() {
                 className="flex h-8 w-8 items-center justify-center rounded-lg"
                 style={{ backgroundImage: getNodeTypeIconGradient("group") }}
               >
-                <Layers className="h-4 w-4 text-primary" />
+                <Boxes className="h-4 w-4 text-primary" />
               </div>
             </Card>
           </TooltipTrigger>
@@ -63,7 +63,7 @@ export function SubFlowTemplateLibrary() {
                   border: `1px solid color-mix(in oklab, ${groupColor} 50%, transparent)`,
                 }}
               >
-                template
+                {template.type}
               </Badge>
               <div className="h-px w-full bg-border" />
               <span className="font-medium leading-tight">{template.name}</span>

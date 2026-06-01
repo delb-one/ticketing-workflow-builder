@@ -5,6 +5,7 @@ export interface SubFlowTemplate {
   id: string;
   name: string;
   description: string;
+  type: string
   nodes: CustomNode[];
   edges: Edge[];
   entryNodeId: string;
@@ -19,6 +20,7 @@ export const SUB_FLOW_TEMPLATES: SubFlowTemplate[] = [
   {
     id: "incident-triage",
     name: "Incident triage",
+    type: "Group",
     description: "Classify, assign and start SLA tracking for a new incident.",
     entryNodeId: "triage-status",
     exitNodeId: "triage-assign",
@@ -86,6 +88,7 @@ export const SUB_FLOW_TEMPLATES: SubFlowTemplate[] = [
   {
     id: "resolution-validation",
     name: "Resolution validation",
+    type: "Group",
     description: "Resolve, ask the client to validate, then close the ticket.",
     entryNodeId: "resolution-action",
     exitNodeId: "resolution-close",

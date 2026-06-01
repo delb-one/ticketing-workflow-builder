@@ -19,6 +19,7 @@ import {
   User,
   UserCog,
   Layers,
+  Blocks,
 } from 'lucide-react';
 import type { NodeType } from '@/lib/simulation/types';
 
@@ -56,7 +57,7 @@ export const TYPE_ICON_MAP: Record<NodeType, LucideIcon> = {
   end: CheckCircle2,
   status: CheckCircle,
   event: Bell,
-  group: Layers,
+  group: Boxes,
 };
 
 export const getNodeIcon = (type: NodeType, blockId?: string): LucideIcon =>

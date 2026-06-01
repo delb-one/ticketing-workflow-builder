@@ -2,7 +2,13 @@
 
 import { useMemo, useEffect } from "react";
 
-import { Handle, NodeResizer, Position, useReactFlow, useUpdateNodeInternals } from "@xyflow/react";
+import {
+  Handle,
+  NodeResizer,
+  Position,
+  useReactFlow,
+  useUpdateNodeInternals,
+} from "@xyflow/react";
 import { motion } from "framer-motion";
 import { BLOCK_ICON_MAP, TYPE_ICON_MAP } from "@/lib/node-icons";
 import { useWorkflowStore } from "@/lib/store";
@@ -31,7 +37,9 @@ export default function CanvasNode(props: CanvasNodeProps) {
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const deleteWorkflowNode = useWorkflowStore((state) => state.deleteNode);
   const updateNode = useWorkflowStore((state) => state.updateNode);
-  const activeTicketsByNodeId = useWorkflowStore((state) => state.activeTicketsByNodeId);
+  const activeTicketsByNodeId = useWorkflowStore(
+    (state) => state.activeTicketsByNodeId,
+  );
   const activeTickets = useMemo(() => {
     const groupConfig = data.config?.nodeType === "group" ? data.config : null;
     const isGroup = data.type === "group" && groupConfig !== null;
@@ -47,8 +55,6 @@ export default function CanvasNode(props: CanvasNodeProps) {
     }
     return activeTicketsByNodeId[id] ?? EMPTY_ACTIVE_TICKETS;
   }, [activeTicketsByNodeId, id, data.type, data.config]);
-
-
 
   const agentPool = useWorkflowStore(
     (state) => state.simulationConfig.agentPool,
@@ -114,16 +120,22 @@ export default function CanvasNode(props: CanvasNodeProps) {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={() => setSelectedNode(id)}
-            className={`group relative ${isGroup ? (isCollapsed ? "h-full w-full min-w-56" : "h-full min-h-40 w-full min-w-80") : "min-w-55"} cursor-pointer rounded-xl p-0 transition-all ${isGroup ? "shadow-sm" : "shadow-lg"} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
+            className={`group relative ${
+              isGroup
+                ? isCollapsed
+                  ? "max-w-25"
+                  : "h-full min-h-40 w-full min-w-80"
+                : "w-full min-w-55"
+            } cursor-pointer rounded-xl p-0 transition-all ${isGroup ? "shadow-sm" : "shadow-lg"} ${isActive ? "scale-[1.01] shadow-xl" : ""} ${isConnecting ? "opacity-40" : ""}`}
             style={
               selected
                 ? {
-                  boxShadow: `0 0 10px ${getCssVarColor(theme.color)}, 0 0 18px ${getCssVarColor(theme.color)}`,
-                }
+                    boxShadow: `0 0 10px ${getCssVarColor(theme.color)}, 0 0 18px ${getCssVarColor(theme.color)}`,
+                  }
                 : isActive
                   ? {
-                    boxShadow: `0 0 6px ${getCssVarColor(theme.color)}, 0 0 12px ${getCssVarColor(theme.color)}`,
-                  }
+                      boxShadow: `0 0 6px ${getCssVarColor(theme.color)}, 0 0 12px ${getCssVarColor(theme.color)}`,
+                    }
                   : undefined
             }
           >
@@ -174,21 +186,19 @@ export default function CanvasNode(props: CanvasNodeProps) {
                   </button>
                 )}
                 <div className="flex items-center gap-2">
-                  {!isGroup && (
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br text-primary"
-                      style={{
-                        backgroundImage: getNodeTypeIconGradient(data.type),
-                      }}
-                    >
-                      <IconComponent className="h-4 w-4" />
-                    </div>
-                  )}
+                  <div
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br text-primary"
+                    style={{
+                      backgroundImage: getNodeTypeIconGradient(data.type),
+                    }}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     {isGroup ? (
                       <div className="w-[calc(100%-3rem)] truncate px-1 text-sm font-semibold text-primary/80">
-                        {data.label}
+                        {isCollapsed ? "" : data.label}
                       </div>
                     ) : (
                       <Input
@@ -295,6 +305,14 @@ export default function CanvasNode(props: CanvasNodeProps) {
             )}
           </motion.div>
         </TooltipTrigger>
+        {isCollapsed && (
+          <TooltipContent
+            side="right"
+            className="max-w-64 text-xs bg-background text-primary border border-border"
+          >
+            {data.label} - {childCount} {childCount === 1 ? "node" : "nodes"}
+          </TooltipContent>
+        )}
         {isSimulating && (
           <TooltipContent
             side="top"
