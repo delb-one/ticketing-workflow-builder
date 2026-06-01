@@ -200,12 +200,22 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   deleteNode: (id) =>
-    set((state) => ({
-      nodes: state.nodes.filter((node) => node.id !== id),
-      edges: state.edges.filter(
-        (edge) => edge.source !== id && edge.target !== id,
-      ),
-    })),
+    set((state) => {
+      const node = state.nodes.find((candidate) => candidate.id === id);
+      const childNodeIds =
+        node?.data.config?.nodeType === "group"
+          ? (node.data.config.childNodeIds ?? [])
+          : [];
+      const deletedNodeIds = new Set([id, ...childNodeIds]);
+
+      return {
+        nodes: state.nodes.filter((node) => !deletedNodeIds.has(node.id)),
+        edges: state.edges.filter(
+          (edge) =>
+            !deletedNodeIds.has(edge.source) && !deletedNodeIds.has(edge.target),
+        ),
+      };
+    }),
 
   setSelectedNode: (id) => set({ selectedNodeId: id }),
 

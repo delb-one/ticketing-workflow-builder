@@ -10,6 +10,18 @@ import {
 
 type NetworkState = Pick<WorkflowStore, "nodes" | "edges">;
 
+const selectExecutableNetworkState = (state: NetworkState): NetworkState => {
+  const nodes = state.nodes.filter((node) => node.data.type !== "group");
+  const nodeIds = new Set(nodes.map((node) => node.id));
+
+  return {
+    nodes,
+    edges: state.edges.filter(
+      (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+    ),
+  };
+};
+
 export type NodeConnectivity = {
   nodeId: string;
   incoming: string[];
@@ -35,7 +47,7 @@ export type CriticalNetworkNode = {
 };
 
 export const selectWorkflowTopology = (state: NetworkState): WorkflowTopology => {
-  const { nodes, edges } = state;
+  const { nodes, edges } = selectExecutableNetworkState(state);
   const adjacency = buildAdjacencyMap(nodes, edges);
   const connectedComponents = findConnectedComponents(nodes, adjacency);
   const nodesWithOutgoingEdges = nodes.filter(
@@ -56,10 +68,16 @@ export const selectNodeConnectivity = (
   state: NetworkState,
   nodeId: string,
 ): NodeConnectivity | null => {
-  const nodeExists = state.nodes.some((node) => node.id === nodeId);
+  const nodeExists = state.nodes.some(
+    (node) => node.id === nodeId && node.data.type !== "group",
+  );
   if (!nodeExists) return null;
 
-  const adjacency = buildAdjacencyMap(state.nodes, state.edges);
+  const executableState = selectExecutableNetworkState(state);
+  const adjacency = buildAdjacencyMap(
+    executableState.nodes,
+    executableState.edges,
+  );
   const incoming = getIncomingNodes(adjacency, nodeId);
   const outgoing = getOutgoingNodes(adjacency, nodeId);
   const degree = incoming.length + outgoing.length;
@@ -81,9 +99,13 @@ export const selectNodeConnectivity = (
 export const selectCriticalNetworkNodes = (
   state: NetworkState,
 ): CriticalNetworkNode[] => {
-  const adjacency = buildAdjacencyMap(state.nodes, state.edges);
+  const executableState = selectExecutableNetworkState(state);
+  const adjacency = buildAdjacencyMap(
+    executableState.nodes,
+    executableState.edges,
+  );
 
-  return state.nodes
+  return executableState.nodes
     .map((node) => {
       const incoming = getIncomingNodes(adjacency, node.id).length;
       const outgoing = getOutgoingNodes(adjacency, node.id).length;
@@ -101,13 +123,18 @@ export const selectCriticalNetworkNodes = (
 };
 
 export const selectLongestWorkflowPath = (state: NetworkState): string[] => {
-  const adjacency = buildAdjacencyMap(state.nodes, state.edges);
-  return selectLongestPath(state.nodes, adjacency);
+  const executableState = selectExecutableNetworkState(state);
+  const adjacency = buildAdjacencyMap(
+    executableState.nodes,
+    executableState.edges,
+  );
+  return selectLongestPath(executableState.nodes, adjacency);
 };
 
 export const selectGraphDensity = (state: NetworkState): number => {
-  const n = state.nodes.length;
+  const executableState = selectExecutableNetworkState(state);
+  const n = executableState.nodes.length;
   if (n <= 1) return 0;
   const maxDirectedEdges = n * (n - 1);
-  return state.edges.length / maxDirectedEdges;
+  return executableState.edges.length / maxDirectedEdges;
 };

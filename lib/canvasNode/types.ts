@@ -12,6 +12,7 @@ export interface CanvasNodeProps {
   selected?: boolean;
   id: string;
   isConnecting?: boolean;
+  parentId?: string;
 }
 
 export interface NodeTheme {

@@ -15,8 +15,10 @@ import {
   ShieldCheck,
   Shuffle,
   SlidersHorizontal,
+  Boxes,
   User,
   UserCog,
+  Layers,
 } from 'lucide-react';
 import type { NodeType } from '@/lib/simulation/types';
 
@@ -41,6 +43,7 @@ export const BLOCK_ICON_MAP: Record<string, LucideIcon> = {
   close: CheckCircle2,
   status: CheckCircle,
   event: Bell,
+  group: Layers,
 };
 
 export const TYPE_ICON_MAP: Record<NodeType, LucideIcon> = {
@@ -53,6 +56,7 @@ export const TYPE_ICON_MAP: Record<NodeType, LucideIcon> = {
   end: CheckCircle2,
   status: CheckCircle,
   event: Bell,
+  group: Layers,
 };
 
 export const getNodeIcon = (type: NodeType, blockId?: string): LucideIcon =>

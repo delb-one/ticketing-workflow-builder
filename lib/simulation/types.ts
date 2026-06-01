@@ -7,7 +7,8 @@ export type NodeType =
   | "decision"
   | "condition"
   | "status"
-  | "event";
+  | "event"
+  | "group";
 
 export interface DecisionOutcome {
   label: string;
@@ -67,6 +68,11 @@ export type NodeConfig =
   | {
       nodeType: "event";
       eventTrigger: string;
+    }
+  | {
+      nodeType: "group";
+      templateId?: string;
+      childNodeIds?: string[];
     }
   | {
       nodeType: "start" | "end" | "condition";

@@ -4,7 +4,8 @@ export type NodeColor =
   | "node-2"
   | "node-3"
   | "node-4"
-  | "node-5";
+  | "node-5"
+  | "node-parent-flow";
 
 const NODE_TYPE_COLOR_MAP: Record<NodeType, NodeColor> = {
   actor: "node-4",
@@ -16,6 +17,7 @@ const NODE_TYPE_COLOR_MAP: Record<NodeType, NodeColor> = {
   end: "node-5",
   status: "node-1",
   event: "node-2",
+  group: "node-parent-flow",
 };
 
 

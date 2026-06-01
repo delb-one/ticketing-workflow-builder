@@ -44,6 +44,8 @@ import {
 import { cn } from "@/lib/utils";
 import { AnimatedPanel } from "../../panels/components/animated-panel/AnimatedPanel";
 import { tools } from "@/features/panels/components/tools-container-panel/data";
+import { SUB_FLOW_TEMPLATES } from "@/lib/flow-template/sub-flow-templates";
+import { instantiateSubFlowTemplate } from "@/lib/flow-template/instantiate-sub-flow-template";
 
 const nodeTypes: NodeTypes = {
   canvas: CanvasNode,
@@ -79,7 +81,7 @@ interface WorkflowCanvasProps {
   onNodeSelect?: (node: CustomNode | null) => void;
 }
 
-interface DragPayload {
+interface BlockDragPayload {
   type: CustomNode["data"]["type"];
   blockId?: string;
   id?: string;
@@ -87,6 +89,13 @@ interface DragPayload {
   description?: string;
   config?: NodeConfig;
 }
+
+interface SubFlowTemplateDragPayload {
+  type: "subflow-template";
+  templateId: string;
+}
+
+type DragPayload = BlockDragPayload | SubFlowTemplateDragPayload;
 
 const isNodeType = (value: unknown): value is NodeType =>
   typeof value === "string" &&
@@ -100,6 +109,7 @@ const isNodeType = (value: unknown): value is NodeType =>
     "condition",
     "status",
     "event",
+    "group",
   ].includes(value);
 
 const INITIAL_VISIBLE_PANELS: Record<string, boolean> = {
@@ -157,6 +167,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   const onNodesChange = useWorkflowStore((state) => state.onNodesChange);
   const onEdgesChange = useWorkflowStore((state) => state.onEdgesChange);
   const addNode = useWorkflowStore((state) => state.addNode);
+  const setNodes = useWorkflowStore((state) => state.setNodes);
   const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
   const addStoreEdge = useWorkflowStore((state) => state.addEdge);
   const setStoreEdges = useWorkflowStore((state) => state.setEdges);
@@ -274,6 +285,19 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
           y: event.clientY,
         });
 
+        if (blockData.type === "subflow-template") {
+          const template = SUB_FLOW_TEMPLATES.find(
+            (item) => item.id === blockData.templateId,
+          );
+          if (!template) return;
+
+          const instance = instantiateSubFlowTemplate(template, position);
+          setNodes([...nodes, ...instance.nodes]);
+          setStoreEdges([...edges, ...instance.edges]);
+          setSelectedNode(instance.groupNodeId);
+          return;
+        }
+
         const nodeId = `${blockData.type}-${Date.now()}`;
         const blockId = blockData.blockId ?? blockData.id;
         const newNode: CustomNode = {
@@ -294,7 +318,15 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         console.error("[workflow-canvas] Error parsing dropped block:", error);
       }
     },
-    [addNode, screenToFlowPosition],
+    [
+      addNode,
+      edges,
+      nodes,
+      screenToFlowPosition,
+      setNodes,
+      setSelectedNode,
+      setStoreEdges,
+    ],
   );
 
   const selectedNodeData = nodes.find((node) => node.id === selectedNodeId);
@@ -305,10 +337,12 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
     }
     return map;
   }, [nodes]);
+
   const renderedNodes = useMemo(
     () =>
       nodes.map((node) => ({
         ...node,
+        deletable: !node.parentId,
         selected: node.id === selectedNodeId,
       })),
     [nodes, selectedNodeId],

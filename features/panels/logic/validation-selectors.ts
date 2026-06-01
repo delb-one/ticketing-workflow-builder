@@ -18,6 +18,23 @@ const START_NODE_TYPE: NodeType = "start";
 const END_NODE_TYPE: NodeType = "end";
 const STATUS_FLOW_ORDER = ["open", "assigned", "pending", "resolved", "closed"] as const;
 
+const selectExecutableGraph = <
+  TEdge extends { source: string; target: string; id?: string },
+>(state: {
+  nodes: CustomNode[];
+  edges: TEdge[];
+}): { nodes: CustomNode[]; edges: TEdge[] } => {
+  const nodes = state.nodes.filter((node) => node.data.type !== "group");
+  const nodeIds = new Set(nodes.map((node) => node.id));
+
+  return {
+    nodes,
+    edges: state.edges.filter(
+      (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+    ),
+  };
+};
+
 export const selectStartNodeIssues = (
   state: { nodes: CustomNode[] }
 ): ValidationIssue[] => {
@@ -180,22 +197,33 @@ export const selectInvalidEdgeReferences = (
 
 export const selectAllIssues = (state: {
   nodes: CustomNode[];
-  edges: { source: string; target: string; id: string; label?: string; condition?: DecisionOutcome["condition"] }[];
-}): ValidationIssue[] => [
-  ...selectStartNodeIssues(state),
-  ...selectEndNodeIssues(state),
-  ...selectDisconnectedBranches(state),
-  ...selectUnreachableNodes(state),
-  ...selectDisconnectedNodes(state),
-  ...selectDeadEndNodes(state),
-  ...selectInvalidDecisionNodes(state),
-  ...selectRuleConditionIssues(state),
-  ...selectActorIssues(state),
-  ...selectAutomationIssues(state),
-  ...selectInvalidStatusTransitions(state),
-  ...selectITSMIssues(state),
-  ...selectInvalidEdgeReferences(state),
-];
+  edges: { source: string; target: string; id: string; label?: unknown; condition?: unknown }[];
+}): ValidationIssue[] => {
+  const executableState = selectExecutableGraph({
+    nodes: state.nodes,
+    edges: state.edges.map((edge) => ({
+      ...edge,
+      label: typeof edge.label === "string" ? edge.label : undefined,
+      condition: edge.condition as DecisionOutcome["condition"] | undefined,
+    })),
+  });
+
+  return [
+    ...selectStartNodeIssues(executableState),
+    ...selectEndNodeIssues(executableState),
+    ...selectDisconnectedBranches(executableState),
+    ...selectUnreachableNodes(executableState),
+    ...selectDisconnectedNodes(executableState),
+    ...selectDeadEndNodes(executableState),
+    ...selectInvalidDecisionNodes(executableState),
+    ...selectRuleConditionIssues(executableState),
+    ...selectActorIssues(executableState),
+    ...selectAutomationIssues(executableState),
+    ...selectInvalidStatusTransitions(executableState),
+    ...selectITSMIssues(executableState),
+    ...selectInvalidEdgeReferences(executableState),
+  ];
+};
 
 export const selectDisconnectedBranches = (state: {
   nodes: CustomNode[];

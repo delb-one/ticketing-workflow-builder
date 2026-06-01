@@ -72,6 +72,8 @@ const createDefaultConfig = (
       return { nodeType: "status", statusValue: "assigned" };
     case "event":
       return { nodeType: "event", eventTrigger: "manual" };
+    case "group":
+      return { nodeType: "group" };
     case "condition":
       return { nodeType: "condition" };
     case "start":

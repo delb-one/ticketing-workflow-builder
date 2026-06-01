@@ -56,6 +56,8 @@ export const createDefaultNodeConfig = (
       return { nodeType: "status", statusValue: "assigned" };
     case "event":
       return { nodeType: "event", eventTrigger: "manual" };
+    case "group":
+      return { nodeType: "group" };
     case "start":
       return { nodeType: "start" };
     case "end":
@@ -68,7 +70,10 @@ export const toWorkflowDefinition = (
   nodes: CustomNode[],
   edges: WorkflowEdge[],
 ): WorkflowDefinition => {
-  const workflowNodes: WorkflowNode[] = nodes.map((node) => {
+  const executableNodes = nodes.filter((node) => node.data.type !== "group");
+  const executableNodeIds = new Set(executableNodes.map((node) => node.id));
+
+  const workflowNodes: WorkflowNode[] = executableNodes.map((node) => {
     const blockId = node.data.blockId ?? node.data.id;
 
     return {
@@ -86,12 +91,17 @@ export const toWorkflowDefinition = (
     };
   });
 
-  const workflowEdges: WorkflowEdge[] = edges.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    label: typeof edge.label === "string" ? edge.label : undefined,
-  }));
+  const workflowEdges: WorkflowEdge[] = edges
+    .filter(
+      (edge) =>
+        executableNodeIds.has(edge.source) && executableNodeIds.has(edge.target),
+    )
+    .map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      label: typeof edge.label === "string" ? edge.label : undefined,
+    }));
 
   return {
     id: "active-workflow",

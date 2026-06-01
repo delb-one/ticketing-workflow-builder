@@ -27,7 +27,8 @@ const PRIORITIES: Ticket["priority"][] = ["critical", "high", "medium", "low"];
 export function SLAInspector({ selectedNode }: SLAInspectorProps) {
   const { updateNode, nodes } = useWorkflowStore();
   const liveNode = nodes.find((node) => node.id === selectedNode.id) ?? selectedNode;
-  const config = liveNode.data.config as Extract<NodeConfig, { nodeType: "automation" }>;
+  type AutomationConfig = Extract<NodeConfig, { nodeType: "automation" }>;
+  const config = liveNode.data.config as AutomationConfig;
 
   if (config.nodeType !== "automation" || config.automationType !== "sla-timer") {
     return null;
@@ -37,7 +38,7 @@ export function SLAInspector({ selectedNode }: SLAInspectorProps) {
   const warningThreshold = config.warningThreshold ?? 0.75;
   const priorityMultipliers = config.priorityMultipliers ?? DEFAULT_MULTIPLIERS;
 
-  const handleConfigChange = (patch: Partial<NodeConfig>) => {
+  const handleConfigChange = (patch: Partial<AutomationConfig>) => {
     updateNode(liveNode.id, {
       data: {
         ...liveNode.data,

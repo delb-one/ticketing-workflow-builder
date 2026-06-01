@@ -57,6 +57,12 @@ export const TYPE_THEME_MAP: Record<NodeType, NodeTheme> = {
     softText: getNodeTypeColorToken("event"),
     handle: getNodeTypeColorToken("event"),
   },
+  group: {
+    color: getNodeTypeColorToken("group"),
+    gradient: getNodeTypeColorToken("group"),
+    softText: getNodeTypeColorToken("group"),
+    handle: getNodeTypeColorToken("group"),
+  },
 };
 
 export const TYPE_LABEL_MAP: Record<NodeType, string> = {
@@ -69,4 +75,5 @@ export const TYPE_LABEL_MAP: Record<NodeType, string> = {
   end: 'End',
   status: 'Status',
   event: 'Event',
+  group: 'Group',
 };
