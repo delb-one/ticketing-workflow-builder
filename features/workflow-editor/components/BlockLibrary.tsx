@@ -15,18 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SubFlowTemplateLibrary } from "./SubFlowTemplateLibrary";
 import { Blocks, Plus, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface BlockLibraryProps {
-  onBlockDrag: (
+  onBlockDrag?: (
     blockType: NodeType,
     blockId: string,
     blockLabel: string,
@@ -36,8 +29,9 @@ interface BlockLibraryProps {
 }
 
 export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
-  const [open, setOpen] = useState(false);
-  void onBlockDrag;
+  const router = useRouter();
+  const pathname = usePathname();
+  const isSubflowMode = pathname.includes("/subflows");
 
   const handleDragStart = (event: React.DragEvent, block: BlockDefinition) => {
     event.dataTransfer.effectAllowed = "move";
@@ -58,8 +52,8 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
     <div className="w-20 h-full flex flex-col ">
       <div className="flex h-full flex-col bg-transparent ">
         <TooltipProvider delayDuration={200}>
-          <Tabs defaultValue="blocks" className="h-full gap-1 px-1 py-2">
-            <TabsList className="mx-auto grid h-auto w-14 grid-cols-2  gap-1 bg-transparent p-0">
+          <Tabs defaultValue="blocks" className="h-full gap-1 px-1 py-2 flex flex-col">
+            <TabsList className="mx-auto grid h-auto w-14 grid-cols-2 gap-1 bg-transparent p-0 flex-shrink-0">
               <TabsTrigger className="h-7 px-1 text-[10px]" value="blocks">
                 <Blocks className="h-3 w-3" />
               </TabsTrigger>
@@ -67,7 +61,7 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
                 <Workflow className="h-3 w-3" />
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="blocks" className="min-h-0">
+            <TabsContent value="blocks" className="flex-1 min-h-0 overflow-hidden">
               <ScrollArea className="h-full overflow-y-auto">
                 <div className="space-y-1">
                   {Object.values(BLOCKS)
@@ -82,46 +76,34 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
                 </div>
               </ScrollArea>
             </TabsContent>
-            <TabsContent value="templates" className="min-h-0">
-              <ScrollArea className="h-full overflow-y-auto">
+            <TabsContent value="templates" className="flex-1 min-h-0 overflow-hidden flex flex-col relative">
+              <ScrollArea className={cn("flex-1 overflow-y-auto", !isSubflowMode && "pb-10")}>
                 <SubFlowTemplateLibrary />
               </ScrollArea>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setOpen(true)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
+              {!isSubflowMode && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => router.push('/subflows/new')}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
 
-                <TooltipContent
-                  side="right"
-                  className="text-xs bg-background text-primary border border-border"
-                >
-                  <p>Add Group Flow</p>
-                </TooltipContent>
-              </Tooltip>
+                  <TooltipContent
+                    side="right"
+                    className="text-xs bg-background text-primary border border-border"
+                  >
+                    <p>Create New Subflow</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </TabsContent>
           </Tabs>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Custom Group Flow </DialogTitle>
-                <DialogDescription>
-                  This feature is coming soon! In the meantime, you can test out
-                  the sub-flow template feature by dragging and dropping the
-                  Group Flow template from the library, and customizing it to
-                  your needs. You can also create your own sub-flow templates by
-                  defining them in code.
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
         </TooltipProvider>
       </div>
     </div>

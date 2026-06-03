@@ -1,6 +1,6 @@
 import type { Edge, XYPosition } from "@xyflow/react";
 import type { CustomNode } from "@/lib/store";
-import type { SubFlowTemplate } from "@/lib/flow-template/sub-flow-templates";
+import type { SubFlowDefinition } from "@/lib/db/dexie";
 
 interface SubFlowTemplateInstance {
   nodes: CustomNode[];
@@ -17,7 +17,7 @@ const createInstanceId = (): string => {
 };
 
 export const instantiateSubFlowTemplate = (
-  template: SubFlowTemplate,
+  template: SubFlowDefinition,
   position: XYPosition,
 ): SubFlowTemplateInstance => {
   const instanceId = createInstanceId();
@@ -35,21 +35,21 @@ export const instantiateSubFlowTemplate = (
     type: "canvas",
     position,
     style: {
-      width: template.size.width,
-      height: template.size.height,
+      width: template.size?.width ?? 600,
+      height: template.size?.height ?? 400,
     },
     data: {
       label: template.name,
       type: "group",
       blockId: template.id,
-      description: template.description,
+      description: template.description || "Custom Subflow",
       config: {
         nodeType: "group",
         templateId: template.id,
         childNodeIds,
         isCollapsed: true,
-        entryNodeId: nodeIdMap.get(template.entryNodeId) ?? template.entryNodeId,
-        exitNodeId: nodeIdMap.get(template.exitNodeId) ?? template.exitNodeId,
+        entryNodeId: template.entryNodeId ? (nodeIdMap.get(template.entryNodeId) ?? template.entryNodeId) : undefined,
+        exitNodeId: template.exitNodeId ? (nodeIdMap.get(template.exitNodeId) ?? template.exitNodeId) : undefined,
       },
     },
   };

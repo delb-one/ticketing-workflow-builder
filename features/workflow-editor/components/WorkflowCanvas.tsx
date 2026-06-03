@@ -45,7 +45,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AnimatedPanel } from "../../panels/components/animated-panel/AnimatedPanel";
 import { tools } from "@/features/panels/components/tools-container-panel/data";
-import { SUB_FLOW_TEMPLATES } from "@/lib/flow-template/sub-flow-templates";
+import { subflowRepository } from "@/lib/db/subflowRepository";
 import { instantiateSubFlowTemplate } from "@/lib/flow-template/instantiate-sub-flow-template";
 
 const nodeTypes: NodeTypes = {
@@ -80,6 +80,8 @@ const DraggablePanel = ({ children, initial }: Props) => {
 
 interface WorkflowCanvasProps {
   onNodeSelect?: (node: CustomNode | null) => void;
+  mode?: "workflow" | "subflow";
+  headerPanel?: React.ReactNode;
 }
 
 interface BlockDragPayload {
@@ -114,7 +116,7 @@ const isNodeType = (value: unknown): value is NodeType =>
   ].includes(value);
 
 const INITIAL_VISIBLE_PANELS: Record<string, boolean> = {
-  "getting-started-panel": true,
+  "getting-started-panel": false,
 
   "agent-panel": false,
   "ticket-panel": false,
@@ -162,7 +164,7 @@ const PANELS = [
 ];
 const CLOSE_PANELS_TOOL_ID = "close-panels";
 
-export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
+export default function WorkflowCanvas({ onNodeSelect, mode = "workflow", headerPanel }: WorkflowCanvasProps) {
   const nodes = useWorkflowStore((state) => state.nodes);
   const edges = useWorkflowStore((state) => state.edges);
   const onNodesChange = useWorkflowStore((state) => state.onNodesChange);
@@ -295,7 +297,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
   }, []);
 
   const onDrop = useCallback(
-    (event: React.DragEvent) => {
+    async (event: React.DragEvent) => {
       event.preventDefault();
 
       const data = event.dataTransfer.getData("application/reactflow");
@@ -310,9 +312,7 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
         });
 
         if (blockData.type === "subflow-template") {
-          const template = SUB_FLOW_TEMPLATES.find(
-            (item) => item.id === blockData.templateId,
-          );
+          const template = await subflowRepository.getSubFlow(blockData.templateId);
           if (!template) return;
 
           const instance = instantiateSubFlowTemplate(template, position);
@@ -644,36 +644,46 @@ export default function WorkflowCanvas({ onNodeSelect }: WorkflowCanvasProps) {
             />
           </div>
         </div>
-        <Panel position="top-center">
-          <ControlsPanel />
-        </Panel>
 
-        {/* <Controls /> */}
+        {mode === "workflow" && (
+          <>
+            <Panel position="top-center">
+              <ControlsPanel />
+            </Panel>
 
-        <Panel position="bottom-center">
-          <ToolsContainerPanel
-            activeToolIds={activeToolIds}
-            onToolToggle={handleToolToggle}
-            onCloseAll={handleCloseAll}
-          />
-        </Panel>
+            <Panel position="bottom-center">
+              <ToolsContainerPanel
+                activeToolIds={activeToolIds}
+                onToolToggle={handleToolToggle}
+                onCloseAll={handleCloseAll}
+              />
+            </Panel>
+          </>
+        )}
+
+        {mode === "subflow" && headerPanel && (
+          <Panel position="top-center">
+            {headerPanel}
+          </Panel>
+        )}
       </ReactFlow>
 
       {/*Panels */}
-
-      <div className="absolute inset-0 pointer-events-none z-10">
-        {PANELS.map((panel) => (
-          <AnimatedPanel
-            key={panel.id}
-            visible={visiblePanels[panel.id]}
-            className="absolute inset-0 pointer-events-none"
-          >
-            <DraggablePanel initial={panel.initial}>
-              <panel.component />
-            </DraggablePanel>
-          </AnimatedPanel>
-        ))}
-      </div>
+      {mode === "workflow" && (
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {PANELS.map((panel) => (
+            <AnimatedPanel
+              key={panel.id}
+              visible={visiblePanels[panel.id]}
+              className="absolute inset-0 pointer-events-none"
+            >
+              <DraggablePanel initial={panel.initial}>
+                <panel.component />
+              </DraggablePanel>
+            </AnimatedPanel>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
