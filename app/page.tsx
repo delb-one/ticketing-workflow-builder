@@ -132,6 +132,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    clearWorkflow();
+  }, [clearWorkflow]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // if (!event.ctrlKey) return;
 

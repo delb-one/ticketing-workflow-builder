@@ -52,43 +52,57 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
     <div className="w-20 h-full flex flex-col ">
       <div className="flex h-full flex-col bg-transparent ">
         <TooltipProvider delayDuration={200}>
-          <Tabs defaultValue="blocks" className="h-full gap-1 px-1 py-2 flex flex-col">
-            <TabsList className="mx-auto grid h-auto w-14 grid-cols-2 gap-1 bg-transparent p-0 flex-shrink-0">
-              <TabsTrigger className="h-7 px-1 text-[10px]" value="blocks">
-                <Blocks className="h-3 w-3" />
-              </TabsTrigger>
-              <TabsTrigger className="h-7 px-1 text-[10px]" value="templates">
-                <Workflow className="h-3 w-3" />
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="blocks" className="flex-1 min-h-0 overflow-hidden">
-              <ScrollArea className="h-full overflow-y-auto">
-                <div className="space-y-1">
-                  {Object.values(BLOCKS)
-                    .flat()
-                    .map((block) => (
-                      <BlockItem
-                        key={block.blockId}
-                        block={block}
-                        onDragStart={handleDragStart}
-                      />
-                    ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="templates" className="flex-1 min-h-0 overflow-hidden flex flex-col relative">
-              <ScrollArea className={cn("flex-1 overflow-y-auto", !isSubflowMode && "pb-10")}>
-                <SubFlowTemplateLibrary />
-              </ScrollArea>
+          {!isSubflowMode ? (
+            <Tabs
+              defaultValue="blocks"
+              className="h-full gap-1 px-1 py-2 flex flex-col"
+            >
+              <TabsList className="mx-auto grid h-auto w-14 grid-cols-2 gap-1 bg-transparent p-0 flex-shrink-0">
+                <TabsTrigger className="h-7 px-1 text-[10px]" value="blocks">
+                  <Blocks className="h-3 w-3" />
+                </TabsTrigger>
+                <TabsTrigger className="h-7 px-1 text-[10px]" value="templates">
+                  <Workflow className="h-3 w-3" />
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent
+                value="blocks"
+                className="flex-1 min-h-0 overflow-hidden"
+              >
+                <ScrollArea className="h-full overflow-y-auto">
+                  <div className="space-y-1">
+                    {Object.values(BLOCKS)
+                      .flat()
+                      .map((block) => (
+                        <BlockItem
+                          key={block.blockId}
+                          block={block}
+                          onDragStart={handleDragStart}
+                        />
+                      ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent
+                value="templates"
+                className="flex-1 min-h-0 overflow-hidden flex flex-col relative"
+              >
+                <ScrollArea
+                  className={cn(
+                    "flex-1 overflow-y-auto",
+                    !isSubflowMode && "pb-10",
+                  )}
+                >
+                  <SubFlowTemplateLibrary />
+                </ScrollArea>
 
-              {!isSubflowMode && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       className="absolute bottom-0 left-1/2 -translate-x-1/2"
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push('/subflows/new')}
+                      onClick={() => router.push("/subflows/new")}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -101,9 +115,23 @@ export default function BlockLibrary({ onBlockDrag }: BlockLibraryProps) {
                     <p>Create New Subflow</p>
                   </TooltipContent>
                 </Tooltip>
-              )}
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <ScrollArea className="h-full overflow-y-auto">
+              <div className="space-y-1">
+                {Object.values(BLOCKS)
+                  .flat()
+                  .map((block) => (
+                    <BlockItem
+                      key={block.blockId}
+                      block={block}
+                      onDragStart={handleDragStart}
+                    />
+                  ))}
+              </div>
+            </ScrollArea>
+          )}
         </TooltipProvider>
       </div>
     </div>
