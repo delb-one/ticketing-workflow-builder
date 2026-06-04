@@ -22,8 +22,23 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { subflowRepository } from "@/lib/db/subflowRepository";
 import { useRouter } from "next/navigation";
 import type { SubFlowDefinition } from "@/lib/db/dexie";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
-const handleDragStart = (event: React.DragEvent, template: SubFlowDefinition) => {
+const handleDragStart = (
+  event: React.DragEvent,
+  template: SubFlowDefinition,
+) => {
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.setData(
     "application/reactflow",
@@ -40,9 +55,7 @@ export function SubFlowTemplateLibrary() {
   const router = useRouter();
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this subflow?")) {
-      await subflowRepository.deleteSubFlow(id);
-    }
+    await subflowRepository.deleteSubFlow(id);
   };
 
   return (
@@ -59,7 +72,9 @@ export function SubFlowTemplateLibrary() {
                 >
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-lg"
-                    style={{ backgroundImage: getNodeTypeIconGradient("group") }}
+                    style={{
+                      backgroundImage: getNodeTypeIconGradient("group"),
+                    }}
                   >
                     <Boxes className="h-4 w-4 text-primary" />
                   </div>
@@ -83,7 +98,9 @@ export function SubFlowTemplateLibrary() {
                   Custom Group
                 </Badge>
                 <div className="h-px w-full bg-border" />
-                <span className="font-medium leading-tight">{template.name}</span>
+                <span className="font-medium leading-tight">
+                  {template.name}
+                </span>
                 {template.description && (
                   <span className="text-muted-foreground text-xs leading-snug">
                     {template.description}
@@ -99,19 +116,49 @@ export function SubFlowTemplateLibrary() {
             </TooltipContent>
           </Tooltip>
 
-          <ContextMenuContent >
-            <ContextMenuItem onClick={() => router.push(`/subflows/${template.id}`)}>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={() => router.push(`/subflows/${template.id}`)}
+            >
               <Pencil className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() => handleDelete(template.id)}
-              className="text-destructive-foreground focus:text-destructive-foreground focus:bg-destructive/10"
-            // variant="destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete</span>
-            </ContextMenuItem>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <ContextMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  className="text-destructive-foreground focus:text-destructive-foreground focus:bg-destructive/10"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </ContextMenuItem>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete subflow?</AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    This action cannot be undone. The subflow{" "}
+                    <span className="font-medium">{template.name}</span> will be
+                    permanently removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel variant="outline">
+                    Cancel
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    onClick={() => handleDelete(template.id)}
+                    variant="destructive"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </ContextMenuContent>
         </ContextMenu>
       ))}
