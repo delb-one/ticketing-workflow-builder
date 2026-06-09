@@ -15,7 +15,7 @@ A visual workflow builder for prototyping ITSM (IT Service Management) ticket li
 - **Simulation Engine**: Test and validate your workflows with a built-in simulation engine
 - **Real-time Feedback**: Visual feedback during simulation with event logging
 - **Decision Handling**: Interactive decision dialogs for manual routing
-- **Dark/Light Theme**: Toggle between themes for better visibility
+
 
 ## Tech Stack
 
